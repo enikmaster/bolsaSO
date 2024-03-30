@@ -19,6 +19,7 @@ struct Utilizador {
     char username[50];
     char password[50];
     unsigned long saldo;
+    EmpresaAcao carteiraAcos[5];
 };
 
 // Estrutura que representa a relação entre uma empresa e as ações que um utilizador tem dessa empresa
@@ -60,7 +61,7 @@ typedef struct Mensagem {
 
 /*// Estrutura que representa a carteira de ações de um utilizador
 typedef struct CarteiraAcoes {
-    EmpresaAcao acoes[MAX_EMPRESAS];
+    EmpresaAcao acoes[5];
     size_t numAcoes;
 } CarteiraAcoes;
 
