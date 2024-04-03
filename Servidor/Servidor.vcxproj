@@ -128,7 +128,6 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="bolsa.c" />
-    <ClCompile Include="comandos.c" />
     <ClCompile Include="serverFunctions.c" />
   </ItemGroup>
   <ItemGroup>

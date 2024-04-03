@@ -10,7 +10,7 @@
 #include <string.h>
 
 
-// funções da plataforma
+// funÃ§Ãµes da plataforma
 DWORD verificaComando(TCHAR*);
 
 // comandos do servidor

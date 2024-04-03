@@ -10,6 +10,11 @@
 #define MAX_EMPRESAS 5 //var ambiente dps
 #define TAM_COMANDO 50 //var ambiente dps
 
+// Mensagens de erro
+#define INVALID_N_ARGS _T("[ERRO] Número de argumentos inválido\n")
+#define INVALID_CMD _T("[ERRO] Comando inválido\n")
+#define ERROR_ADDC _T("[ERRO] Erro ao adicionar a empresa\n")
+
 // TODO: alterar os valores hardcoded dos tamanhos dos arrays para outros valores
 
 // Tipos de transação
@@ -66,5 +71,5 @@ struct DetalhesTransacao {
 typedef struct Mensagem Mensagem, * pMensagem;
 struct Mensagem {
     TipoMensagem TipoM;
-    char data[256];
+    char data[256]; // TODO: alterar o tamanho do array para deixar de ser harcoded
 };

@@ -1,6 +1,7 @@
 #include "constantes.h"
 #include "servidor.h"
 
+// funções da plataforma
 DWORD verificaComando(TCHAR* comando) {
 	const TCHAR listaComandos[][TAM_COMANDO] = { _T("addc"), _T("listc"), _T("stock"), _T("users"), _T("pause"), _T("close")};
 
@@ -11,35 +12,39 @@ DWORD verificaComando(TCHAR* comando) {
 				return i + 1;
 			}
 		}
-		// comando sem argumentos mas comando nao existe
-		return 0;
 	} else {
 		TCHAR comandoTemp[TAM_COMANDO];
 		TCHAR argumentos[TAM_COMANDO];
 		memset(comandoTemp, 0, sizeof(comandoTemp));
 		memset(argumentos, 0, sizeof(argumentos));
-        _stscanf_s(
-            comando,
-            _T("%s %s"),
-            comandoTemp, TAM_COMANDO,
-            argumentos, TAM_COMANDO);
+		_stscanf_s(
+			comando,
+			_T("%s %s"),
+			comandoTemp, TAM_COMANDO,
+			argumentos, TAM_COMANDO);
 
-        // garantir que a string é terminada com zero
-        comandoTemp[TAM_COMANDO - 1] = _T('\0');
+		// garantir que a string é terminada com zero
+		comandoTemp[TAM_COMANDO - 1] = _T('\0');
 
 		for(DWORD i = 0; i <sizeof(listaComandos) / sizeof(listaComandos[0]); ++i) {
 			if (_tcscmp(comandoTemp, listaComandos[i]) == 0) {
 				return ++i;
 			}
 		}
-        return 0;
 	}
+	return 0;
 }
 
 // comandos do servidor
 void comandoAddc(TCHAR* nomeEmpresa, DWORD numeroAcoes, double precoAcao) {
 	// TODO: adicionar a empresa ao array de empresas
-	_tprintf_s(_T("Empresa: %s\nN_Ações: %d\nPreço: %f\n"), nomeEmpresa, numeroAcoes, precoAcao);
+	//  para isso é necessário passar o ponteiro para o array de empresas
+	
+	// lógica para adicionar a empresa
+	// em caso de sucesso
+	_tprintf_s(_T("Empresa: %s\nN_Ações: %lu\nPreço: %lf\n"), nomeEmpresa, numeroAcoes, precoAcao);
+	// em caso de erro
+	_tprintf_s(ERROR_ADDC);
 }
 
 void comandoListc() {
@@ -59,5 +64,6 @@ void comandoPause(DWORD numeroSegundos) {
 }
 
 void comandoClose() {
-	// TODO: fechar o programa
+	// TODO: avisar todos os clientes que o servidor vai fechar
+	// TODO: mais qq coisa que seja necessária
 }

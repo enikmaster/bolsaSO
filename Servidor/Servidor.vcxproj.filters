@@ -21,9 +21,6 @@
     <ClCompile Include="serverFunctions.c">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="comandos.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="constantes.h">
