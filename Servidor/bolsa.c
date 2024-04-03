@@ -27,6 +27,7 @@ int _tmain(int argc, TCHAR** argv)
 	TCHAR argumento3[TAM_COMANDO];
 	TCHAR failSafe[TAM_COMANDO];
 	DWORD repetir = 0;
+	int numArgumentos;
 	do {
 		memset(comandoTemp, 0, sizeof(comando));
 		memset(argumento1, 0, sizeof(argumento1));
@@ -37,11 +38,11 @@ int _tmain(int argc, TCHAR** argv)
 		_fgetts(comando, sizeof(comando)/sizeof(comando[0]), stdin);
 		comando[_tcslen(comando) - 1] = _T('\0');
 		controlo = verificaComando(comando);
-
+		numArgumentos = 0;
 		switch (controlo) {
 		case 1: // comando addc
 			_tprintf_s(_T("[INFO] Comando addc\n")); // para apagar
-			int numArgumentos = _stscanf_s(
+			numArgumentos = _stscanf_s(
 				comando,
 				_T("%s %s %s %s %s"),
 				comandoTemp, TAM_COMANDO,
@@ -68,7 +69,7 @@ int _tmain(int argc, TCHAR** argv)
 			break;
 		case 3: // comando stock
 			_tprintf_s(_T("[INFO] Comando stock\n")); // para apagar
-			int numArgumentos = _stscanf_s(
+			numArgumentos = _stscanf_s(
 				comando,
 				_T("%s %s %s %s"),
 				comandoTemp, TAM_COMANDO,
@@ -93,7 +94,7 @@ int _tmain(int argc, TCHAR** argv)
 		case 5: // comando pause
 			_tprintf_s(_T("[INFO] Comando pause\n")); // para apagar
 			// TODO: ler os argumentos do comando
-			int numArgumentos = _stscanf_s(
+			numArgumentos = _stscanf_s(
 				comando,
 				_T("%s %s %s"),
 				comandoTemp, TAM_COMANDO,
