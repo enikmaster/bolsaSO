@@ -1,11 +1,11 @@
 #include "constantes.h"
 #include "servidor.h"
 
-DWORD verificaComandos(TCHAR* comando) {
+DWORD verificaComando(TCHAR* comando) {
 	const TCHAR listaComandos[][TAM_COMANDO] = { _T("addc"), _T("listc"), _T("stock"), _T("users"), _T("pause"), _T("close")};
 
 	// comando sem argumentos (listc, users e close)
-	if (StrChr(comando, _T(' ')) == NULL) {
+	if (_tcschr(comando, _T(' ')) == NULL) {
 		for(DWORD i = 0; i < sizeof(listaComandos) / sizeof(listaComandos[0]); ++i) {
 			if (_tcscmp(comando, listaComandos[i]) == 0) {
 				return i + 1;
@@ -13,42 +13,51 @@ DWORD verificaComandos(TCHAR* comando) {
 		}
 		// comando sem argumentos mas comando nao existe
 		return 0;
-	}
-	
-	// comando com 1 ou + argumentos (pause, addc e stock)
-	if (StrChr(comando, _T(' ')) != NULL) {
+	} else {
 		TCHAR comandoTemp[TAM_COMANDO];
-		TCHAR argumentoOne[TAM_COMANDO];
-		TCHAR argumentoTwo[TAM_COMANDO];
-		TCHAR controlo[TAM_COMANDO];
+		TCHAR argumentos[TAM_COMANDO];
 		memset(comandoTemp, 0, sizeof(comandoTemp));
-		memset(argumentoOne, 0, sizeof(argumentoOne));
-		memset(argumentoTwo, 0, sizeof(argumentoTwo));
-		memset(controlo, 0, sizeof(controlo));
-		DWORD numeroArgumentos = _stscanf_s(comando, _T("%s %s %s"), comandoTemp, _countof(comandoTemp), argumentoOne, _countof(argumentoOne), argumentoTwo, _countof(argumentoTwo), controlo, _countof(controlo));
+		memset(argumentos, 0, sizeof(argumentos));
+        _stscanf_s(
+            comando,
+            _T("%s %s"),
+            comandoTemp, TAM_COMANDO,
+            argumentos, TAM_COMANDO);
 
-		// comando com 1 argumento (pause)
-		if (numeroArgumentos == 2) {
-			for(DWORD i = 0; i <sizeof(listaComandos) / sizeof(listaComandos[0]); ++i) {
-				if (_tcscmp(comandoTemp, listaComandos[i]) == 0) {
-					return ++i;
-				}
-			}
-			// comando com 1 argumento mas comando nao existe
-			return 0;
-		}
+        // garantir que a string é terminada com zero
+        comandoTemp[TAM_COMANDO - 1] = _T('\0');
 
-		// comando com 2 argumentos (addc, stock)
-		if(numeroArgumentos == 3) {
-			for(DWORD i = 0; i < sizeof(listaComandos) / sizeof(listaComandos[0]); ++i) {
-				if (_tcscmp(comandoTemp, listaComandos[i]) == 0) {
-					return ++i;
-				}
+		for(DWORD i = 0; i <sizeof(listaComandos) / sizeof(listaComandos[0]); ++i) {
+			if (_tcscmp(comandoTemp, listaComandos[i]) == 0) {
+				return ++i;
 			}
-			// comando com 2 argumentos mas comando nao existe
-			return 0;
 		}
-		// mais do que 2 argumentos devolve erro
-		return 0;
+        return 0;
 	}
+}
+
+// comandos do servidor
+void comandoAddc(TCHAR* nomeEmpresa, DWORD numeroAcoes, double precoAcao) {
+	// TODO: adicionar a empresa ao array de empresas
+	_tprintf_s(_T("Empresa: %s\nN_Ações: %d\nPreço: %f\n"), nomeEmpresa, numeroAcoes, precoAcao);
+}
+
+void comandoListc() {
+	// TODO: listar as empresas
+}
+
+void comandoStock(TCHAR* nomeEmpresa, double precoAcao) {
+	// TODO: atualizar o preço da ação de uma empresa
+}
+
+void comandoUsers() {
+	// TODO: listar os utilizadores
+}
+
+void comandoPause(DWORD numeroSegundos) {
+	// TODO: parar o servidor por um determinado tempo
+}
+
+void comandoClose() {
+	// TODO: fechar o programa
 }

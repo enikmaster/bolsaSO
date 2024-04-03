@@ -1,5 +1,11 @@
 #pragma once
 #include <stddef.h>
+#include <windows.h>
+#include <tchar.h>
+#include <io.h>
+#include <fcntl.h>
+#include <stdio.h>
+#include <string.h>
 
 #define MAX_EMPRESAS 5 //var ambiente dps
 #define TAM_COMANDO 50 //var ambiente dps

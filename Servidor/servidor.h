@@ -7,22 +7,23 @@
 #include <io.h>
 #include <fcntl.h>
 #include <stdio.h>
+#include <string.h>
 
 
 // funções da plataforma
 DWORD verificaComando(TCHAR*);
 
 // comandos do servidor
-void addc(TCHAR*, DWORD, double);
+void comandoAddc(TCHAR*, DWORD, double);
 
-void listc();
+void comandoListc();
 
-void stock(TCHAR*, double);
+void comandoStock(TCHAR*, double);
 
-void users();
+void comandoUsers();
 
-void pause(DWORD);
+void comandoPause(DWORD);
 
-void close();
+void comandoClose();
 
 #endif
