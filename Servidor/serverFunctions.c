@@ -44,7 +44,7 @@ void comandoAddc(TCHAR* nomeEmpresa, DWORD numeroAcoes, double precoAcao) {
 	// em caso de sucesso
 	_tprintf_s(_T("Empresa: %s\nN_Ações: %lu\nPreço: %lf\n"), nomeEmpresa, numeroAcoes, precoAcao);
 	// em caso de erro
-	_tprintf_s(ERROR_ADDC);
+	_tprintf_s(ERRO_ADDC);
 }
 
 void comandoListc() {

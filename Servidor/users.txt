@@ -1,0 +1,7 @@
+maria qwerty 100
+antónio 12345 123.56
+marques asdf 200
+filipe qazwsxedc 150
+alberta 123456 200
+pierce qwerty 1290.56
+ben 435ert 250
