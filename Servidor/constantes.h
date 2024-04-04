@@ -7,61 +7,69 @@
 #include <stdio.h>
 #include <string.h>
 
-#define MAX_EMPRESAS 5 //var ambiente dps
-#define TAM_COMANDO 50 //var ambiente dps
+#define MAX_EMPRESA_ACAO 5  //var ambiente dps
+#define MAX_EMPRESAS 30     //var ambiente dps
+#define MAX_USERS 20        //var ambiente dps
+#define TAM_COMANDO 50      //var ambiente dps
+#define TAM_NOME 50         //var ambiente dps
+#define TAM_PASSWORD 50     //var ambiente dps
 
 // Mensagens de erro
 #define INVALID_N_ARGS _T("[ERRO] Número de argumentos inválido\n")
 #define INVALID_CMD _T("[ERRO] Comando inválido\n")
-#define ERROR_ADDC _T("[ERRO] Erro ao adicionar a empresa\n")
+#define ERRO_OPEN_FILE _T("[ERRO] Não foi possível abrir o ficheiro\n")
+#define ERRO_MEM_ALLOC _T("[ERRO] Erro ao alocar memória para o utilizador\n")
+#define ERRO_ADDC _T("[ERRO] Erro ao adicionar a empresa\n")
+
 
 // TODO: alterar os valores hardcoded dos tamanhos dos arrays para outros valores
 
 // Tipos de transação
 typedef enum {
-    COMPRA,
-    VENDA
+    TTransacao_COMPRA,
+    TTransacao_VENDA
 } TipoTransacao;
 
 // Tipos de mensagem
 typedef enum {
-    LOGIN,
-    LOGOUT,
-    OPERACAO_COMPRA,
-    OPERACAO_VENDA,
-    LISTA_EMPRESAS,
-    VERIFICA_SALDO,
-    RESPOSTA
+    TMensagem_LOGIN,
+    TMensagem_LOGOUT,
+    TMensagem_COMPRA,
+    TMensagem_VENDA,
+    TMensagem_LISTA_EMPRESAS,
+    TMensagem_VERIFICA_SALDO,
+    TMensagem_RESPOSTA
 } TipoMensagem;
 
 // Estrutura que representa informações gerais de uma empresa
 typedef struct Empresa Empresa, * pEmpresa;
 struct Empresa {
-    char nome[50];
+    TCHAR nome[TAM_NOME];
     DWORD quantidadeAcoes;
     double valorAcao;
-};
-
-// Estrutura que representa um utilizador do sistema
-typedef struct Utilizador Utilizador, * pUtilizador;
-struct Utilizador {
-    char username[50];
-    char password[50];
-    double saldo;
 };
 
 // Estrutura que representa a relação entre uma empresa e as ações que um utilizador tem dessa empresa
 typedef struct EmpresaAcao EmpresaAcao, * pEmpresaAcao;
 struct EmpresaAcao {
-    char nomeEmpresa[50];
+    TCHAR nomeEmpresa[50];
     DWORD quantidadeAcoes;
+};
+
+// Estrutura que representa um utilizador do sistema
+typedef struct Utilizador Utilizador, * pUtilizador;
+struct Utilizador {
+    TCHAR username[TAM_NOME];
+    TCHAR password[TAM_PASSWORD];
+    double saldo;
+    EmpresaAcao carteiraAcoes[MAX_EMPRESA_ACAO];
 };
 
 // Estrutura que detalha transação de compra ou venda
 typedef struct DetalhesTransacao DetalhesTransacao, * pDetalhesTransacao;
 struct DetalhesTransacao {
     TipoTransacao TipoT;
-    char nomeEmpresa[50];
+    TCHAR nomeEmpresa[TAM_NOME];
     DWORD quantidadeAcoes;
     double precoPorAcao;
 };
@@ -71,5 +79,5 @@ struct DetalhesTransacao {
 typedef struct Mensagem Mensagem, * pMensagem;
 struct Mensagem {
     TipoMensagem TipoM;
-    char data[256]; // TODO: alterar o tamanho do array para deixar de ser harcoded
+    TCHAR data[256]; // TODO: alterar o tamanho do array para deixar de ser harcoded
 };
