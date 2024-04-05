@@ -1,3 +1,5 @@
+#include "constantes.h"
+
 #pragma once
 #ifndef BOLSASO_SERVIDOR_H
 #define BOLSASO_SERVIDOR_H
@@ -20,7 +22,7 @@ void comandoListc();
 
 void comandoStock(TCHAR*, double);
 
-void comandoUsers();
+void comandoUsers(DWORD, Utilizador* );
 
 void comandoPause(DWORD);
 

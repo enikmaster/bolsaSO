@@ -37,6 +37,7 @@ int _tmain(int argc, TCHAR** argv)
 			utilizadores[numUtilizadores].username, (unsigned)_countof(utilizadores[numUtilizadores].username),
 			utilizadores[numUtilizadores].password, (unsigned)_countof(utilizadores[numUtilizadores].password),
 			&(utilizadores[numUtilizadores].saldo));
+		utilizadores[numUtilizadores].ligado = FALSE;
 		numUtilizadores++;
 	};
 	fclose(file);
@@ -113,9 +114,7 @@ int _tmain(int argc, TCHAR** argv)
 			}
 			break;
 		case 4: // comando users
-			_tprintf_s(_T("[INFO] Comando users\n")); // para apagar
-			comandoUsers();
-			// TODO: falta adicionar a referência ao array de utilizadores aos argumentos da função
+			comandoUsers(numUtilizadores, utilizadores);
 			break;
 		case 5: // comando pause
 			_tprintf_s(_T("[INFO] Comando pause\n")); // para apagar

@@ -62,6 +62,7 @@ struct Utilizador {
     TCHAR username[TAM_NOME];
     TCHAR password[TAM_PASSWORD];
     double saldo;
+    boolean ligado;
     EmpresaAcao carteiraAcoes[MAX_EMPRESA_ACAO];
 };
 
