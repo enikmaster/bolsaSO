@@ -15,7 +15,12 @@ int _tmain(int argc, TCHAR** argv)
 		_tprintf_s(INVALID_N_ARGS);
 		return(1);
 	}
-	
+
+	Utilizador utilizadores[MAX_USERS];
+	DWORD numUtilizadores = 0;
+
+	//lerUtilizadores(utilizadores, &numUtilizadores, argv[1]);
+
 	FILE* file;
 	errno_t err = _tfopen_s(&file, argv[1], _T("r"));
 	if (err != 0 || file == NULL) {
@@ -26,8 +31,8 @@ int _tmain(int argc, TCHAR** argv)
 	}
 
 	TCHAR linha[MAX_PATH];
-	Utilizador utilizadores[MAX_USERS] ;
-	DWORD numUtilizadores = 0;
+	memset(linha, 0, sizeof(linha));
+	// Cria um array de utilizadores
 	while (_fgetts(linha, sizeof(linha) / sizeof(linha[0]), file) != NULL) {
 		if (numUtilizadores >= MAX_USERS)
 			break;
@@ -39,10 +44,13 @@ int _tmain(int argc, TCHAR** argv)
 			&(utilizadores[numUtilizadores].saldo));
 		utilizadores[numUtilizadores].ligado = FALSE;
 		numUtilizadores++;
+		memset(linha, 0, sizeof(linha));
 	};
 	fclose(file);
 
 	// TODO: criar um array de empresas
+	Empresa empresas[MAX_EMPRESAS];
+	DWORD numEmpresas = 0;
 
 	// TODO: criar threads para as diferente funcionalidades necessárias
 
@@ -67,8 +75,7 @@ int _tmain(int argc, TCHAR** argv)
 		controlo = verificaComando(comando);
 		numArgumentos = 0;
 		switch (controlo) {
-		case 1: // comando addc
-			_tprintf_s(_T("[INFO] Comando addc\n")); // para apagar
+		case 1:
 			numArgumentos = _stscanf_s(
 				comando,									  // buffer de onde ler
 				_T("%s %s %s %s %s"),                         // formato para "partir" a string
@@ -84,8 +91,13 @@ int _tmain(int argc, TCHAR** argv)
 			else {
 				DWORD numeroAcoes = _tstoi(argumento2);
 				double precoAcao = _tstof(argumento3);
-				comandoAddc(argumento1, numeroAcoes, precoAcao);
-				// TODO: falta adicionar a referência ao array de empresas aos argumentos da função
+				if (comandoAddc(argumento1, numeroAcoes, precoAcao, &empresas, numEmpresas) == -1)
+					_tprintf_s(ERRO_ADDC);
+				else
+				{
+					++numEmpresas;
+					_tprintf_s(_T("[INFO] Empresa adicionada com sucesso\n"));
+				}
 			}
 			
 			break;

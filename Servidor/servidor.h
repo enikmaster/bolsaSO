@@ -15,8 +15,10 @@
 // funções da plataforma
 DWORD verificaComando(TCHAR*);
 
+void lerUtilizadores(Utilizador[], DWORD, const TCHAR*);
+
 // comandos do servidor
-void comandoAddc(TCHAR*, DWORD, double);
+DWORD comandoAddc(TCHAR*, DWORD, double, Empresa*, DWORD);
 
 void comandoListc();
 
