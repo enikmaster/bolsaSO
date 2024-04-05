@@ -45,7 +45,7 @@ int _tmain(int argc, TCHAR** argv)
 		controlo = verificaComando(comando);
 		numArgumentos = 0;
 		switch (controlo) {
-		case 1:
+		case 1: // comando addc
 			numArgumentos = _stscanf_s(
 				comando,									  // buffer de onde ler
 				_T("%s %s %s %s %s"),                         // formato para "partir" a string
@@ -69,12 +69,9 @@ int _tmain(int argc, TCHAR** argv)
 					_tprintf_s(INFO_ADDC);
 				}
 			}
-			
 			break;
 		case 2: // comando listc
-			_tprintf_s(_T("[INFO] Comando listc\n"));
-			comandoListc();
-			// TODO: falta adicionar a referência ao array de empresas aos argumentos da função
+			comandoListc(numEmpresas, empresas);
 			break;
 		case 3: // comando stock
 			_tprintf_s(_T("[INFO] Comando stock\n")); // para apagar
@@ -100,7 +97,6 @@ int _tmain(int argc, TCHAR** argv)
 			break;
 		case 5: // comando pause
 			_tprintf_s(_T("[INFO] Comando pause\n")); // para apagar
-			// TODO: ler os argumentos do comando
 			numArgumentos = _stscanf_s(
 				comando,
 				_T("%s %s %s"),
@@ -143,7 +139,7 @@ int _tmain(int argc, TCHAR** argv)
 			repetir = 1;
 			break;
 		case 0:
-		default:
+		default: // casos de erro
 			_tprintf_s(INVALID_CMD);
 			break;
 		}

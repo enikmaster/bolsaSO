@@ -20,11 +20,11 @@ DWORD lerUtilizadores(Utilizador*, const TCHAR*);
 // comandos do servidor
 DWORD comandoAddc(TCHAR*, DWORD, double, Empresa*, DWORD);
 
-void comandoListc();
+void comandoListc(DWORD, Empresa*);
 
 void comandoStock(TCHAR*, double);
 
-void comandoUsers(DWORD, Utilizador* );
+void comandoUsers(DWORD, Utilizador*);
 
 void comandoPause(DWORD);
 

@@ -71,8 +71,11 @@ DWORD comandoAddc(TCHAR* nomeEmpresa, DWORD numeroAcoes, double precoAcao, Empre
 	return numEmpresas;
 }
 
-void comandoListc() {
-	// TODO: listar as empresas
+void comandoListc(DWORD numEmpresas, Empresa* empresas) {
+	_tprintf_s(_T("Lista de empresas:\n"));
+	for (DWORD i = 0; i < numEmpresas; ++i) {
+		_tprintf_s(_T("Nome: %s \tAções disponíveis: %lu \tPreço atual por ação: %lf\n"), empresas[i].nome, empresas[i].quantidadeAcoes, empresas[i].valorAcao);
+	}
 }
 
 void comandoStock(TCHAR* nomeEmpresa, double precoAcao) {
@@ -113,7 +116,7 @@ DWORD comandoLoad(Empresa* empresas, DWORD numEmpresas, TCHAR* nomeFicheiro) {
 		i++;
 	};
 	fclose(file);
-	return ++i;
+	return i;
 }
 
 void comandoClose() {
