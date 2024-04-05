@@ -55,8 +55,11 @@ void comandoStock(TCHAR* nomeEmpresa, double precoAcao) {
 	// TODO: atualizar o preço da ação de uma empresa
 }
 
-void comandoUsers() {
-	// TODO: listar os utilizadores
+void comandoUsers(DWORD numUtilizadores, Utilizador* utilizadores) {
+	_tprintf_s(_T("Lista de utilizadores registados:\n"));
+	for (DWORD i = 0; i < numUtilizadores; ++i) {
+		_tprintf_s(_T("Username: %s \tSaldo: %lf \tEstado: %s\n"), utilizadores[i].username, utilizadores[i].saldo, (utilizadores[i].ligado == TRUE ? _T("ligado") : _T("desligado")));
+	}
 }
 
 void comandoPause(DWORD numeroSegundos) {
