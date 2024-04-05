@@ -135,6 +135,7 @@
     <ClInclude Include="servidor.h" />
   </ItemGroup>
   <ItemGroup>
+    <Text Include="empresas.txt" />
     <Text Include="users.txt" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

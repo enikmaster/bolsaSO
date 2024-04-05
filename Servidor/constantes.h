@@ -20,6 +20,12 @@
 #define ERRO_OPEN_FILE _T("[ERRO] Não foi possível abrir o ficheiro\n")
 #define ERRO_MEM_ALLOC _T("[ERRO] Erro ao alocar memória para o utilizador\n")
 #define ERRO_ADDC _T("[ERRO] Erro ao adicionar a empresa\n")
+#define ERRO_LOAD _T("[ERRO] Erro ao carregar as empresas\n")
+
+// Mensagens de informação
+#define INFO_ADDC _T("[INFO] Empresa adicionada com sucesso\n")
+#define INFO_LOAD _T("[INFO] Empresas carregadas com sucesso\n")
+
 
 
 // TODO: alterar os valores hardcoded dos tamanhos dos arrays para outros valores

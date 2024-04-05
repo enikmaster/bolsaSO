@@ -17,38 +17,8 @@ int _tmain(int argc, TCHAR** argv)
 	}
 
 	Utilizador utilizadores[MAX_USERS];
-	DWORD numUtilizadores = 0;
+	DWORD numUtilizadores = lerUtilizadores(&utilizadores, argv[1]);
 
-	//lerUtilizadores(utilizadores, &numUtilizadores, argv[1]);
-
-	FILE* file;
-	errno_t err = _tfopen_s(&file, argv[1], _T("r"));
-	if (err != 0 || file == NULL) {
-		_tprintf_s(ERRO_OPEN_FILE);
-		if(file != NULL)
-			fclose(file);
-		ExitProcess(-1);
-	}
-
-	TCHAR linha[MAX_PATH];
-	memset(linha, 0, sizeof(linha));
-	// Cria um array de utilizadores
-	while (_fgetts(linha, sizeof(linha) / sizeof(linha[0]), file) != NULL) {
-		if (numUtilizadores >= MAX_USERS)
-			break;
-		_stscanf_s(
-			linha,
-			_T("%s %s %lf"),
-			utilizadores[numUtilizadores].username, (unsigned)_countof(utilizadores[numUtilizadores].username),
-			utilizadores[numUtilizadores].password, (unsigned)_countof(utilizadores[numUtilizadores].password),
-			&(utilizadores[numUtilizadores].saldo));
-		utilizadores[numUtilizadores].ligado = FALSE;
-		numUtilizadores++;
-		memset(linha, 0, sizeof(linha));
-	};
-	fclose(file);
-
-	// TODO: criar um array de empresas
 	Empresa empresas[MAX_EMPRESAS];
 	DWORD numEmpresas = 0;
 
@@ -96,7 +66,7 @@ int _tmain(int argc, TCHAR** argv)
 				else
 				{
 					++numEmpresas;
-					_tprintf_s(_T("[INFO] Empresa adicionada com sucesso\n"));
+					_tprintf_s(INFO_ADDC);
 				}
 			}
 			
@@ -147,7 +117,27 @@ int _tmain(int argc, TCHAR** argv)
 				// TODO: falta qq coisa mas não sei o que é para já
 			}
 			break;
-		case 6: // comando close
+		case 6: // comando load
+			numArgumentos = _stscanf_s(
+				comando,
+				_T("%s %s %s"),
+				comandoTemp, (unsigned)_countof(comandoTemp),
+				argumento1, (unsigned)_countof(argumento1),
+				failSafe, (unsigned)_countof(failSafe));
+			if (numArgumentos != 2) {
+				_tprintf_s(INVALID_N_ARGS);
+				break;
+			}
+			else {
+				if(numEmpresas < MAX_EMPRESAS) {
+					numEmpresas = comandoLoad(&empresas, numEmpresas, argumento1);
+					_tprintf_s(INFO_LOAD);
+				} else
+					_tprintf_s(ERRO_LOAD);
+			}
+			
+			break;
+		case 7: // comando close
 			_tprintf_s(_T("[INFO] Comando close\n")); // para apagar
 			comandoClose();
 			repetir = 1;
