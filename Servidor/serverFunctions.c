@@ -3,7 +3,7 @@
 
 // funções da plataforma
 DWORD verificaComando(TCHAR* comando) {
-	const TCHAR listaComandos[][TAM_COMANDO] = { _T("addc"), _T("listc"), _T("stock"), _T("users"), _T("pause"), _T("close")};
+	const TCHAR listaComandos[][TAM_COMANDO] = { _T("addc"), _T("listc"), _T("stock"), _T("users"), _T("pause"), _T("load"), _T("close")};
 
 	// comando sem argumentos (listc, users e close)
 	if (_tcschr(comando, _T(' ')) == NULL) {
@@ -35,16 +35,40 @@ DWORD verificaComando(TCHAR* comando) {
 	return 0;
 }
 
+DWORD lerUtilizadores(Utilizador* utilizadores, const TCHAR* nomeFicheiro) {
+	FILE* file;
+	errno_t err = _tfopen_s(&file, nomeFicheiro, _T("r"));
+	if (err != 0 || file == NULL) {
+		_tprintf_s(ERRO_OPEN_FILE);
+		if (file != NULL)
+			fclose(file);
+		ExitProcess(-1);
+	}
+	TCHAR linha[MAX_PATH];
+	DWORD i = 0;
+	while (_fgetts(linha, sizeof(linha) / sizeof(linha[0]), file) != NULL) {
+		if (i >= MAX_USERS)
+			break;
+		_stscanf_s(
+			linha,
+			_T("%s %s %lf"),
+			utilizadores[i].username, (unsigned)_countof(utilizadores[i].username),
+			utilizadores[i].password, (unsigned)_countof(utilizadores[i].password),
+			&(utilizadores[i].saldo));
+		utilizadores[i++].ligado = FALSE;
+	};
+	fclose(file);
+	return i;
+}
+
 // comandos do servidor
-void comandoAddc(TCHAR* nomeEmpresa, DWORD numeroAcoes, double precoAcao) {
-	// TODO: adicionar a empresa ao array de empresas
-	//  para isso é necessário passar o ponteiro para o array de empresas
-	
-	// lógica para adicionar a empresa
-	// em caso de sucesso
-	_tprintf_s(_T("Empresa: %s\nN_Ações: %lu\nPreço: %lf\n"), nomeEmpresa, numeroAcoes, precoAcao);
-	// em caso de erro
-	_tprintf_s(ERRO_ADDC);
+DWORD comandoAddc(TCHAR* nomeEmpresa, DWORD numeroAcoes, double precoAcao, Empresa* empresas, DWORD numEmpresas) {
+	if (numEmpresas >= MAX_EMPRESAS)
+		return -1;
+	_tcscpy_s(empresas[numEmpresas].nome, TAM_NOME, nomeEmpresa);
+	empresas[numEmpresas].quantidadeAcoes = numeroAcoes;
+	empresas[numEmpresas].valorAcao = precoAcao;
+	return numEmpresas;
 }
 
 void comandoListc() {
@@ -64,6 +88,32 @@ void comandoUsers(DWORD numUtilizadores, Utilizador* utilizadores) {
 
 void comandoPause(DWORD numeroSegundos) {
 	// TODO: parar o servidor por um determinado tempo
+}
+
+DWORD comandoLoad(Empresa* empresas, DWORD numEmpresas, TCHAR* nomeFicheiro) {
+	DWORD i = numEmpresas;
+	FILE* file;
+	errno_t err = _tfopen_s(&file, nomeFicheiro, _T("r"));
+	if (err != 0 || file == NULL) {
+		_tprintf_s(ERRO_OPEN_FILE);
+		if (file != NULL)
+			fclose(file);
+		return i;
+	}
+	TCHAR linha[MAX_PATH];
+	while (_fgetts(linha, sizeof(linha) / sizeof(linha[0]), file) != NULL) {
+		if (i >= MAX_EMPRESAS)
+			break;
+		_stscanf_s(
+			linha,
+			_T("%s %lu %lf"),
+			empresas[i].nome, (unsigned)_countof(empresas[i].nome),
+			&(empresas[i].quantidadeAcoes),
+			&(empresas[i].valorAcao));
+		i++;
+	};
+	fclose(file);
+	return ++i;
 }
 
 void comandoClose() {
