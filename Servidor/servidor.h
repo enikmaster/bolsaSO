@@ -1,6 +1,7 @@
+#pragma once
+
 #include "constantes.h"
 
-#pragma once
 #ifndef BOLSASO_SERVIDOR_H
 #define BOLSASO_SERVIDOR_H
 

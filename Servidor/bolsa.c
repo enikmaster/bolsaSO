@@ -13,7 +13,7 @@ int _tmain(int argc, TCHAR** argv)
 	#endif
 	if (argc != 2) {
 		_tprintf_s(INVALID_N_ARGS);
-		return(1);
+		ExitProcess(-1);
 	}
 
 	Utilizador utilizadores[MAX_USERS];
@@ -31,9 +31,9 @@ int _tmain(int argc, TCHAR** argv)
 	TCHAR argumento2[TAM_COMANDO];
 	TCHAR argumento3[TAM_COMANDO];
 	TCHAR failSafe[TAM_COMANDO];
-	DWORD repetir = 0;
+	boolean repetir = FALSE;
 	int numArgumentos;
-	do {
+	while(repetir) {
 		memset(comandoTemp, 0, sizeof(comando));
 		memset(argumento1, 0, sizeof(argumento1));
 		memset(argumento2, 0, sizeof(argumento2));
@@ -56,9 +56,7 @@ int _tmain(int argc, TCHAR** argv)
 				failSafe, (unsigned)_countof(failSafe));      // variável de segurança + tamanho do buffer (se preenchida o num de argumentos estará a mais)
 			if(numArgumentos != 4) {
 				_tprintf_s(INVALID_N_ARGS);
-				break;
-			}
-			else {
+			} else {
 				DWORD numeroAcoes = _tstoi(argumento2);
 				double precoAcao = _tstof(argumento3);
 				if (comandoAddc(argumento1, numeroAcoes, precoAcao, &empresas, numEmpresas) == -1)
@@ -105,9 +103,7 @@ int _tmain(int argc, TCHAR** argv)
 				failSafe, (unsigned)_countof(failSafe));
 			if (numArgumentos != 2) {
 				_tprintf_s(INVALID_N_ARGS);
-				break;
-			}
-			else {
+			} else {
 				DWORD numeroSegundos = _tstoi(argumento1);
 				comandoPause(numeroSegundos);
 				// TODO: falta qq coisa mas não sei o que é para já
@@ -122,28 +118,25 @@ int _tmain(int argc, TCHAR** argv)
 				failSafe, (unsigned)_countof(failSafe));
 			if (numArgumentos != 2) {
 				_tprintf_s(INVALID_N_ARGS);
-				break;
-			}
-			else {
+			} else {
 				if(numEmpresas < MAX_EMPRESAS) {
 					numEmpresas = comandoLoad(&empresas, numEmpresas, argumento1);
 					_tprintf_s(INFO_LOAD);
 				} else
 					_tprintf_s(ERRO_LOAD);
 			}
-			
 			break;
 		case 7: // comando close
 			_tprintf_s(_T("[INFO] Comando close\n")); // para apagar
 			comandoClose();
-			repetir = 1;
+			repetir = FALSE;
 			break;
 		case 0:
-		default: // casos de erro
+		default: // comando inválido
 			_tprintf_s(INVALID_CMD);
 			break;
 		}
-	} while (repetir == 0);
+	};
 
-	return 0;
+	ExitProcess(0);
 }
