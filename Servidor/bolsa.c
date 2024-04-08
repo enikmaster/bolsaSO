@@ -87,9 +87,9 @@ int _tmain(int argc, TCHAR** argv)
 			} else {
 				double valorAcao = _tstof(argumento2);
 				if (comandoStock(argumento1, valorAcao, &empresas, numEmpresas))
-					_tprintf_s(_T("[INFO] Valor alterado com sucesso"));
+					_tprintf_s(INFO_STOCK);
 				else
-					_tprintf_s(_T("[ERRO] Erro a altera o valor da ação"));
+					_tprintf_s(ERRO_STOCK);
 			}
 			break;
 		case 4: // comando users

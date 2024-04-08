@@ -21,7 +21,7 @@
 #define ERRO_MEM_ALLOC _T("[ERRO] Erro ao alocar memória para o utilizador\n")
 #define ERRO_ADDC _T("[ERRO] Erro ao adicionar a empresa\n")
 #define ERRO_LOAD _T("[ERRO] Erro ao carregar as empresas\n")
-#define ERRO_STOCK _T("[ERRO] Erro a altera o valor da ação\n"));
+#define ERRO_STOCK _T("[ERRO] Erro a altera o valor da ação\n")
 
 // Mensagens de informação
 #define INFO_ADDC _T("[INFO] Empresa adicionada com sucesso\n")
