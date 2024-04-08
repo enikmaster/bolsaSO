@@ -84,12 +84,12 @@ int _tmain(int argc, TCHAR** argv)
 				failSafe, (unsigned)_countof(failSafe));
 			if (numArgumentos != 3) {
 				_tprintf_s(INVALID_N_ARGS);
-				break;
-			}
-			else {
-				double precoAcao = _tstof(argumento2);
-				comandoStock(argumento1, precoAcao);
-				// TODO: falta adicionar a referência ao array de empresas aos argumentos da função
+			} else {
+				double valorAcao = _tstof(argumento2);
+				if (comandoStock(argumento1, valorAcao, &empresas, numEmpresas))
+					_tprintf_s(_T("[INFO] Valor alterado com sucesso"));
+				else
+					_tprintf_s(_T("[ERRO] Erro a altera o valor da ação"));
 			}
 			break;
 		case 4: // comando users
