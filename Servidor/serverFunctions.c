@@ -78,8 +78,14 @@ void comandoListc(DWORD numEmpresas, Empresa* empresas) {
 	}
 }
 
-void comandoStock(TCHAR* nomeEmpresa, double precoAcao) {
-	// TODO: atualizar o preço da ação de uma empresa
+boolean comandoStock(TCHAR* nomeEmpresa, double valorAcao, Empresa* empresas, DWORD numEmpresas) {
+	for (DWORD i = 0; i < numEmpresas; ++i) {
+		if (_tcscmp(nomeEmpresa, empresas[i].nome) == 0) {
+			empresas[i].valorAcao = valorAcao;
+			return TRUE;
+		}
+	}
+	return FALSE;
 }
 
 void comandoUsers(DWORD numUtilizadores, Utilizador* utilizadores) {

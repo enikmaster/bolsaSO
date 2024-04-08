@@ -22,7 +22,7 @@ DWORD comandoAddc(TCHAR*, DWORD, double, Empresa*, DWORD);
 
 void comandoListc(DWORD, Empresa*);
 
-void comandoStock(TCHAR*, double);
+boolean comandoStock(TCHAR*, double, Empresa*, DWORD);
 
 void comandoUsers(DWORD, Utilizador*);
 
