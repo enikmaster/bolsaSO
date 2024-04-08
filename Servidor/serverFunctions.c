@@ -5,7 +5,7 @@
 DWORD verificaComando(TCHAR* comando) {
 	const TCHAR listaComandos[][TAM_COMANDO] = { _T("addc"), _T("listc"), _T("stock"), _T("users"), _T("pause"), _T("load"), _T("close")};
 
-	// comando sem argumentos (listc, users e close)
+	// comando sem argumentos
 	if (_tcschr(comando, _T(' ')) == NULL) {
 		for(DWORD i = 0; i < sizeof(listaComandos) / sizeof(listaComandos[0]); ++i) {
 			if (_tcscmp(comando, listaComandos[i]) == 0) {
@@ -17,11 +17,7 @@ DWORD verificaComando(TCHAR* comando) {
 		TCHAR argumentos[TAM_COMANDO];
 		memset(comandoTemp, 0, sizeof(comandoTemp));
 		memset(argumentos, 0, sizeof(argumentos));
-		_stscanf_s(
-			comando,
-			_T("%s %s"),
-			comandoTemp, TAM_COMANDO,
-			argumentos, TAM_COMANDO);
+		_stscanf_s(comando, _T("%s %s"), comandoTemp, TAM_COMANDO, argumentos, TAM_COMANDO);
 
 		// garantir que a string é terminada com zero
 		comandoTemp[TAM_COMANDO - 1] = _T('\0');

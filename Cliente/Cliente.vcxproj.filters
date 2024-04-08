@@ -18,5 +18,13 @@
     <ClCompile Include="cliente.c">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="clientFunctions.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="cliente.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

@@ -23,12 +23,16 @@
 #define ERRO_LOAD _T("[ERRO] Erro ao carregar as empresas\n")
 #define ERRO_STOCK _T("[ERRO] Erro a altera o valor da ação\n")
 
+#define ERRO_LOGIN _T("[ERRO] Erro ao efetuar login\n")
+#define ERRO_NO_LOGIN _T("[ERRO] Efetue o login primeiro\n")
+#define ERRO_ALREADY_LOGIN _T("[ERRO] Já efetuou login\n")
+
 // Mensagens de informação
 #define INFO_ADDC _T("[INFO] Empresa adicionada com sucesso\n")
 #define INFO_LOAD _T("[INFO] Empresas carregadas com sucesso\n")
 #define INFO_STOCK _T("[INFO] Valor alterado com sucesso\n")
 
-
+#define INFO_LOGIN _T("[INFO] Login efetuado com sucesso\n")
 
 // TODO: alterar os valores hardcoded dos tamanhos dos arrays para outros valores
 
