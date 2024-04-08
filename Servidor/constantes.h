@@ -10,7 +10,7 @@
 #define MAX_EMPRESA_ACAO 5  //var ambiente dps
 #define MAX_EMPRESAS 30     //var ambiente dps
 #define MAX_USERS 20        //var ambiente dps
-#define TAM_COMANDO 50      //var ambiente dps
+#define TAM_COMANDO 100      //var ambiente dps
 #define TAM_NOME 50         //var ambiente dps
 #define TAM_PASSWORD 50     //var ambiente dps
 
