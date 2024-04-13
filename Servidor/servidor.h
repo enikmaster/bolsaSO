@@ -1,10 +1,9 @@
 #pragma once
 
-#include "constantes.h"
-
 #ifndef BOLSASO_SERVIDOR_H
 #define BOLSASO_SERVIDOR_H
 
+#include "constantes.h"
 #include <windows.h>
 #include <tchar.h>
 #include <io.h>

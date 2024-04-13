@@ -23,6 +23,10 @@ int _tmain(int argc, TCHAR** argv)
 	DWORD numEmpresas = 0;
 
 	// TODO: criar threads para as diferente funcionalidades necessárias
+	// Thread 1 - ler as mensagens dos clientes
+	// Thread 2 - escrever as mensagens para os clientes
+	// Thread 3 - ler os comandos do administrador
+	//
 
 	DWORD controlo = 0;
 	TCHAR comando[TAM_COMANDO];
@@ -31,7 +35,7 @@ int _tmain(int argc, TCHAR** argv)
 	TCHAR argumento2[TAM_COMANDO];
 	TCHAR argumento3[TAM_COMANDO];
 	TCHAR failSafe[TAM_COMANDO];
-	boolean repetir = FALSE;
+	boolean repetir = TRUE;
 	int numArgumentos;
 	while(repetir) {
 		memset(comandoTemp, 0, sizeof(comando));

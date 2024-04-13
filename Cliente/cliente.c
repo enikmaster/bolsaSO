@@ -15,6 +15,12 @@ int _tmain(int argc, TCHAR** argv)
 		_tprintf_s(INVALID_N_ARGS);
 		ExitProcess(-1);
 	}
+
+	// TODO: criar threads para as diferentes funcionalidades necessárias
+	// Thread 1 - ler as mensagens do servidor
+	// Thread 2 - ler os comandos do utilizador para enviar para o servidor
+	//
+
 	DWORD controlo = 0;
 	TCHAR comando[TAM_COMANDO];
 	TCHAR comandoTemp[TAM_COMANDO];
