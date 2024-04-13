@@ -94,3 +94,11 @@ struct Mensagem {
     TipoMensagem TipoM;
     TCHAR data[256]; // TODO: alterar o tamanho do array para deixar de ser harcoded
 };
+
+// Estrutura de Memória partilhada
+typedef struct DadosPartilhados DadosPartilhados;
+struct DadosPartilhados {
+    Empresa empresas[MAX_EMPRESAS];
+    DWORD numEmpresas;
+    DetalhesTransacao ultimaTransacao;
+};
