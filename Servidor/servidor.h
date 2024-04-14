@@ -32,4 +32,11 @@ DWORD comandoLoad(Empresa*, DWORD, TCHAR*);
 
 void comandoClose();
 
+// funções das threads
+void WINAPI threadComandos(PVOID);
+
+void WINAPI threadReceberMensagens(PVOID);
+
+void WINAPI threadEnviarMensagens(PVOID);
+
 #endif

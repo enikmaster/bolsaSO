@@ -101,4 +101,5 @@ struct DadosPartilhados {
     Empresa empresas[MAX_EMPRESAS];
     DWORD numEmpresas;
     DetalhesTransacao ultimaTransacao;
+    HANDLE csBoard;
 };

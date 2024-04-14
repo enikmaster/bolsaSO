@@ -16,8 +16,23 @@ int _tmain(int argc, TCHAR** argv)
 		ExitProcess(-1);
 	}
 
+	
+
+	// Inicializar o semáforo para dar prioridade ao bolsa na escrita dos dados partilhados
+	HANDLE semaforo = CreateSemaphore(NULL, 0, 1, _T("SemaforoBolsa"));
+
 	Utilizador utilizadores[MAX_USERS];
 	DWORD numUtilizadores = lerUtilizadores(&utilizadores, argv[1]);
+
+
+
+	DadosPartilhados sharedData;
+	sharedData.numEmpresas = 0;
+
+	// TODO: iniciar a CriticalSection  a ser usada pelos Boards
+	sharedData.csBoard;
+
+
 
 	Empresa empresas[MAX_EMPRESAS];
 	DWORD numEmpresas = 0;
@@ -25,7 +40,7 @@ int _tmain(int argc, TCHAR** argv)
 	// TODO: criar threads para as diferente funcionalidades necessárias
 	// Thread 1 - ler as mensagens dos clientes
 	// Thread 2 - escrever as mensagens para os clientes
-	// Thread 3 - ler os comandos do administrador
+	// Thread 3 - ler os comandos do administrador (é o main)
 	//
 
 	DWORD controlo = 0;
@@ -63,11 +78,21 @@ int _tmain(int argc, TCHAR** argv)
 			} else {
 				DWORD numeroAcoes = _tstoi(argumento2);
 				double precoAcao = _tstof(argumento3);
+				// TODO: alterar as variáveis locais por variáveis dos dados partilhados
 				if (comandoAddc(argumento1, numeroAcoes, precoAcao, &empresas, numEmpresas) == -1)
 					_tprintf_s(ERRO_ADDC);
 				else
 				{
 					++numEmpresas;
+					// TODO: Atualizar os dados partilhados
+					// esta parte é para ser feita em exclusão mútua
+					// por isso tenho de pedir o controloe do semáforo
+					// pedir o controlo da CriticalSection
+					// atualizar os dados
+					// talvez sinalizar um evento para os Boards (em discussão)
+					// libertar o controlo da CriticalSection
+					// libertar o controlo do semáforo
+					//
 					_tprintf_s(INFO_ADDC);
 				}
 			}
