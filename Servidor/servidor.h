@@ -32,4 +32,6 @@ DWORD comandoLoad(Empresa*, DWORD, TCHAR*);
 
 void comandoClose();
 
+DWORD lerCriarRegistryKey();
+
 #endif

@@ -13,6 +13,7 @@
 #define TAM_COMANDO 100      //var ambiente dps
 #define TAM_NOME 50         //var ambiente dps
 #define TAM_PASSWORD 50     //var ambiente dps
+#define TAM 100             //define usado no registry
 
 // Mensagens de erro
 #define INVALID_N_ARGS _T("[ERRO] Número de argumentos inválido\n")

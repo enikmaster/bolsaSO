@@ -125,3 +125,35 @@ void comandoClose() {
 	// TODO: avisar todos os clientes que o servidor vai fechar
 	// TODO: mais qq coisa que seja necessária
 }
+
+// lê o valor de NCLIENTES do registo, se nexistir cria a key
+DWORD lerCriarRegistryKey() {
+	HKEY hKey;
+	TCHAR nomeKey[TAM];
+	DWORD tamanho;
+	DWORD nClientes = 5;
+	DWORD res;
+	DWORD LimiteClientes;
+
+	_stprintf_s(nomeKey, TAM, _T("SOFTWARE\\SO2\\NCLIENTES"));
+
+	res = RegOpenKeyEx(HKEY_CURRENT_USER, nomeKey, 0, KEY_READ, &hKey);
+	if (res == ERROR_SUCCESS) {
+		RegQueryValueEx(hKey, NULL, NULL, NULL, (LPBYTE)&LimiteClientes, &tamanho);
+		_tprintf_s(_T("O valor lido para NCLIENTES foi: %d\n"), LimiteClientes);
+	}
+	else {
+		res = RegCreateKeyEx(HKEY_CURRENT_USER, nomeKey, 0, NULL, REG_OPTION_NON_VOLATILE, KEY_WRITE, NULL, &hKey, &res);
+		if (res == ERROR_SUCCESS) {
+			RegSetValueEx(hKey, NULL, 0, REG_DWORD, (const BYTE*)&nClientes, sizeof(DWORD));
+			_tprintf_s(_T("O valor escrito em NCLIENTES foi: %d\n"), nClientes);
+			LimiteClientes = nClientes;
+		}
+		else {
+			_tprintf_s(_T("Erro ao criar a key NCLIENTES\n"));
+		}
+	}
+
+	RegCloseKey(hKey);
+	return LimiteClientes;
+}
