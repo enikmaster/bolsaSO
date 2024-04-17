@@ -14,11 +14,25 @@
 #define TAM_NOME 50         //var ambiente dps
 #define TAM_PASSWORD 50     //var ambiente dps
 
+// Nomes
+#define SHM_NAME _T("Dados_Partilhados")
+#define SEM_NAME _T("Semaforo_Bolsa")
+#define MTX_BOARD _T("Mutex_Board")
+
+
 // Mensagens de erro
 #define INVALID_N_ARGS _T("[ERRO] Número de argumentos inválido\n")
 #define INVALID_CMD _T("[ERRO] Comando inválido\n")
 #define ERRO_OPEN_FILE _T("[ERRO] Não foi possível abrir o ficheiro\n")
 #define ERRO_MEM_ALLOC _T("[ERRO] Erro ao alocar memória para o utilizador\n")
+#define ERRO_CREATE_FILE_MAPPING _T("[ERRO] Erro ao criar file mapping\n")
+#define ERRO_CREATE_MAP_VIEW _T("[ERRO] Erro ao criar file mapping view\n")
+#define ERRO_CREATE_SEM _T("[ERRO] Erro ao criar semáforo\n")
+#define ERRO_CREATE_MUTEX _T("[ERRO] Erro ao criar mutex\n")
+
+#define ERRO_INICIALIZAR_DTO _T("[ERRO] Erro a incializar o sistema\n")
+
+// Mensages de erro de comandos do administrador
 #define ERRO_ADDC _T("[ERRO] Erro ao adicionar a empresa\n")
 #define ERRO_LOAD _T("[ERRO] Erro ao carregar as empresas\n")
 #define ERRO_STOCK _T("[ERRO] Erro a altera o valor da ação\n")
@@ -74,7 +88,7 @@ struct Utilizador {
     TCHAR username[TAM_NOME];
     TCHAR password[TAM_PASSWORD];
     double saldo;
-    boolean ligado;
+    BOOL logado;
     EmpresaAcao carteiraAcoes[MAX_EMPRESA_ACAO];
 };
 
@@ -101,5 +115,17 @@ struct DadosPartilhados {
     Empresa empresas[MAX_EMPRESAS];
     DWORD numEmpresas;
     DetalhesTransacao ultimaTransacao;
-    HANDLE csBoard;
+};
+
+// Estrutura de dados partilhados entre threads do servidor
+typedef struct DataTransferObject DataTransferObject;
+struct DataTransferObject {
+    HANDLE hMap;
+    PVOID pView;
+	HANDLE hSemBolsa;
+	HANDLE hMtxBolsa;
+    CRITICAL_SECTION cs;
+	DadosPartilhados* sharedData;
+    DWORD numUtilizadores;
+    Utilizador utilizadores[MAX_USERS];
 };

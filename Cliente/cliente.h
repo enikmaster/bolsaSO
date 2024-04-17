@@ -15,7 +15,7 @@
 DWORD verificaComando(TCHAR*);
 
 // comandos do cliente
-boolean comandoLogin(TCHAR*, TCHAR*);
+BOOL comandoLogin(TCHAR*, TCHAR*);
 
 void comandoListc();
 

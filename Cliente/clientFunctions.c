@@ -33,7 +33,7 @@ DWORD verificaComando(TCHAR* comando) {
 }
 
 // comandos do cliente
-boolean comandoLogin(TCHAR* username, TCHAR* password) {
+BOOL comandoLogin(TCHAR* username, TCHAR* password) {
 	// TODO: fazer lógica de login depois de implementar a comunicação com o servidor
 	//	envia uma mensagem para o servidor com o username e password
 	//	recebe uma mensagem do servidor com a resposta

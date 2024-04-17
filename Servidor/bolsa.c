@@ -15,27 +15,20 @@ int _tmain(int argc, TCHAR** argv)
 		_tprintf_s(INVALID_N_ARGS);
 		ExitProcess(-1);
 	}
+	DataTransferObject dto;
 
-	
+	// Inicializar toda a cena da memória partilhada
+	if(!inicializarDTO(&dto)) {
+		_tprintf_s(ERRO_INICIALIZAR_DTO);
+		ExitProcess(-1);
+	}
 
-	// Inicializar o semáforo para dar prioridade ao bolsa na escrita dos dados partilhados
-	HANDLE semaforo = CreateSemaphore(NULL, 0, 1, _T("SemaforoBolsa"));
+	dto.numUtilizadores = lerUtilizadores(&dto.utilizadores, argv[1]);
+	//Utilizador utilizadores[MAX_USERS];
+	//DWORD numUtilizadores = lerUtilizadores(&utilizadores, argv[1]);
 
-	Utilizador utilizadores[MAX_USERS];
-	DWORD numUtilizadores = lerUtilizadores(&utilizadores, argv[1]);
-
-
-
-	DadosPartilhados sharedData;
-	sharedData.numEmpresas = 0;
-
-	// TODO: iniciar a CriticalSection  a ser usada pelos Boards
-	sharedData.csBoard;
-
-
-
-	Empresa empresas[MAX_EMPRESAS];
-	DWORD numEmpresas = 0;
+	//Empresa empresas[MAX_EMPRESAS];
+	//DWORD numEmpresas = 0;
 
 	// TODO: criar threads para as diferente funcionalidades necessárias
 	// Thread 1 - ler as mensagens dos clientes
@@ -50,7 +43,7 @@ int _tmain(int argc, TCHAR** argv)
 	TCHAR argumento2[TAM_COMANDO];
 	TCHAR argumento3[TAM_COMANDO];
 	TCHAR failSafe[TAM_COMANDO];
-	boolean repetir = TRUE;
+	BOOL repetir = TRUE;
 	int numArgumentos;
 	while(repetir) {
 		memset(comandoTemp, 0, sizeof(comando));
@@ -78,27 +71,13 @@ int _tmain(int argc, TCHAR** argv)
 			} else {
 				DWORD numeroAcoes = _tstoi(argumento2);
 				double precoAcao = _tstof(argumento3);
-				// TODO: alterar as variáveis locais por variáveis dos dados partilhados
-				if (comandoAddc(argumento1, numeroAcoes, precoAcao, &empresas, numEmpresas) == -1)
-					_tprintf_s(ERRO_ADDC);
-				else
-				{
-					++numEmpresas;
-					// TODO: Atualizar os dados partilhados
-					// esta parte é para ser feita em exclusão mútua
-					// por isso tenho de pedir o controloe do semáforo
-					// pedir o controlo da CriticalSection
-					// atualizar os dados
-					// talvez sinalizar um evento para os Boards (em discussão)
-					// libertar o controlo da CriticalSection
-					// libertar o controlo do semáforo
-					//
-					_tprintf_s(INFO_ADDC);
-				}
+				comandoAddc(dto.sharedData, argumento1, numeroAcoes, precoAcao, dto.cs)
+				? _tprintf_s(INFO_ADDC)
+				: _tprintf_s(ERRO_ADDC);
 			}
 			break;
 		case 2: // comando listc
-			comandoListc(numEmpresas, empresas);
+			comandoListc(dto.sharedData, dto.cs);
 			break;
 		case 3: // comando stock
 			_tprintf_s(_T("[INFO] Comando stock\n")); // para apagar
@@ -113,14 +92,13 @@ int _tmain(int argc, TCHAR** argv)
 				_tprintf_s(INVALID_N_ARGS);
 			} else {
 				double valorAcao = _tstof(argumento2);
-				if (comandoStock(argumento1, valorAcao, &empresas, numEmpresas))
-					_tprintf_s(INFO_STOCK);
-				else
-					_tprintf_s(ERRO_STOCK);
+				comandoStock(dto.sharedData, argumento1, valorAcao, dto.cs)
+				? _tprintf_s(INFO_STOCK)
+				: _tprintf_s(ERRO_STOCK);
 			}
 			break;
 		case 4: // comando users
-			comandoUsers(numUtilizadores, utilizadores);
+			comandoUsers(&(dto.numUtilizadores), dto.utilizadores);
 			break;
 		case 5: // comando pause
 			_tprintf_s(_T("[INFO] Comando pause\n")); // para apagar
@@ -148,11 +126,9 @@ int _tmain(int argc, TCHAR** argv)
 			if (numArgumentos != 2) {
 				_tprintf_s(INVALID_N_ARGS);
 			} else {
-				if(numEmpresas < MAX_EMPRESAS) {
-					numEmpresas = comandoLoad(&empresas, numEmpresas, argumento1);
-					_tprintf_s(INFO_LOAD);
-				} else
-					_tprintf_s(ERRO_LOAD);
+				comandoLoad(dto.sharedData, argumento1, dto.cs)
+					? _tprintf_s(INFO_LOAD)
+					: _tprintf_s(ERRO_LOAD);
 			}
 			break;
 		case 7: // comando close
@@ -166,6 +142,8 @@ int _tmain(int argc, TCHAR** argv)
 			break;
 		}
 	};
+
+	terminarDTO(&dto);
 
 	ExitProcess(0);
 }
