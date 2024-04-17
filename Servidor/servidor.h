@@ -17,6 +17,8 @@ DWORD verificaComando(const TCHAR*);
 
 DWORD lerUtilizadores(Utilizador*, const TCHAR*);
 
+DWORD lerCriarRegistryKey();
+
 BOOL inicializarDTO(DataTransferObject*);
 
 void terminarDTO(DataTransferObject*);
@@ -42,5 +44,7 @@ void WINAPI threadComandos(PVOID);
 void WINAPI threadReceberMensagens(PVOID);
 
 void WINAPI threadEnviarMensagens(PVOID);
+
+
 
 #endif

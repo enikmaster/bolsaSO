@@ -13,11 +13,13 @@
 #define TAM_COMANDO 100      //var ambiente dps
 #define TAM_NOME 50         //var ambiente dps
 #define TAM_PASSWORD 50     //var ambiente dps
+#define TAM 100             //define usado no registry
 
 // Nomes
 #define SHM_NAME _T("Dados_Partilhados")
 #define SEM_NAME _T("Semaforo_Bolsa")
 #define MTX_BOARD _T("Mutex_Board")
+#define REGISTRY_KEY_NCLIENTES _T("SOFTWARE\\SO2\\NCLIENTES")
 
 
 // Mensagens de erro
@@ -25,6 +27,7 @@
 #define INVALID_CMD _T("[ERRO] Comando inválido\n")
 #define ERRO_OPEN_FILE _T("[ERRO] Não foi possível abrir o ficheiro\n")
 #define ERRO_MEM_ALLOC _T("[ERRO] Erro ao alocar memória para o utilizador\n")
+#define ERRO_CREATE_KEY_NCLIENTES _T("[ERRO] Erro ao criar a key NCLIENTES\n")
 #define ERRO_CREATE_FILE_MAPPING _T("[ERRO] Erro ao criar file mapping\n")
 #define ERRO_CREATE_MAP_VIEW _T("[ERRO] Erro ao criar file mapping view\n")
 #define ERRO_CREATE_SEM _T("[ERRO] Erro ao criar semáforo\n")

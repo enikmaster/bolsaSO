@@ -57,6 +57,38 @@ DWORD lerUtilizadores(Utilizador* utilizadores, const TCHAR* nomeFicheiro) {
 	return i;
 }
 
+// lê o valor de NCLIENTES do registo, se nexistir cria a key
+DWORD lerCriarRegistryKey() {
+	HKEY hKey;
+	TCHAR nomeKey[TAM];
+	DWORD tamanho;
+	DWORD nClientes = 5;
+	DWORD res;
+	DWORD limiteClientes;
+
+	_stprintf_s(nomeKey, TAM, REGISTRY_KEY_NCLIENTES);
+
+	res = RegOpenKeyEx(HKEY_CURRENT_USER, nomeKey, 0, KEY_READ, &hKey);
+	if (res == ERROR_SUCCESS) {
+		RegQueryValueEx(hKey, NULL, NULL, NULL, (LPBYTE)&limiteClientes, &tamanho);
+		_tprintf_s(_T("O valor lido para NCLIENTES foi: %d\n"), limiteClientes);
+	}
+	else {
+		res = RegCreateKeyEx(HKEY_CURRENT_USER, nomeKey, 0, NULL, REG_OPTION_NON_VOLATILE, KEY_WRITE, NULL, &hKey, &res);
+		if (res == ERROR_SUCCESS) {
+			RegSetValueEx(hKey, NULL, 0, REG_DWORD, (const BYTE*)&nClientes, sizeof(DWORD));
+			_tprintf_s(_T("O valor escrito em NCLIENTES foi: %d\n"), nClientes);
+			limiteClientes = nClientes;
+		}
+		else {
+			_tprintf_s(ERRO_CREATE_KEY_NCLIENTES);
+		}
+	}
+
+	RegCloseKey(hKey);
+	return limiteClientes;
+}
+
 BOOL inicializarDTO(DataTransferObject* dto) {
 	// criar o file mapping
 	dto->hMap = CreateFileMapping(
@@ -240,3 +272,4 @@ void comandoClose() {
 	// TODO: avisar todos os clientes que o servidor vai fechar
 	// TODO: mais qq coisa que seja necessária
 }
+

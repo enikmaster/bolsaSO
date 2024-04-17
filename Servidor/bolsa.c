@@ -1,8 +1,7 @@
 #include "servidor.h"
 #include "constantes.h"
 
-int _tmain(int argc, TCHAR** argv)
-{
+int _tmain(int argc, TCHAR** argv) {
 	#ifdef UNICODE
 	DWORD x1, x2, x3;
 		x1 = _setmode(_fileno(stdin), _O_WTEXT);
@@ -35,6 +34,8 @@ int _tmain(int argc, TCHAR** argv)
 	// Thread 2 - escrever as mensagens para os clientes
 	// Thread 3 - ler os comandos do administrador (é o main)
 	//
+
+	DWORD limiteClientes = lerCriarRegistryKey();
 
 	DWORD controlo = 0;
 	TCHAR comando[TAM_COMANDO];
