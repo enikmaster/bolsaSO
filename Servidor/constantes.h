@@ -21,7 +21,6 @@
 #define MTX_BOARD _T("Mutex_Board")
 #define REGISTRY_KEY_NCLIENTES _T("SOFTWARE\\SO2\\NCLIENTES")
 
-
 // Mensagens de erro
 #define INVALID_N_ARGS _T("[ERRO] Número de argumentos inválido\n")
 #define INVALID_CMD _T("[ERRO] Comando inválido\n")
@@ -35,11 +34,12 @@
 
 #define ERRO_INICIALIZAR_DTO _T("[ERRO] Erro a incializar o sistema\n")
 
-// Mensages de erro de comandos do administrador
+// Mensages de erro do administrador
 #define ERRO_ADDC _T("[ERRO] Erro ao adicionar a empresa\n")
 #define ERRO_LOAD _T("[ERRO] Erro ao carregar as empresas\n")
 #define ERRO_STOCK _T("[ERRO] Erro a altera o valor da ação\n")
 
+// Mensagens de erro do utilizador
 #define ERRO_LOGIN _T("[ERRO] Erro ao efetuar login\n")
 #define ERRO_NO_LOGIN _T("[ERRO] Efetue o login primeiro\n")
 #define ERRO_ALREADY_LOGIN _T("[ERRO] Já efetuou login\n")
@@ -48,10 +48,9 @@
 #define INFO_ADDC _T("[INFO] Empresa adicionada com sucesso\n")
 #define INFO_LOAD _T("[INFO] Empresas carregadas com sucesso\n")
 #define INFO_STOCK _T("[INFO] Valor alterado com sucesso\n")
-
 #define INFO_LOGIN _T("[INFO] Login efetuado com sucesso\n")
-
-// TODO: alterar os valores hardcoded dos tamanhos dos arrays para outros valores
+#define INFO_LISTC _T("Nome: %s \tAções disponíveis: %lu \tPreço atual por ação: %.2lf\n")
+#define INFO_USERS _T("Username: %s \tSaldo: %lf \tEstado: %s\n")
 
 // Tipos de transação
 typedef enum {
@@ -130,5 +129,6 @@ struct DataTransferObject {
     CRITICAL_SECTION cs;
 	DadosPartilhados* sharedData;
     DWORD numUtilizadores;
+    DWORD limiteClientes;
     Utilizador utilizadores[MAX_USERS];
 };

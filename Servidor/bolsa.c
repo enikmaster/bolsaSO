@@ -14,29 +14,23 @@ int _tmain(int argc, TCHAR** argv) {
 		_tprintf_s(INVALID_N_ARGS);
 		ExitProcess(-1);
 	}
+	
+	// Inicializar os dados do sistema
 	DataTransferObject dto;
-
-	// Inicializar toda a cena da memória partilhada
 	if(!inicializarDTO(&dto)) {
 		_tprintf_s(ERRO_INICIALIZAR_DTO);
 		ExitProcess(-1);
 	}
-
+	dto.limiteClientes = lerCriarRegistryKey();
 	dto.numUtilizadores = lerUtilizadores(&dto.utilizadores, argv[1]);
-	//Utilizador utilizadores[MAX_USERS];
-	//DWORD numUtilizadores = lerUtilizadores(&utilizadores, argv[1]);
-
-	//Empresa empresas[MAX_EMPRESAS];
-	//DWORD numEmpresas = 0;
 
 	// TODO: criar threads para as diferente funcionalidades necessárias
-	// Thread 1 - ler as mensagens dos clientes
-	// Thread 2 - escrever as mensagens para os clientes
-	// Thread 3 - ler os comandos do administrador (é o main)
-	//
-
-	DWORD limiteClientes = lerCriarRegistryKey();
-
+	// Thread 0 - ler os comandos do administrador (é o main)
+	// por cada cliente é lançado uma instância do named pipe (thread)
+	// cada uma dessas threads tem duas threads sendo que uma delas é a do próprio named pipe
+	// Thread pipe 0 - ler as mensagens dos clientes
+	// Thread pipe 1 - escrever as mensagens para os clientes
+	
 	DWORD controlo = 0;
 	TCHAR comando[TAM_COMANDO];
 	TCHAR comandoTemp[TAM_COMANDO];
@@ -81,7 +75,6 @@ int _tmain(int argc, TCHAR** argv) {
 			comandoListc(dto.sharedData, dto.cs);
 			break;
 		case 3: // comando stock
-			_tprintf_s(_T("[INFO] Comando stock\n")); // para apagar
 			numArgumentos = _stscanf_s(
 				comando,
 				_T("%s %s %s %s"),
@@ -99,7 +92,7 @@ int _tmain(int argc, TCHAR** argv) {
 			}
 			break;
 		case 4: // comando users
-			comandoUsers(&(dto.numUtilizadores), dto.utilizadores);
+			comandoUsers(dto.numUtilizadores, dto.utilizadores);
 			break;
 		case 5: // comando pause
 			_tprintf_s(_T("[INFO] Comando pause\n")); // para apagar

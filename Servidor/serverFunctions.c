@@ -71,13 +71,13 @@ DWORD lerCriarRegistryKey() {
 	res = RegOpenKeyEx(HKEY_CURRENT_USER, nomeKey, 0, KEY_READ, &hKey);
 	if (res == ERROR_SUCCESS) {
 		RegQueryValueEx(hKey, NULL, NULL, NULL, (LPBYTE)&limiteClientes, &tamanho);
-		_tprintf_s(_T("O valor lido para NCLIENTES foi: %d\n"), limiteClientes);
+		_tprintf_s(_T("[INFO] O valor lido no registry para NCLIENTES foi: %lu\n"), limiteClientes);
 	}
 	else {
 		res = RegCreateKeyEx(HKEY_CURRENT_USER, nomeKey, 0, NULL, REG_OPTION_NON_VOLATILE, KEY_WRITE, NULL, &hKey, &res);
 		if (res == ERROR_SUCCESS) {
 			RegSetValueEx(hKey, NULL, 0, REG_DWORD, (const BYTE*)&nClientes, sizeof(DWORD));
-			_tprintf_s(_T("O valor escrito em NCLIENTES foi: %d\n"), nClientes);
+			_tprintf_s(_T("O valor NCLIENTES escrito no registry foi: %lu\n"), nClientes);
 			limiteClientes = nClientes;
 		}
 		else {
@@ -170,7 +170,7 @@ void terminarDTO(DataTransferObject* dto) {
 BOOL comandoAddc(DadosPartilhados* dadosP, const TCHAR* nomeEmpresa, const DWORD numeroAcoes, const double precoAcao, CRITICAL_SECTION cs) {
 	
 	EnterCriticalSection(&cs);
-	DWORD numEmpresas = &(dadosP->numEmpresas);
+	DWORD numEmpresas = dadosP->numEmpresas;
 	if (numEmpresas >= MAX_EMPRESAS) {
 		LeaveCriticalSection(&cs);
 		return FALSE;
@@ -184,7 +184,7 @@ BOOL comandoAddc(DadosPartilhados* dadosP, const TCHAR* nomeEmpresa, const DWORD
 	return TRUE;
 }
 
-void comandoListc(DadosPartilhados*dadosP, CRITICAL_SECTION cs) {
+void comandoListc(const DadosPartilhados*dadosP, CRITICAL_SECTION cs) {
 	Empresa eLocal[MAX_EMPRESAS];
 	DWORD numEmpresasLocal = 0;
 
@@ -195,7 +195,7 @@ void comandoListc(DadosPartilhados*dadosP, CRITICAL_SECTION cs) {
 
 	_tprintf_s(_T("Lista de empresas:\n"));
 	for (DWORD i = 0; i < numEmpresasLocal; ++i) {
-		_tprintf_s(_T("Nome: %s \tAções disponíveis: %lu \tPreço atual por ação: %lf\n"), eLocal[i].nome, eLocal[i].quantidadeAcoes, eLocal[i].valorAcao);
+		_tprintf_s(INFO_LISTC, eLocal[i].nome, eLocal[i].quantidadeAcoes, eLocal[i].valorAcao);
 	}
 }
 
@@ -215,7 +215,7 @@ BOOL comandoStock(DadosPartilhados* dadosP, const TCHAR* nomeEmpresa, const doub
 void comandoUsers(const DWORD numUtilizadores, const Utilizador* utilizadores) {
 	_tprintf_s(_T("Lista de utilizadores registados:\n"));
 	for (DWORD i = 0; i < numUtilizadores; ++i) {
-		_tprintf_s(_T("Username: %s \tSaldo: %lf \tEstado: %s\n"), utilizadores[i].username, utilizadores[i].saldo, (utilizadores[i].logado ? _T("ligado") : _T("desligado")));
+		_tprintf_s(INFO_USERS, utilizadores[i].username, utilizadores[i].saldo, (utilizadores[i].logado ? _T("ligado") : _T("desligado")));
 	}
 }
 

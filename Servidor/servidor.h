@@ -13,15 +13,15 @@
 
 
 // funções da plataforma
-DWORD verificaComando(const TCHAR*);
+DWORD lerCriarRegistryKey();
 
 DWORD lerUtilizadores(Utilizador*, const TCHAR*);
-
-DWORD lerCriarRegistryKey();
 
 BOOL inicializarDTO(DataTransferObject*);
 
 void terminarDTO(DataTransferObject*);
+
+DWORD verificaComando(const TCHAR*);
 
 // comandos do servidor
 BOOL comandoAddc(DadosPartilhados*, const TCHAR*, const DWORD, const double, CRITICAL_SECTION);
@@ -44,7 +44,5 @@ void WINAPI threadComandos(PVOID);
 void WINAPI threadReceberMensagens(PVOID);
 
 void WINAPI threadEnviarMensagens(PVOID);
-
-
 
 #endif
