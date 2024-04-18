@@ -15,15 +15,31 @@
 #define TAM_PASSWORD 50     //var ambiente dps
 #define TAM 100             //define usado no registry
 
+// Nomes
+#define SHM_NAME _T("Dados_Partilhados")
+#define SEM_NAME _T("Semaforo_Bolsa")
+#define MTX_BOARD _T("Mutex_Board")
+#define REGISTRY_KEY_NCLIENTES _T("SOFTWARE\\SO2\\NCLIENTES")
+
 // Mensagens de erro
 #define INVALID_N_ARGS _T("[ERRO] Número de argumentos inválido\n")
 #define INVALID_CMD _T("[ERRO] Comando inválido\n")
 #define ERRO_OPEN_FILE _T("[ERRO] Não foi possível abrir o ficheiro\n")
 #define ERRO_MEM_ALLOC _T("[ERRO] Erro ao alocar memória para o utilizador\n")
+#define ERRO_CREATE_KEY_NCLIENTES _T("[ERRO] Erro ao criar a key NCLIENTES\n")
+#define ERRO_CREATE_FILE_MAPPING _T("[ERRO] Erro ao criar file mapping\n")
+#define ERRO_CREATE_MAP_VIEW _T("[ERRO] Erro ao criar file mapping view\n")
+#define ERRO_CREATE_SEM _T("[ERRO] Erro ao criar semáforo\n")
+#define ERRO_CREATE_MUTEX _T("[ERRO] Erro ao criar mutex\n")
+
+#define ERRO_INICIALIZAR_DTO _T("[ERRO] Erro a incializar o sistema\n")
+
+// Mensages de erro do administrador
 #define ERRO_ADDC _T("[ERRO] Erro ao adicionar a empresa\n")
 #define ERRO_LOAD _T("[ERRO] Erro ao carregar as empresas\n")
 #define ERRO_STOCK _T("[ERRO] Erro a altera o valor da ação\n")
 
+// Mensagens de erro do utilizador
 #define ERRO_LOGIN _T("[ERRO] Erro ao efetuar login\n")
 #define ERRO_NO_LOGIN _T("[ERRO] Efetue o login primeiro\n")
 #define ERRO_ALREADY_LOGIN _T("[ERRO] Já efetuou login\n")
@@ -32,10 +48,9 @@
 #define INFO_ADDC _T("[INFO] Empresa adicionada com sucesso\n")
 #define INFO_LOAD _T("[INFO] Empresas carregadas com sucesso\n")
 #define INFO_STOCK _T("[INFO] Valor alterado com sucesso\n")
-
 #define INFO_LOGIN _T("[INFO] Login efetuado com sucesso\n")
-
-// TODO: alterar os valores hardcoded dos tamanhos dos arrays para outros valores
+#define INFO_LISTC _T("Nome: %s \tAções disponíveis: %lu \tPreço atual por ação: %.2lf\n")
+#define INFO_USERS _T("Username: %s \tSaldo: %lf \tEstado: %s\n")
 
 // Tipos de transação
 typedef enum {
@@ -75,7 +90,7 @@ struct Utilizador {
     TCHAR username[TAM_NOME];
     TCHAR password[TAM_PASSWORD];
     double saldo;
-    boolean ligado;
+    BOOL logado;
     EmpresaAcao carteiraAcoes[MAX_EMPRESA_ACAO];
 };
 
@@ -102,4 +117,18 @@ struct DadosPartilhados {
     Empresa empresas[MAX_EMPRESAS];
     DWORD numEmpresas;
     DetalhesTransacao ultimaTransacao;
+};
+
+// Estrutura de dados partilhados entre threads do servidor
+typedef struct DataTransferObject DataTransferObject;
+struct DataTransferObject {
+    HANDLE hMap;
+    PVOID pView;
+	HANDLE hSemBolsa;
+	HANDLE hMtxBolsa;
+    CRITICAL_SECTION cs;
+	DadosPartilhados* sharedData;
+    DWORD numUtilizadores;
+    DWORD limiteClientes;
+    Utilizador utilizadores[MAX_USERS];
 };

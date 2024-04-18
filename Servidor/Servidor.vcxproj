@@ -129,6 +129,7 @@
   <ItemGroup>
     <ClCompile Include="bolsa.c" />
     <ClCompile Include="serverFunctions.c" />
+    <ClCompile Include="serverThreads.c" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="constantes.h" />

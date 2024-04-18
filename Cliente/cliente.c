@@ -27,8 +27,8 @@ int _tmain(int argc, TCHAR** argv)
 	TCHAR argumento1[TAM_COMANDO];
 	TCHAR argumento2[TAM_COMANDO];
 	TCHAR failSafe[TAM_COMANDO];
-	boolean repetir = TRUE;
-	boolean logado = FALSE;
+	BOOL repetir = TRUE;
+	BOOL logado = FALSE;
 	int numArgumentos;
 	while(repetir) {
 		memset(comandoTemp, 0, sizeof(comandoTemp));
