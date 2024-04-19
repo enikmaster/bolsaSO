@@ -7,23 +7,25 @@
 #include <stdio.h>
 #include <string.h>
 
-#define MAX_EMPRESA_ACAO 5  //var ambiente dps
-#define MAX_EMPRESAS 30     //var ambiente dps
-#define MAX_USERS 20        //var ambiente dps
-#define TAM_COMANDO 100      //var ambiente dps
-#define TAM_NOME 50         //var ambiente dps
-#define TAM_PASSWORD 50     //var ambiente dps
-#define TAM 100             //define usado no registry
+// Constantes
+#define TAM_MAX_EMPRESA_ACAO 5  // carteira de ações
+#define TAM_MAX_EMPRESAS 30 // tamanho máximo de empresas
+#define TAM_MAX_USERS 20 // tamanho máximo de utilizadores
+#define TAM_COMANDO 100 // tamanho máximo de um comando
+#define TAM_NOME 50 // tamanho máximo de um nome
+#define TAM_PASSWORD 50 // tamanho máximo de uma password
+#define TAM_REGISTRY 100 // tamanho máximo de uma key do registo
 
 // Nomes
-#define SHM_NAME _T("Dados_Partilhados")
-#define SEM_NAME _T("Semaforo_Bolsa")
-#define MTX_BOARD _T("Mutex_Board")
-#define REGISTRY_KEY_NCLIENTES _T("SOFTWARE\\SO2\\NCLIENTES")
+#define NOME_SHARED_MEMORY _T("Dados_Partilhados")
+#define NOME_SEMAFORO _T("Semaforo_Bolsa")
+#define NOME_MUTEX_BOARD _T("Mutex_Board")
+#define NOME_REGISTRY_KEY_NCLIENTES _T("SOFTWARE\\SO2\\NCLIENTES")
+#define NOME_NAMED_PIPE _T("\\\\.\\pipe\\Pipe_Servidor_Cliente")
 
-// Mensagens de erro
-#define INVALID_N_ARGS _T("[ERRO] Número de argumentos inválido\n")
-#define INVALID_CMD _T("[ERRO] Comando inválido\n")
+// Mensagens de erro do sistema
+#define ERRO_INVALID_N_ARGS _T("[ERRO] Número de argumentos inválido\n")
+#define ERRO_INVALID_CMD _T("[ERRO] Comando inválido\n")
 #define ERRO_OPEN_FILE _T("[ERRO] Não foi possível abrir o ficheiro\n")
 #define ERRO_MEM_ALLOC _T("[ERRO] Erro ao alocar memória para o utilizador\n")
 #define ERRO_CREATE_KEY_NCLIENTES _T("[ERRO] Erro ao criar a key NCLIENTES\n")
@@ -31,8 +33,15 @@
 #define ERRO_CREATE_MAP_VIEW _T("[ERRO] Erro ao criar file mapping view\n")
 #define ERRO_CREATE_SEM _T("[ERRO] Erro ao criar semáforo\n")
 #define ERRO_CREATE_MUTEX _T("[ERRO] Erro ao criar mutex\n")
-
+#define ERRO_CREATE_NAMED_PIPE _T("[ERRO] Erro ao criar named pipe\n")
+#define ERRO_CREATE_THREAD _T("[ERRO] Erro ao criar thread\n")
+#define ERRO_CREATE_EVENT _T("[ERRO] Erro ao criar evento\n")
+#define ERRO_ESPERAR_THREADS _T("[ERRO] Erro ao esperar que as threads terminem\n")
+#define ERRO_MAX_CLIENTES _T("[ERRO] Limite máximo de clientes ativos atingido\n")
 #define ERRO_INICIALIZAR_DTO _T("[ERRO] Erro a incializar o sistema\n")
+#define ERRO_READ_PIPE _T("[ERRO] Erro ao ler do named pipe\n")
+#define ERRO_CONNECT_NAMED_PIPE _T("[ERRO] Erro ao conectar ao named pipe\n")
+#define ERRO_MEM_ALLOC _T("[ERRO] Erro a alocar memória\n")
 
 // Mensages de erro do administrador
 #define ERRO_ADDC _T("[ERRO] Erro ao adicionar a empresa\n")
@@ -91,7 +100,7 @@ struct Utilizador {
     TCHAR password[TAM_PASSWORD];
     double saldo;
     BOOL logado;
-    EmpresaAcao carteiraAcoes[MAX_EMPRESA_ACAO];
+    EmpresaAcao carteiraAcoes[TAM_MAX_EMPRESA_ACAO];
 };
 
 // Estrutura que detalha transação de compra ou venda
@@ -108,13 +117,15 @@ struct DetalhesTransacao {
 typedef struct Mensagem Mensagem, * pMensagem;
 struct Mensagem {
     TipoMensagem TipoM;
-    TCHAR data[256]; // TODO: alterar o tamanho do array para deixar de ser harcoded
+    TCHAR data[256];
+    DWORD valorNumerico;
+    double valorReal;
 };
 
 // Estrutura de Memória partilhada
 typedef struct DadosPartilhados DadosPartilhados;
 struct DadosPartilhados {
-    Empresa empresas[MAX_EMPRESAS];
+    Empresa empresas[TAM_MAX_EMPRESAS];
     DWORD numEmpresas;
     DetalhesTransacao ultimaTransacao;
 };
@@ -126,9 +137,23 @@ struct DataTransferObject {
     PVOID pView;
 	HANDLE hSemBolsa;
 	HANDLE hMtxBolsa;
-    CRITICAL_SECTION cs;
+    CRITICAL_SECTION csDados;
+    CRITICAL_SECTION csUtilizadores;
+    CRITICAL_SECTION csThreads;
 	DadosPartilhados* sharedData;
     DWORD numUtilizadores;
+    Utilizador utilizadores[TAM_MAX_USERS];
     DWORD limiteClientes;
-    Utilizador utilizadores[MAX_USERS];
+    DWORD numPipes;
+    HANDLE hPipes[TAM_MAX_USERS];
+    DWORD numThreads;
+    HANDLE hThreads[TAM_MAX_USERS];
+    BOOL continuar;
+};
+
+// Estrutura para lidar com threads
+typedef struct ThreadData ThreadData;
+struct ThreadData {
+	DataTransferObject* dto;
+	DWORD pipeIndex;
 };

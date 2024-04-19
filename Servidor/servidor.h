@@ -23,6 +23,8 @@ void terminarDTO(DataTransferObject*);
 
 DWORD verificaComando(const TCHAR*);
 
+BOOL instanciarNamedPipe(DataTransferObject*);
+
 // comandos do servidor
 BOOL comandoAddc(DadosPartilhados*, const TCHAR*, const DWORD, const double, CRITICAL_SECTION);
 
@@ -39,10 +41,12 @@ BOOL comandoLoad(DadosPartilhados*, TCHAR*, CRITICAL_SECTION);
 void comandoClose();
 
 // funções das threads
-void WINAPI threadComandos(PVOID);
+void WINAPI threadConnectionHandler(PVOID);
 
-void WINAPI threadReceberMensagens(PVOID);
+void WINAPI threadClientHandler(PVOID);
 
-void WINAPI threadEnviarMensagens(PVOID);
+void WINAPI threadReadHandler(PVOID);
+
+void WINAPI threadWriteHandler(PVOID);
 
 #endif
