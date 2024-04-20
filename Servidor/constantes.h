@@ -71,13 +71,27 @@ typedef enum {
 
 // Tipos de mensagem
 typedef enum {
+    // Cliente -> Servidor
     TMensagem_LOGIN,
-    TMensagem_LOGOUT,
-    TMensagem_COMPRA,
-    TMensagem_VENDA,
-    TMensagem_LISTA_EMPRESAS,
-    TMensagem_VERIFICA_SALDO,
-    TMensagem_RESPOSTA
+    TMensagem_R_LOGIN, // resposta ao login
+    TMensagem_LISTC,
+    TMensagem_R_LISTC, // resposta ao listc
+    TMensagem_BUY,
+    TMensagem_R_BUY, // resposta ao buy
+    TMensagem_SELL,
+    TMensagem_R_SELL, // resposta ao sell
+    TMensagem_BALANCE,
+    TMensagem_R_BALANCE, // resposta ao balance
+    TMensagem_WALLET,
+    TMensagem_R_WALLET, // resposta ao wallet
+    TMensagem_EXIT,
+    // Servidor -> Cliente todas em broadcast
+    TMensagem_ADDC,
+    TMensagem_STOCK,
+    TMensagem_PAUSE,
+    TMensagem_RESUME,
+    TMensagem_LOAD,
+    TMensagem_CLOSE
 } TipoMensagem;
 
 // Estrutura que representa informações gerais de uma empresa
@@ -119,9 +133,42 @@ struct DetalhesTransacao {
 typedef struct Mensagem Mensagem, * pMensagem;
 struct Mensagem {
     TipoMensagem TipoM;
-    TCHAR data[256];
-    DWORD valorNumerico;
-    double valorReal;
+    // Cliente -> Servidor
+    // TMensagem_LOGIN
+    TCHAR username[TAM_NOME];
+    TCHAR password[TAM_PASSWORD];
+    // TMensagem_R_LOGIN
+    BOOL loginSucesso;
+    // TMensagem_R_LISTC
+    DWORD numEmpresas;
+    Empresa empresas[TAM_MAX_EMPRESAS];
+    // TMensagem_BUY
+    // TMensagem_SELL
+    TCHAR empresa[TAM_NOME];
+    DWORD quantidadeAcoes;
+    // TMensagem_R_BUY
+    // TMensagem_R_SELL
+    BOOL transacaoSucesso;
+    // TMensagem_R_BALANCE
+    double saldo;
+    // TMensagem_R_WALLET
+    DWORD numEmpresasAcoes;
+    EmpresaAcao carteiraAcoes[TAM_MAX_EMPRESA_ACAO];
+    // Servidor -> Cliente
+    // TMensagem_ADDC
+    double valorAcao;
+    // TMensagem_STOCK
+    double valorAcao;
+    // TMensagem_PAUSE
+    DWORD numeroSegundos;
+
+    // TCHAR valor1[TAM_COMANDO];
+    // TCHAR valor2[TAM_COMANDO];
+    // BOOL valor3;
+    // DWORD valor4;
+    // double valor5;
+    // EmpresaAcao carteiraAcoes[TAM_MAX_EMPRESA_ACAO];
+    // Empresa empresas[TAM_MAX_EMPRESAS];
 };
 
 // Estrutura de Memória partilhada
@@ -165,4 +212,5 @@ typedef struct ThreadData ThreadData;
 struct ThreadData {
 	DataTransferObject* dto;
 	DWORD pipeIndex;
+    Mensagem mensagem;
 };

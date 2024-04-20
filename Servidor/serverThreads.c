@@ -101,7 +101,7 @@ void WINAPI threadReadHandler(PVOID p) {
 	DWORD pipeIndex = td->pipeIndex;
 	BOOL continuar = TRUE;
 	DWORD bytesLidos;
-	Mensagem mensagemRecebida;
+	//Mensagem mensagemRecebida;
 	OVERLAPPED ov;
 	ZeroMemory(&ov, sizeof(OVERLAPPED));
 	ov.hEvent = CreateEvent(NULL, TRUE, FALSE, NULL);
@@ -115,11 +115,11 @@ void WINAPI threadReadHandler(PVOID p) {
 	while(continuar) {
 		ZeroMemory(&ov, sizeof(OVERLAPPED));
 		ResetEvent(ov.hEvent);
-		ZeroMemory(&mensagemRecebida, sizeof(Mensagem));
+		ZeroMemory(&td->mensagem, sizeof(Mensagem));
 		// ler a mensagem do named pipe
 		BOOL fSuccess = ReadFile(
 			hPipe, // handle do named pipe
-			&mensagemRecebida,	// buffer de leitura
+			&td->mensagem,	// buffer de leitura
 			sizeof(Mensagem),	// número de bytes a ler
 			&bytesLidos,	// número de bytes lidos
 			&ov);	// estrutura overlapped)
@@ -142,7 +142,10 @@ void WINAPI threadReadHandler(PVOID p) {
 			}
 		}
 		// leitura imediata
-		trataMensagemRecebida(dto, &mensagemRecebida);
+		// lança thread para tratar a mensagem
+		HANDLE hThread = CreateThread(NULL, 0, threadMessageHandler, &td, 0, NULL);
+
+		//trataMensagemRecebida(dto, &mensagemRecebida);
 		EnterCriticalSection(&dto->pSync->csContinuar);
 		// TODO: cuidado, ao alterar este valor, estou a mandar fechar todos
 		//       alterar para um método que permita fechar apenas este pipe
@@ -207,6 +210,12 @@ void WINAPI threadWriteHandler(PVOID p) {
 
 
 // funções de tratamento de mensagens
-void trataMensagemRecebida(DataTransferObject* dto, Mensagem* mensagem) {
+void WINAPI threadMessageHandler(PVOID p) {
 	// TODO: fazer esta cena
+	ThreadData* td = (ThreadData*)p;
+	DataTransferObject* dto = td->dto;
+
+	switch(td->mensagem.TipoM) {
+	case TMensagem_LOGIN:
+
 }

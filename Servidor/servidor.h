@@ -49,6 +49,6 @@ void WINAPI threadReadHandler(PVOID);
 
 void WINAPI threadWriteHandler(PVOID);
 
-void trataMensagemRecebida(DataTransferObject*, pMensagem);
+void WINAPI threadMessageHandler(PVOID);
 
 #endif
