@@ -22,7 +22,7 @@ int _tmain(int argc, TCHAR** argv) {
 		ExitProcess(-1);
 	}
 	dto.limiteClientes = lerCriarRegistryKey();
-	dto.numUtilizadores = lerUtilizadores(&dto.utilizadores, argv[1]);
+	dto.numUtilizadores = lerUtilizadores(&dto, argv[1]);
 	dto.numPipes = 0;
 	dto.numThreads = 0;
 
@@ -78,13 +78,13 @@ int _tmain(int argc, TCHAR** argv) {
 			} else {
 				DWORD numeroAcoes = _tstoi(argumento2);
 				double precoAcao = _tstof(argumento3);
-				comandoAddc(dto.sharedData, argumento1, numeroAcoes, precoAcao, dto.csDados)
+				comandoAddc(&dto, argumento1, numeroAcoes, precoAcao)
 				? _tprintf_s(INFO_ADDC)
 				: _tprintf_s(ERRO_ADDC);
 			}
 			break;
 		case 2: // comando listc
-			comandoListc(dto.sharedData, dto.csDados);
+			comandoListc(&dto);
 			break;
 		case 3: // comando stock
 			numArgumentos = _stscanf_s(
@@ -98,13 +98,13 @@ int _tmain(int argc, TCHAR** argv) {
 				_tprintf_s(ERRO_INVALID_N_ARGS);
 			} else {
 				double valorAcao = _tstof(argumento2);
-				comandoStock(dto.sharedData, argumento1, valorAcao, dto.csDados)
+				comandoStock(&dto, argumento1, valorAcao)
 				? _tprintf_s(INFO_STOCK)
 				: _tprintf_s(ERRO_STOCK);
 			}
 			break;
 		case 4: // comando users
-			comandoUsers(dto.numUtilizadores, dto.utilizadores);
+			comandoUsers(&dto);
 			break;
 		case 5: // comando pause
 			_tprintf_s(_T("[INFO] Comando pause\n")); // para apagar
@@ -120,6 +120,7 @@ int _tmain(int argc, TCHAR** argv) {
 				DWORD numeroSegundos = _tstoi(argumento1);
 				comandoPause(numeroSegundos);
 				// TODO: falta qq coisa mas não sei o que é para já
+				//	fazer SuspendThread e ResumeThread
 			}
 			break;
 		case 6: // comando load
@@ -132,14 +133,14 @@ int _tmain(int argc, TCHAR** argv) {
 			if (numArgumentos != 2) {
 				_tprintf_s(ERRO_INVALID_N_ARGS);
 			} else {
-				comandoLoad(dto.sharedData, argumento1, dto.csDados)
+				comandoLoad(&dto, argumento1)
 					? _tprintf_s(INFO_LOAD)
 					: _tprintf_s(ERRO_LOAD);
 			}
 			break;
 		case 7: // comando close
 			_tprintf_s(_T("[INFO] Comando close\n")); // para apagar
-			comandoClose();
+			comandoClose(); // TODO: passar o dto por referência
 			repetir = FALSE;
 			break;
 		case 0:

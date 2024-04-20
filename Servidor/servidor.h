@@ -15,7 +15,7 @@
 // funções da plataforma
 DWORD lerCriarRegistryKey();
 
-DWORD lerUtilizadores(Utilizador*, const TCHAR*);
+DWORD lerUtilizadores(DataTransferObject*, const TCHAR*);
 
 BOOL inicializarDTO(DataTransferObject*);
 
@@ -26,17 +26,17 @@ DWORD verificaComando(const TCHAR*);
 BOOL instanciarNamedPipe(DataTransferObject*);
 
 // comandos do servidor
-BOOL comandoAddc(DadosPartilhados*, const TCHAR*, const DWORD, const double, CRITICAL_SECTION);
+BOOL comandoAddc(DataTransferObject*, const TCHAR*, const DWORD, const double);
 
-void comandoListc(DadosPartilhados*, CRITICAL_SECTION);
+void comandoListc(DataTransferObject*);
 
-BOOL comandoStock(DadosPartilhados*,const TCHAR*, const double, CRITICAL_SECTION);
+BOOL comandoStock(DataTransferObject*,const TCHAR*, const double);
 
-void comandoUsers(const DWORD, const Utilizador*);
+void comandoUsers(DataTransferObject*);
 
 void comandoPause(DWORD);
 
-BOOL comandoLoad(DadosPartilhados*, TCHAR*, CRITICAL_SECTION);
+BOOL comandoLoad(DataTransferObject*, TCHAR*);
 
 void comandoClose();
 
@@ -48,5 +48,7 @@ void WINAPI threadClientHandler(PVOID);
 void WINAPI threadReadHandler(PVOID);
 
 void WINAPI threadWriteHandler(PVOID);
+
+void trataMensagemRecebida(DataTransferObject*, pMensagem);
 
 #endif

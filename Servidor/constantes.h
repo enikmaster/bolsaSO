@@ -130,17 +130,24 @@ struct DadosPartilhados {
     DetalhesTransacao ultimaTransacao;
 };
 
+// Estrutura de mecanismos de sincorização
+typedef struct Sync Sync, * pSync;
+struct Sync {
+    HANDLE hSemBolsa;
+    HANDLE hMtxBolsa;
+    CRITICAL_SECTION csContinuar;
+    CRITICAL_SECTION csListaPipes;
+    CRITICAL_SECTION csEmpresas;
+    CRITICAL_SECTION csUtilizadores;
+};
+
 // Estrutura de dados partilhados entre threads do servidor
 typedef struct DataTransferObject DataTransferObject;
 struct DataTransferObject {
     HANDLE hMap;
     PVOID pView;
-	HANDLE hSemBolsa;
-	HANDLE hMtxBolsa;
-    CRITICAL_SECTION csDados;
-    CRITICAL_SECTION csUtilizadores;
-    CRITICAL_SECTION csThreads;
-	DadosPartilhados* sharedData;
+    pSync pSync;
+	DadosPartilhados* dadosP;
     DWORD numUtilizadores;
     Utilizador utilizadores[TAM_MAX_USERS];
     DWORD limiteClientes;
