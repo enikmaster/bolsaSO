@@ -55,7 +55,7 @@ DWORD lerUtilizadores(DataTransferObject* dto, const TCHAR* nomeFicheiro) {
 	};
 	fclose(file);
 	EnterCriticalSection(&dto->pSync->csUtilizadores);
-	memcpy(dto->utilizadores, uLocal, i * sizeof(Utilizador));
+	CopyMemory(dto->utilizadores, uLocal, i * sizeof(Utilizador));
 	LeaveCriticalSection(&dto->pSync->csUtilizadores);
 	return i;
 }
@@ -202,7 +202,6 @@ BOOL instanciarNamedPipe(DataTransferObject* dto) {
 }
 
 // comandos do servidor
-// TODO: alterar os argumentos para receber só o DTO
 BOOL comandoAddc(DataTransferObject* dto, const TCHAR* nomeEmpresa, const DWORD numeroAcoes, const double precoAcao) {
 	
 	EnterCriticalSection(&dto->pSync->csEmpresas);
@@ -226,7 +225,7 @@ void comandoListc(DataTransferObject* dto) {
 
 	EnterCriticalSection(&dto->pSync->csEmpresas);
 	numEmpresasLocal = dto->dadosP->numEmpresas;
-	memcpy(eLocal, dto->dadosP->empresas, numEmpresasLocal * sizeof(Empresa));
+	CopyMemory(eLocal, dto->dadosP->empresas, numEmpresasLocal * sizeof(Empresa));
 	LeaveCriticalSection(&dto->pSync->csEmpresas);
 
 	_tprintf_s(_T(" -- Lista de empresas --\n"));
@@ -254,7 +253,7 @@ void comandoUsers(DataTransferObject* dto) {
 
 	EnterCriticalSection(&dto->pSync->csUtilizadores);
 	numUtilizadoresLocal = dto->numUtilizadores;
-	memcpy(uLocal, dto->utilizadores, numUtilizadoresLocal * sizeof(Utilizador));
+	CopyMemory(uLocal, dto->utilizadores, numUtilizadoresLocal * sizeof(Utilizador));
 	LeaveCriticalSection(&dto->pSync->csUtilizadores);
 
 	_tprintf_s(_T("-- Lista de utilizadores registados --\n"));
@@ -296,13 +295,13 @@ BOOL comandoLoad(DataTransferObject* dto, TCHAR* nomeFicheiro) {
 	EnterCriticalSection(&dto->pSync->csEmpresas);
 	if(TAM_MAX_EMPRESAS - dto->dadosP->numEmpresas > 0) {
 		if (numEmpresasLidas <= TAM_MAX_EMPRESAS - dto->dadosP->numEmpresas) {
-			memcpy(&dto->dadosP->empresas[dto->dadosP->numEmpresas], eLocal, numEmpresasLidas * sizeof(Empresa));
+			CopyMemory(&dto->dadosP->empresas[dto->dadosP->numEmpresas], eLocal, numEmpresasLidas * sizeof(Empresa));
 			dto->dadosP->numEmpresas += numEmpresasLidas;
 			LeaveCriticalSection(&dto->pSync->csEmpresas);
 			return TRUE;
 		}
 		if (numEmpresasLidas > TAM_MAX_EMPRESAS - dto->dadosP->numEmpresas) {
-			memcpy(&dto->dadosP->empresas[dto->dadosP->numEmpresas], eLocal, (TAM_MAX_EMPRESAS - dto->dadosP->numEmpresas) * sizeof(Empresa));
+			CopyMemory(&dto->dadosP->empresas[dto->dadosP->numEmpresas], eLocal, (TAM_MAX_EMPRESAS - dto->dadosP->numEmpresas) * sizeof(Empresa));
 			dto->dadosP->numEmpresas = TAM_MAX_EMPRESAS;
 			LeaveCriticalSection(&dto->pSync->csEmpresas);
 			return TRUE;

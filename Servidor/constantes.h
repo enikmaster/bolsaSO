@@ -41,7 +41,9 @@
 #define ERRO_INICIALIZAR_DTO _T("[ERRO] Erro a incializar o sistema\n")
 #define ERRO_READ_PIPE _T("[ERRO] Erro ao ler do named pipe\n")
 #define ERRO_CONNECT_NAMED_PIPE _T("[ERRO] Erro ao conectar ao named pipe\n")
+#define ERRO_BROKEN_PIPE _T("[ERRO] A conexão foi interrompida\n")
 #define ERRO_MEM_ALLOC _T("[ERRO] Erro a alocar memória\n")
+#define ERRO_ESCRITA_MSG _T("[ERRO] Erro ao escrever a mensagem\n")
 
 // Mensages de erro do administrador
 #define ERRO_ADDC _T("[ERRO] Erro ao adicionar a empresa\n")

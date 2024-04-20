@@ -71,24 +71,28 @@ void WINAPI threadConnectionHandler(PVOID p) {
 void WINAPI threadClientHandler(PVOID p) {
 	ThreadData* td = (ThreadData*)p;
 
-	HANDLE hThreads[2];
-	hThreads[0] = CreateThread(NULL, 0, threadReadHandler, td, 0, NULL);
-	if(hThreads[0] == NULL) {
+	HANDLE hThread = CreateThread(NULL, 0, threadReadHandler, td, 0, NULL);
+	if(hThread == NULL) {
 		_tprintf_s(ERRO_CREATE_THREAD);
 		return;
 	}
 
-	hThreads[1] = CreateThread(NULL, 0, threadWriteHandler, td, 0, NULL);
+	/*hThreads[1] = CreateThread(NULL, 0, threadWriteHandler, td, 0, NULL);
 	if(hThreads[1] == NULL) {
 		_tprintf_s(ERRO_CREATE_THREAD);
 		CloseHandle(hThreads[0]);
 		return;
-	}
+	}*/
 
-	WaitForMultipleObjects(2, hThreads, TRUE, INFINITE);
+	WaitForSingleObject(hThread, INFINITE);
 
-	CloseHandle(hThreads[0]);
-	CloseHandle(hThreads[1]);
+	// decrementar o número de named pipes
+	EnterCriticalSection(&td->dto->pSync->csListaPipes);
+	td->dto->hPipes[td->pipeIndex] = INVALID_HANDLE_VALUE;
+	td->dto->numPipes--;
+	LeaveCriticalSection(&td->dto->pSync->csListaPipes);
+
+	CloseHandle(hThread);
 }
 
 void WINAPI threadReadHandler(PVOID p) {
@@ -96,8 +100,7 @@ void WINAPI threadReadHandler(PVOID p) {
 	DataTransferObject* dto = td->dto;
 	DWORD pipeIndex = td->pipeIndex;
 	BOOL continuar = TRUE;
-	BOOL res = TRUE;
-	DWORD lidos;
+	DWORD bytesLidos;
 	Mensagem mensagemRecebida;
 	OVERLAPPED ov;
 	ZeroMemory(&ov, sizeof(OVERLAPPED));
@@ -112,34 +115,37 @@ void WINAPI threadReadHandler(PVOID p) {
 	while(continuar) {
 		ZeroMemory(&ov, sizeof(OVERLAPPED));
 		ResetEvent(ov.hEvent);
-		if (!ReadFile(
-			hPipe,	// handle do named pipe
+		ZeroMemory(&mensagemRecebida, sizeof(Mensagem));
+		// ler a mensagem do named pipe
+		BOOL fSuccess = ReadFile(
+			hPipe, // handle do named pipe
 			&mensagemRecebida,	// buffer de leitura
 			sizeof(Mensagem),	// número de bytes a ler
-			&lidos,	// número de bytes lidos
-			&ov)) {	// estrutura overlapped
+			&bytesLidos,	// número de bytes lidos
+			&ov);	// estrutura overlapped)
+		if (!fSuccess || bytesLidos == 0) {
+			// verifica se a leitura falhou
 			if (GetLastError() != ERROR_IO_PENDING) {
 				_tprintf_s(ERRO_READ_PIPE);
 				CloseHandle(ov.hEvent);
 				CloseHandle(hPipe);
 				continue;
 			}
-			else {
-				// leitura pendente
-				WaitForSingleObject(ov.hEvent, INFINITE);
-				if (!GetOverlappedResult(hPipe, &ov, &lidos, FALSE)) {
-					_tprintf_s(ERRO_READ_PIPE);
-					CloseHandle(ov.hEvent);
-					CloseHandle(hPipe);
-					continue;
-				}
-				trataMensagemRecebida(dto, &mensagemRecebida);
+			// leitura pendente
+			WaitForSingleObject(ov.hEvent, INFINITE);
+			// verifica se a leitura foi bem sucedida
+			if (!GetOverlappedResult(hPipe, &ov, &bytesLidos, FALSE)) {
+				_tprintf_s(ERRO_READ_PIPE);
+				CloseHandle(ov.hEvent);
+				CloseHandle(hPipe);
+				continue;
 			}
 		}
-		else {
-			trataMensagemRecebida(dto, &mensagemRecebida);
-		}
+		// leitura imediata
+		trataMensagemRecebida(dto, &mensagemRecebida);
 		EnterCriticalSection(&dto->pSync->csContinuar);
+		// TODO: cuidado, ao alterar este valor, estou a mandar fechar todos
+		//       alterar para um método que permita fechar apenas este pipe
 		continuar = dto->continuar;
 		LeaveCriticalSection(&dto->pSync->csContinuar);
 	}
@@ -149,18 +155,54 @@ void WINAPI threadReadHandler(PVOID p) {
 	DisconnectNamedPipe(hPipe);
 	// fechar o handle do named pipe na lista do servidor
 	CloseHandle(hPipe);
-	// decrementar o número de named pipes
-	EnterCriticalSection(&dto->pSync->csListaPipes);
-	dto->hPipes[pipeIndex] = INVALID_HANDLE_VALUE;
-	dto->numPipes--;
-	LeaveCriticalSection(&dto->pSync->csListaPipes);
 	// fechar o handle do evento
 	CloseHandle(ov.hEvent);
 }
 
 void WINAPI threadWriteHandler(PVOID p) {
-	DataTransferObject* dto = (DataTransferObject*)p;
-	// TODO: implementar o ciclo de leitura e escrita
+	ThreadData* td = (ThreadData*)p;
+	DataTransferObject* dto = td->dto;
+	DWORD pipeIndex = td->pipeIndex;
+	BOOL continuar = TRUE;
+	DWORD bytesEscritos;
+	Mensagem mensagem;
+	OVERLAPPED ov;
+	ZeroMemory(&ov, sizeof(OVERLAPPED));
+	ov.hEvent = CreateEvent(NULL, TRUE, FALSE, NULL);
+	if (ov.hEvent == NULL) {
+		_tprintf_s(ERRO_CREATE_EVENT);
+		return;
+	}
+
+	HANDLE hPipe = dto->hPipes[pipeIndex];
+
+	while (continuar) {
+		ZeroMemory(&ov, sizeof(OVERLAPPED));
+		ResetEvent(ov.hEvent);
+		ZeroMemory(&mensagem, sizeof(Mensagem));
+		// escrever a mensagem no named pipe
+		
+		// TODO: construir a mensagem
+
+		BOOL fSuccess = WriteFile(
+			hPipe, // handle do named pipe
+			&mensagem,	// buffer de escrita
+			sizeof(Mensagem),	// número de bytes a escrever
+			&bytesEscritos,	// número de bytes escritos
+			&ov);	// estrutura overlapped
+		if (!fSuccess || bytesEscritos == 0) {
+			_tprintf_s(ERRO_ESCRITA_MSG);
+			continue;
+		}
+	}
+	// limpar os dados do buffer
+	FlushFileBuffers(hPipe);
+	// desconectar o named pipe
+	DisconnectNamedPipe(hPipe);
+	// fechar o handle do named pipe na lista do servidor
+	CloseHandle(hPipe);
+	// fechar o handle do evento
+	CloseHandle(ov.hEvent);
 }
 
 
