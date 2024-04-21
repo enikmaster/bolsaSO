@@ -44,6 +44,8 @@
 #define ERRO_BROKEN_PIPE _T("[ERRO] A conexão foi interrompida\n")
 #define ERRO_MEM_ALLOC _T("[ERRO] Erro a alocar memória\n")
 #define ERRO_ESCRITA_MSG _T("[ERRO] Erro ao escrever a mensagem\n")
+#define ERRO_INVALID_MSG _T("[ERRO] Mensagem inválida\n")
+#define ERRO_MEMORIA _T("[ERRO] Erro ao alocar memória\n")
 
 // Mensages de erro do administrador
 #define ERRO_ADDC _T("[ERRO] Erro ao adicionar a empresa\n")
@@ -62,6 +64,9 @@
 #define INFO_LOGIN _T("[INFO] Login efetuado com sucesso\n")
 #define INFO_LISTC _T("Nome: %s \tAções disponíveis: %lu \tPreço atual por ação: %.2lf\n")
 #define INFO_USERS _T("Username: %s \tSaldo: %lf \tEstado: %s\n")
+
+// Mensagens de debug
+#define DEBUGGER _T("\n[DEBUG] Estou aqui\n")
 
 // Tipos de transação
 typedef enum {
@@ -135,36 +140,36 @@ struct Mensagem {
     TipoMensagem TipoM;
     // Cliente -> Servidor
     // TMensagem_LOGIN
-    TCHAR username[TAM_NOME];
+    TCHAR nome[TAM_NOME];
     TCHAR password[TAM_PASSWORD];
     // TMensagem_R_LOGIN
-    BOOL loginSucesso;
+    BOOL sucesso;
     // TMensagem_R_LISTC
-    DWORD numEmpresas;
+    DWORD quantidade;
     Empresa empresas[TAM_MAX_EMPRESAS];
     // TMensagem_BUY
     // TMensagem_SELL
-    TCHAR empresa[TAM_NOME];
-    DWORD quantidadeAcoes;
+        //TCHAR empresa[TAM_NOME];
+        //DWORD quantidadeAcoes;
     // TMensagem_R_BUY
     // TMensagem_R_SELL
-    BOOL transacaoSucesso;
+        //BOOL transacaoSucesso;
     // TMensagem_R_BALANCE
-    double saldo;
+    double valor;
     // TMensagem_R_WALLET
-    DWORD numEmpresasAcoes;
+        //DWORD numEmpresasAcoes;
     EmpresaAcao carteiraAcoes[TAM_MAX_EMPRESA_ACAO];
     // Servidor -> Cliente
     // TMensagem_ADDC
-    double valorAcao;
+        //double valorAcao;
     // TMensagem_STOCK
-    double valorAcao;
+        //double valorAcao;
     // TMensagem_PAUSE
-    DWORD numeroSegundos;
+        //DWORD numeroSegundos;
 
-    // TCHAR valor1[TAM_COMANDO];
-    // TCHAR valor2[TAM_COMANDO];
-    // BOOL valor3;
+    // TCHAR valor1[TAM_NOME];
+    // TCHAR valor2[TAM_NOME];
+    // BOOL valor3
     // DWORD valor4;
     // double valor5;
     // EmpresaAcao carteiraAcoes[TAM_MAX_EMPRESA_ACAO];

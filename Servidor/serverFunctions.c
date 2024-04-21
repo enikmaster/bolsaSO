@@ -64,7 +64,7 @@ DWORD lerUtilizadores(DataTransferObject* dto, const TCHAR* nomeFicheiro) {
 DWORD lerCriarRegistryKey() {
 	HKEY hKey;
 	TCHAR nomeKey[TAM_REGISTRY];
-	DWORD tamanho = 0;
+	DWORD tamanho = sizeof(DWORD);
 	DWORD nClientes = 5;
 	DWORD res;
 	DWORD limiteClientes = 0;
@@ -115,6 +115,13 @@ BOOL inicializarDTO(DataTransferObject* dto) {
 		CloseHandle(dto->hMap);
 		return FALSE;
 	}
+	dto->pSync = (pSync)malloc(sizeof(Sync));
+	if (dto->pSync == NULL) {
+		_tprintf_s(ERRO_MEMORIA);
+		UnmapViewOfFile(dto->pView);
+		CloseHandle(dto->hMap);
+		return FALSE;
+	};
 
 	// criar o semáforo da bolsa
 	dto->pSync->hSemBolsa = CreateSemaphore(
@@ -175,6 +182,7 @@ void terminarDTO(DataTransferObject* dto) {
 	CloseHandle(dto->pSync->hMtxBolsa);
 	for (DWORD i = dto->numThreads; i > 0; --i)
 		CloseHandle(dto->hThreads[i - 1]);
+	free(dto->pSync);
 	
 }
 

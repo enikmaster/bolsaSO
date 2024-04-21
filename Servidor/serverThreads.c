@@ -2,6 +2,7 @@
 
 // funções das threads
 void WINAPI threadConnectionHandler(PVOID p) {
+	_tprintf_s(DEBUGGER);
 	DataTransferObject* dto = (DataTransferObject *)p;
 	DWORD numPipes = 0;
 	DWORD limiteClientes = dto->limiteClientes; // não é critical section porque depois de definido, não volta a ser alterado
@@ -143,7 +144,7 @@ void WINAPI threadReadHandler(PVOID p) {
 		}
 		// leitura imediata
 		// lança thread para tratar a mensagem
-		HANDLE hThread = CreateThread(NULL, 0, threadMessageHandler, &td, 0, NULL);
+		HANDLE hThread = CreateThread(NULL, 0, threadMessageHandler, td, 0, NULL);
 
 		//trataMensagemRecebida(dto, &mensagemRecebida);
 		EnterCriticalSection(&dto->pSync->csContinuar);
@@ -162,7 +163,7 @@ void WINAPI threadReadHandler(PVOID p) {
 	CloseHandle(ov.hEvent);
 }
 
-void WINAPI threadWriteHandler(PVOID p) {
+/*void WINAPI threadWriteHandler(PVOID p) {
 	ThreadData* td = (ThreadData*)p;
 	DataTransferObject* dto = td->dto;
 	DWORD pipeIndex = td->pipeIndex;
@@ -185,8 +186,6 @@ void WINAPI threadWriteHandler(PVOID p) {
 		ZeroMemory(&mensagem, sizeof(Mensagem));
 		// escrever a mensagem no named pipe
 		
-		// TODO: construir a mensagem
-
 		BOOL fSuccess = WriteFile(
 			hPipe, // handle do named pipe
 			&mensagem,	// buffer de escrita
@@ -206,16 +205,39 @@ void WINAPI threadWriteHandler(PVOID p) {
 	CloseHandle(hPipe);
 	// fechar o handle do evento
 	CloseHandle(ov.hEvent);
-}
+}*/
 
 
 // funções de tratamento de mensagens
 void WINAPI threadMessageHandler(PVOID p) {
-	// TODO: fazer esta cena
+	// TODO: tratamento de mensagens
 	ThreadData* td = (ThreadData*)p;
-	DataTransferObject* dto = td->dto;
 
-	switch(td->mensagem.TipoM) {
+	switch (td->mensagem.TipoM) {
 	case TMensagem_LOGIN:
+		mensagemLogin(td);
+		break;
+	case TMensagem_LISTC:
+		mensagemListc(td->dto, td->pipeIndex);
+		break;
+	case TMensagem_BUY:
+		mensagemBuy();
+		break;
+	case TMensagem_SELL:
+		mensagemSell();
+		break;
+	case TMensagem_BALANCE:
+		mensagemBalance();
+		break;
+	case TMensagem_WALLET:
+		mensagemWallet();
+		break;
+	case TMensagem_EXIT:
+		mensagemExit();
+		break;
+	default:
+		_tprintf_s(ERRO_INVALID_MSG);
+		break;
+	}
 
 }
