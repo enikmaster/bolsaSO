@@ -180,8 +180,6 @@ void terminarDTO(DataTransferObject* dto) {
 	CloseHandle(dto->hMap);
 	CloseHandle(dto->pSync->hSemBolsa);
 	CloseHandle(dto->pSync->hMtxBolsa);
-	for (DWORD i = dto->numThreads; i > 0; --i)
-		CloseHandle(dto->hThreads[i - 1]);
 	free(dto->pSync);
 	
 }
@@ -211,7 +209,7 @@ BOOL instanciarNamedPipe(DataTransferObject* dto) {
 
 // comandos do servidor
 BOOL comandoAddc(DataTransferObject* dto, const TCHAR* nomeEmpresa, const DWORD numeroAcoes, const double precoAcao) {
-	
+	system("cls");
 	EnterCriticalSection(&dto->pSync->csEmpresas);
 	DWORD numEmpresas = dto->dadosP->numEmpresas;
 	if (numEmpresas >= TAM_MAX_EMPRESAS) {
@@ -228,6 +226,7 @@ BOOL comandoAddc(DataTransferObject* dto, const TCHAR* nomeEmpresa, const DWORD 
 }
 
 void comandoListc(DataTransferObject* dto) {
+	system("cls");
 	Empresa eLocal[TAM_MAX_EMPRESAS];
 	DWORD numEmpresasLocal = 0;
 
@@ -243,6 +242,7 @@ void comandoListc(DataTransferObject* dto) {
 }
 
 BOOL comandoStock(DataTransferObject* dto, const TCHAR* nomeEmpresa, const double valorAcao) {
+	system("cls");
 	EnterCriticalSection(&dto->pSync->csEmpresas);
 	for (DWORD i = 0; i < &(dto->dadosP->numEmpresas); ++i) {
 		if (_tcscmp(nomeEmpresa, dto->dadosP->empresas[i].nome) == 0) {
@@ -256,6 +256,7 @@ BOOL comandoStock(DataTransferObject* dto, const TCHAR* nomeEmpresa, const doubl
 }
 
 void comandoUsers(DataTransferObject* dto) {
+	system("cls");
 	Utilizador uLocal[TAM_MAX_USERS];
 	DWORD numUtilizadoresLocal = 0;
 
@@ -271,10 +272,12 @@ void comandoUsers(DataTransferObject* dto) {
 }
 
 void comandoPause(DWORD numeroSegundos) {
+	system("cls");
 	// TODO: parar o servidor por um determinado tempo
 }
 
 BOOL comandoLoad(DataTransferObject* dto, TCHAR* nomeFicheiro) {
+	system("cls");
 	DWORD numEmpresasLidas = 0;
 	Empresa eLocal[TAM_MAX_EMPRESAS];
 	FILE* file;
@@ -320,6 +323,7 @@ BOOL comandoLoad(DataTransferObject* dto, TCHAR* nomeFicheiro) {
 }
 
 void comandoClose() {
+	system("cls");
 	// TODO: avisar todos os clientes que o servidor vai fechar
 	// TODO: mais qq coisa que seja necessária
 }

@@ -56,6 +56,7 @@
 #define ERRO_LOGIN _T("[ERRO] Erro ao efetuar login\n")
 #define ERRO_NO_LOGIN _T("[ERRO] Efetue o login primeiro\n")
 #define ERRO_ALREADY_LOGIN _T("[ERRO] Já efetuou login\n")
+#define ERRO_EMPRESA_NAO_EXISTE _T("[ERRO] A empresa não existe\n")
 
 // Mensagens de informação
 #define INFO_ADDC _T("[INFO] Empresa adicionada com sucesso\n")
@@ -122,6 +123,7 @@ struct Utilizador {
     double saldo;
     BOOL logado;
     EmpresaAcao carteiraAcoes[TAM_MAX_EMPRESA_ACAO];
+    DWORD numEmpresasAcoes;
 };
 
 // Estrutura que detalha transação de compra ou venda
@@ -207,8 +209,6 @@ struct DataTransferObject {
     DWORD limiteClientes;
     DWORD numPipes;
     HANDLE hPipes[TAM_MAX_USERS];
-    DWORD numThreads;
-    HANDLE hThreads[TAM_MAX_USERS];
     BOOL continuar;
 };
 

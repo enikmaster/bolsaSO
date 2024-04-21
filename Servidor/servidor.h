@@ -45,7 +45,7 @@ void mensagemLogin(ThreadData*);
 
 void mensagemListc(DataTransferObject*, DWORD);
 
-void mensagemBuy();
+void mensagemBuy(ThreadData*);
 
 void mensagemSell();
 

@@ -24,25 +24,14 @@ int _tmain(int argc, TCHAR** argv) {
 	dto.limiteClientes = lerCriarRegistryKey();
 	dto.numUtilizadores = lerUtilizadores(&dto, argv[1]);
 	dto.numPipes = 0;
-	dto.numThreads = 0;
 
-	dto.hThreads[dto.numThreads] = CreateThread(NULL, 0, threadConnectionHandler, &dto,	0, NULL);
-	if (dto.hThreads[dto.numThreads] == NULL) {
+	HANDLE hThread = CreateThread(NULL, 0, threadConnectionHandler, &dto,	0, NULL);
+	if (hThread == NULL) {
 		_tprintf_s(ERRO_CREATE_THREAD);
 		terminarDTO(&dto);
 		ExitProcess(-1);
 	}
 
-	dto.numThreads++;
-
-
-	// TODO: criar threads para as diferente funcionalidades necessárias
-	// Thread 0 - ler os comandos do administrador (é o main) - feito
-	// Thread 1 - threadConnectionHandler para gerir as ligações aos clientes - feito
-	// Thread 1.0 - threadClientHandler para gerir as mensagens dos clientes
-	// Thread pipe 0 - ler as mensagens dos clientes
-	// Thread pipe 1 - escrever as mensagens para os clientes
-	
 	DWORD controlo = 0;
 	TCHAR comando[TAM_COMANDO];
 	TCHAR comandoTemp[TAM_COMANDO];
@@ -151,9 +140,9 @@ int _tmain(int argc, TCHAR** argv) {
 	};
 
 	// esperar que as threads terminem
-	if (WaitForMultipleObjects(dto.numThreads, dto.hThreads, TRUE, INFINITE) != WAIT_OBJECT_0)
+	if (WaitForSingleObject(hThread, INFINITE) != WAIT_OBJECT_0)
 		_tprintf_s(ERRO_ESPERAR_THREADS);
-
+	CloseHandle(hThread);
 	terminarDTO(&dto);
 
 	ExitProcess(0);

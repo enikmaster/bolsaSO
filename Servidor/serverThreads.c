@@ -78,13 +78,6 @@ void WINAPI threadClientHandler(PVOID p) {
 		return;
 	}
 
-	/*hThreads[1] = CreateThread(NULL, 0, threadWriteHandler, td, 0, NULL);
-	if(hThreads[1] == NULL) {
-		_tprintf_s(ERRO_CREATE_THREAD);
-		CloseHandle(hThreads[0]);
-		return;
-	}*/
-
 	WaitForSingleObject(hThread, INFINITE);
 
 	// decrementar o número de named pipes
@@ -102,7 +95,6 @@ void WINAPI threadReadHandler(PVOID p) {
 	DWORD pipeIndex = td->pipeIndex;
 	BOOL continuar = TRUE;
 	DWORD bytesLidos;
-	//Mensagem mensagemRecebida;
 	OVERLAPPED ov;
 	ZeroMemory(&ov, sizeof(OVERLAPPED));
 	ov.hEvent = CreateEvent(NULL, TRUE, FALSE, NULL);
