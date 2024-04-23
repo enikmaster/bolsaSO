@@ -74,5 +74,50 @@ void WINAPI threadConnectionHandlerCliente() {
 
 void WINAPI threadMessageHandlerCliente(PVOID p) {
 	Mensagem* mensagem = (Mensagem*)p;
-
+	// Mensagens recebidas pelo cliente vindas do servidor
+	// Mensagens com prefixo R_ são respostas do servidor
+	switch (mensagem->TipoM) {
+	case TMensagem_R_LOGIN:
+		mensagemRLogin();
+		break;
+	case TMensagem_R_LISTC:
+		mensagemRListc();
+		break;
+	case TMensagem_R_BUY:
+		mensagemRBuy();
+		break;
+	case TMensagem_R_SELL:
+		mensagemRSell();
+		break;
+	case TMensagem_R_BALANCE:
+		mensagemRBalance();
+		break;
+	case TMensagem_R_WALLET:
+		mensagemRWallet();
+		break;
+	case TMensagem_ADDC:
+		mensagemAddc();
+		break;
+	case TMensagem_STOCK:
+		mensagemStock();
+		break;
+	case TMensagem_PAUSE:
+		mensagemPause();
+		break;
+	case TMensagem_RESUME:
+		mensagemResume();
+		break;
+	case TMensagem_LOAD:
+		mensagemLoad();
+		break;
+	case TMensagem_CLOSE:
+		mensagemClose();
+		break;
+	case TMensagem_EXIT:
+		mensagemExit();
+		break;
+	default:
+		_tprintf_s(ERRO_INVALID_MSG);
+		break;
+	}
 }

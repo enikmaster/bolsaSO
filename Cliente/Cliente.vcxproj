@@ -130,6 +130,7 @@
     <ClCompile Include="cliente.c" />
     <ClCompile Include="clientFunctions.c" />
     <ClCompile Include="clientThreads.c" />
+    <ClCompile Include="messageCFunctions.c" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="cliente.h" />
