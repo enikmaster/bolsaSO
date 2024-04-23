@@ -24,6 +24,9 @@
     <ClCompile Include="clientThreads.c">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="messageCFunctions.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="cliente.h">
