@@ -4,13 +4,6 @@
 #define BOLSASO_SERVIDOR_H
 
 #include "constantes.h"
-#include <windows.h>
-#include <tchar.h>
-#include <io.h>
-#include <fcntl.h>
-#include <stdio.h>
-#include <string.h>
-
 
 // funções da plataforma
 DWORD lerCriarRegistryKey();
@@ -73,8 +66,6 @@ void WINAPI threadConnectionHandler(PVOID);
 void WINAPI threadClientHandler(PVOID);
 
 void WINAPI threadReadHandler(PVOID);
-
-//void WINAPI threadWriteHandler(PVOID);
 
 void WINAPI threadMessageHandler(PVOID);
 

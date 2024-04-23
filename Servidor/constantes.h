@@ -41,8 +41,11 @@
 #define ERRO_INICIALIZAR_DTO _T("[ERRO] Erro a incializar o sistema\n")
 #define ERRO_READ_PIPE _T("[ERRO] Erro ao ler do named pipe\n")
 #define ERRO_CONNECT_NAMED_PIPE _T("[ERRO] Erro ao conectar ao named pipe\n")
+#define ERRO_PIPE_BUSY _T("[ERRO] O named pipe está ocupado\n")
 #define ERRO_BROKEN_PIPE _T("[ERRO] A conexão foi interrompida\n")
+#define ERRO_SET_PIPE_STATE _T("[ERRO] Erro ao definir o estado do named pipe\n")
 #define ERRO_MEM_ALLOC _T("[ERRO] Erro a alocar memória\n")
+#define ERRO_LEITURA_MSG _T("[ERRO] Erro ao ler a mensagem\n")
 #define ERRO_ESCRITA_MSG _T("[ERRO] Erro ao escrever a mensagem\n")
 #define ERRO_INVALID_MSG _T("[ERRO] Mensagem inválida\n")
 #define ERRO_MEMORIA _T("[ERRO] Erro ao alocar memória\n")
@@ -140,42 +143,14 @@ struct DetalhesTransacao {
 typedef struct Mensagem Mensagem, * pMensagem;
 struct Mensagem {
     TipoMensagem TipoM;
-    // Cliente -> Servidor
-    // TMensagem_LOGIN
     TCHAR nome[TAM_NOME];
     TCHAR password[TAM_PASSWORD];
-    // TMensagem_R_LOGIN
     BOOL sucesso;
-    // TMensagem_R_LISTC
     DWORD quantidade;
     Empresa empresas[TAM_MAX_EMPRESAS];
-    // TMensagem_BUY
-    // TMensagem_SELL
-        //TCHAR empresa[TAM_NOME];
-        //DWORD quantidadeAcoes;
-    // TMensagem_R_BUY
-    // TMensagem_R_SELL
-        //BOOL transacaoSucesso;
-    // TMensagem_R_BALANCE
     double valor;
-    // TMensagem_R_WALLET
-        //DWORD numEmpresasAcoes;
     EmpresaAcao carteiraAcoes[TAM_MAX_EMPRESA_ACAO];
-    // Servidor -> Cliente
-    // TMensagem_ADDC
-        //double valorAcao;
-    // TMensagem_STOCK
-        //double valorAcao;
-    // TMensagem_PAUSE
-        //DWORD numeroSegundos;
-
-    // TCHAR valor1[TAM_NOME];
-    // TCHAR valor2[TAM_NOME];
-    // BOOL valor3
-    // DWORD valor4;
-    // double valor5;
-    // EmpresaAcao carteiraAcoes[TAM_MAX_EMPRESA_ACAO];
-    // Empresa empresas[TAM_MAX_EMPRESAS];
+    BOOL continuar;
 };
 
 // Estrutura de Memória partilhada

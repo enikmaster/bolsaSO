@@ -16,25 +16,11 @@ int _tmain(int argc, TCHAR** argv)
 		ExitProcess(-1);
 	}
 
-	// TODO: criar threads para as diferentes funcionalidades necessárias
-	// Thread 1 - ler as mensagens do servidor
-	// Thread 2 - ler os comandos do utilizador para enviar para o servidor
-	// 
-	// 
-	//	- liga ao named pipe
-	// loop
-	//  - constroi mensagem
-	//  - escreve mensagem
-	//  - lê resposta
-	// 
-	// 1 - Criar evento não assinalado
-	// 2 - inicializar a estrutura overlapped
-	//     tudo a zero
-	//     colocar handle do evento
-	// 3 - ReadFile(..., &ov);
-	// 4 - fazer cenas
-	// 5 - WaitForSingleObject(evento, INFINITE);
-	//
+	HANDLE hThread = CreateThread(NULL, 0, threadConnectionHandlerCliente, NULL, 0, NULL);
+	if (hThread == NULL) {
+		_tprintf_s(ERRO_CREATE_THREAD);
+		ExitProcess(-1);
+	}
 
 	DWORD controlo = 0;
 	TCHAR comando[TAM_COMANDO];
@@ -123,13 +109,9 @@ int _tmain(int argc, TCHAR** argv)
 				_tprintf_s(ERRO_NO_LOGIN);
 			break;
 		case 7: // comando exit
-			if (logado) {
-				_tprintf_s(_T("[INFO] Comando exit\n"));
-				comandoExit();
-				repetir = FALSE;
-			} else {
-				_tprintf_s(ERRO_NO_LOGIN);
-			}
+			_tprintf_s(_T("[INFO] Comando exit\n"));
+			comandoExit();
+			repetir = FALSE;
 			break;
 		case 0: // comando inválido
 		default:
@@ -137,6 +119,9 @@ int _tmain(int argc, TCHAR** argv)
 			break;
 		}
 	};
+
+	WaitForSingleObject(hThread, INFINITE);
+	CloseHandle(hThread);
 
 	ExitProcess(0);
 }

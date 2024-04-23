@@ -2,7 +2,6 @@
 
 // funções das threads
 void WINAPI threadConnectionHandler(PVOID p) {
-	_tprintf_s(DEBUGGER);
 	DataTransferObject* dto = (DataTransferObject *)p;
 	DWORD numPipes = 0;
 	DWORD limiteClientes = dto->limiteClientes; // não é critical section porque depois de definido, não volta a ser alterado
@@ -142,7 +141,7 @@ void WINAPI threadReadHandler(PVOID p) {
 		EnterCriticalSection(&dto->pSync->csContinuar);
 		// TODO: cuidado, ao alterar este valor, estou a mandar fechar todos
 		//       alterar para um método que permita fechar apenas este pipe
-		continuar = dto->continuar;
+		continuar = td->mensagem.continuar;
 		LeaveCriticalSection(&dto->pSync->csContinuar);
 	}
 	// limpar os dados do buffer
@@ -213,7 +212,7 @@ void WINAPI threadMessageHandler(PVOID p) {
 		mensagemListc(td->dto, td->pipeIndex);
 		break;
 	case TMensagem_BUY:
-		mensagemBuy();
+		mensagemBuy(td);
 		break;
 	case TMensagem_SELL:
 		mensagemSell();
