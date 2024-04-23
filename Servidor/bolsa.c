@@ -11,7 +11,7 @@ int _tmain(int argc, TCHAR** argv) {
 			ExitProcess(-1);
 	#endif
 	if (argc != 2) {
-		_tprintf_s(INVALID_N_ARGS);
+		_tprintf_s(ERRO_INVALID_N_ARGS);
 		ExitProcess(-1);
 	}
 	
@@ -22,15 +22,16 @@ int _tmain(int argc, TCHAR** argv) {
 		ExitProcess(-1);
 	}
 	dto.limiteClientes = lerCriarRegistryKey();
-	dto.numUtilizadores = lerUtilizadores(&dto.utilizadores, argv[1]);
+	dto.numUtilizadores = lerUtilizadores(&dto, argv[1]);
+	dto.numPipes = 0;
 
-	// TODO: criar threads para as diferente funcionalidades necessárias
-	// Thread 0 - ler os comandos do administrador (é o main)
-	// por cada cliente é lançado uma instância do named pipe (thread)
-	// cada uma dessas threads tem duas threads sendo que uma delas é a do próprio named pipe
-	// Thread pipe 0 - ler as mensagens dos clientes
-	// Thread pipe 1 - escrever as mensagens para os clientes
-	
+	HANDLE hThread = CreateThread(NULL, 0, threadConnectionHandler, &dto,	0, NULL);
+	if (hThread == NULL) {
+		_tprintf_s(ERRO_CREATE_THREAD);
+		terminarDTO(&dto);
+		ExitProcess(-1);
+	}
+
 	DWORD controlo = 0;
 	TCHAR comando[TAM_COMANDO];
 	TCHAR comandoTemp[TAM_COMANDO];
@@ -62,17 +63,17 @@ int _tmain(int argc, TCHAR** argv) {
 				argumento3, (unsigned)_countof(argumento3),   // variável onde guardar o 3º argumento + tamanho do buffer
 				failSafe, (unsigned)_countof(failSafe));      // variável de segurança + tamanho do buffer (se preenchida o num de argumentos estará a mais)
 			if(numArgumentos != 4) {
-				_tprintf_s(INVALID_N_ARGS);
+				_tprintf_s(ERRO_INVALID_N_ARGS);
 			} else {
 				DWORD numeroAcoes = _tstoi(argumento2);
 				double precoAcao = _tstof(argumento3);
-				comandoAddc(dto.sharedData, argumento1, numeroAcoes, precoAcao, dto.cs)
+				comandoAddc(&dto, argumento1, numeroAcoes, precoAcao)
 				? _tprintf_s(INFO_ADDC)
 				: _tprintf_s(ERRO_ADDC);
 			}
 			break;
 		case 2: // comando listc
-			comandoListc(dto.sharedData, dto.cs);
+			comandoListc(&dto);
 			break;
 		case 3: // comando stock
 			numArgumentos = _stscanf_s(
@@ -83,16 +84,16 @@ int _tmain(int argc, TCHAR** argv) {
 				argumento2, (unsigned)_countof(argumento2),
 				failSafe, (unsigned)_countof(failSafe));
 			if (numArgumentos != 3) {
-				_tprintf_s(INVALID_N_ARGS);
+				_tprintf_s(ERRO_INVALID_N_ARGS);
 			} else {
 				double valorAcao = _tstof(argumento2);
-				comandoStock(dto.sharedData, argumento1, valorAcao, dto.cs)
+				comandoStock(&dto, argumento1, valorAcao)
 				? _tprintf_s(INFO_STOCK)
 				: _tprintf_s(ERRO_STOCK);
 			}
 			break;
 		case 4: // comando users
-			comandoUsers(dto.numUtilizadores, dto.utilizadores);
+			comandoUsers(&dto);
 			break;
 		case 5: // comando pause
 			_tprintf_s(_T("[INFO] Comando pause\n")); // para apagar
@@ -103,11 +104,12 @@ int _tmain(int argc, TCHAR** argv) {
 				argumento1, (unsigned)_countof(argumento1),
 				failSafe, (unsigned)_countof(failSafe));
 			if (numArgumentos != 2) {
-				_tprintf_s(INVALID_N_ARGS);
+				_tprintf_s(ERRO_INVALID_N_ARGS);
 			} else {
 				DWORD numeroSegundos = _tstoi(argumento1);
 				comandoPause(numeroSegundos);
 				// TODO: falta qq coisa mas não sei o que é para já
+				//	fazer SuspendThread e ResumeThread
 			}
 			break;
 		case 6: // comando load
@@ -118,25 +120,29 @@ int _tmain(int argc, TCHAR** argv) {
 				argumento1, (unsigned)_countof(argumento1),
 				failSafe, (unsigned)_countof(failSafe));
 			if (numArgumentos != 2) {
-				_tprintf_s(INVALID_N_ARGS);
+				_tprintf_s(ERRO_INVALID_N_ARGS);
 			} else {
-				comandoLoad(dto.sharedData, argumento1, dto.cs)
+				comandoLoad(&dto, argumento1)
 					? _tprintf_s(INFO_LOAD)
 					: _tprintf_s(ERRO_LOAD);
 			}
 			break;
 		case 7: // comando close
 			_tprintf_s(_T("[INFO] Comando close\n")); // para apagar
-			comandoClose();
+			comandoClose(); // TODO: passar o dto por referência
 			repetir = FALSE;
 			break;
 		case 0:
 		default: // comando inválido
-			_tprintf_s(INVALID_CMD);
+			_tprintf_s(ERRO_INVALID_CMD);
 			break;
 		}
 	};
 
+	// esperar que as threads terminem
+	if (WaitForSingleObject(hThread, INFINITE) != WAIT_OBJECT_0)
+		_tprintf_s(ERRO_ESPERAR_THREADS);
+	CloseHandle(hThread);
 	terminarDTO(&dto);
 
 	ExitProcess(0);

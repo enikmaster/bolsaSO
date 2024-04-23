@@ -12,14 +12,15 @@ int _tmain(int argc, TCHAR** argv)
 			ExitProcess(-1);
 	#endif
 	if (argc != 1) {
-		_tprintf_s(INVALID_N_ARGS);
+		_tprintf_s(ERRO_INVALID_N_ARGS);
 		ExitProcess(-1);
 	}
 
-	// TODO: criar threads para as diferentes funcionalidades necessárias
-	// Thread 1 - ler as mensagens do servidor
-	// Thread 2 - ler os comandos do utilizador para enviar para o servidor
-	//
+	HANDLE hThread = CreateThread(NULL, 0, threadConnectionHandlerCliente, NULL, 0, NULL);
+	if (hThread == NULL) {
+		_tprintf_s(ERRO_CREATE_THREAD);
+		ExitProcess(-1);
+	}
 
 	DWORD controlo = 0;
 	TCHAR comando[TAM_COMANDO];
@@ -49,7 +50,7 @@ int _tmain(int argc, TCHAR** argv)
 					argumento2, (unsigned)_countof(argumento2),
 					failSafe, (unsigned)_countof(failSafe));
 				if (numArgumentos != 3)
-					_tprintf_s(INVALID_N_ARGS);
+					_tprintf_s(ERRO_INVALID_N_ARGS);
 				else {
 					logado = comandoLogin(argumento1, argumento2);
 					logado ? _tprintf_s(INFO_LOGIN) : _tprintf_s(ERRO_LOGIN);
@@ -73,7 +74,7 @@ int _tmain(int argc, TCHAR** argv)
 					argumento2, (unsigned)_countof(argumento2),
 					failSafe, (unsigned)_countof(failSafe));
 				if (numArgumentos != 3)
-					_tprintf_s(INVALID_N_ARGS);
+					_tprintf_s(ERRO_INVALID_N_ARGS);
 				else
 					comandoBuy(argumento1, _tstoi(argumento2));
 			} else {
@@ -88,7 +89,7 @@ int _tmain(int argc, TCHAR** argv)
 					argumento2, (unsigned)_countof(argumento2),
 					failSafe, (unsigned)_countof(failSafe));
 				if (numArgumentos != 3)
-					_tprintf_s(INVALID_N_ARGS);
+					_tprintf_s(ERRO_INVALID_N_ARGS);
 				else
 					comandoSell(argumento1, _tstoi(argumento2));
 			} else {
@@ -108,20 +109,19 @@ int _tmain(int argc, TCHAR** argv)
 				_tprintf_s(ERRO_NO_LOGIN);
 			break;
 		case 7: // comando exit
-			if (logado) {
-				_tprintf_s(_T("[INFO] Comando exit\n"));
-				comandoExit();
-				repetir = FALSE;
-			} else {
-				_tprintf_s(ERRO_NO_LOGIN);
-			}
+			_tprintf_s(_T("[INFO] Comando exit\n"));
+			comandoExit();
+			repetir = FALSE;
 			break;
 		case 0: // comando inválido
 		default:
-			_tprintf_s(INVALID_CMD);
+			_tprintf_s(ERRO_INVALID_CMD);
 			break;
 		}
 	};
+
+	WaitForSingleObject(hThread, INFINITE);
+	CloseHandle(hThread);
 
 	ExitProcess(0);
 }

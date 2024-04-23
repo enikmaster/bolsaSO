@@ -4,18 +4,11 @@
 #define BOLSASO_SERVIDOR_H
 
 #include "constantes.h"
-#include <windows.h>
-#include <tchar.h>
-#include <io.h>
-#include <fcntl.h>
-#include <stdio.h>
-#include <string.h>
-
 
 // funções da plataforma
 DWORD lerCriarRegistryKey();
 
-DWORD lerUtilizadores(Utilizador*, const TCHAR*);
+DWORD lerUtilizadores(DataTransferObject*, const TCHAR*);
 
 BOOL inicializarDTO(DataTransferObject*);
 
@@ -23,26 +16,57 @@ void terminarDTO(DataTransferObject*);
 
 DWORD verificaComando(const TCHAR*);
 
+BOOL instanciarNamedPipe(DataTransferObject*);
+
 // comandos do servidor
-BOOL comandoAddc(DadosPartilhados*, const TCHAR*, const DWORD, const double, CRITICAL_SECTION);
+BOOL comandoAddc(DataTransferObject*, const TCHAR*, const DWORD, const double);
 
-void comandoListc(DadosPartilhados*, CRITICAL_SECTION);
+void comandoListc(DataTransferObject*);
 
-BOOL comandoStock(DadosPartilhados*,const TCHAR*, const double, CRITICAL_SECTION);
+BOOL comandoStock(DataTransferObject*,const TCHAR*, const double);
 
-void comandoUsers(const DWORD, const Utilizador*);
+void comandoUsers(DataTransferObject*);
 
 void comandoPause(DWORD);
 
-BOOL comandoLoad(DadosPartilhados*, TCHAR*, CRITICAL_SECTION);
+BOOL comandoLoad(DataTransferObject*, TCHAR*);
 
 void comandoClose();
 
+// funções de tratamento de mensagens
+void mensagemLogin(ThreadData*);
+
+void mensagemListc(DataTransferObject*, DWORD);
+
+void mensagemBuy(ThreadData*);
+
+void mensagemSell();
+
+void mensagemBalance();
+
+void mensagemWallet();
+
+void mensagemExit();
+
+void mensagemAddc();
+
+void mensagemStock();
+
+void mensagemPause();
+
+void mensagemResume();
+
+void mensagemLoad();
+
+void mensagemClose();
+
 // funções das threads
-void WINAPI threadComandos(PVOID);
+void WINAPI threadConnectionHandler(PVOID);
 
-void WINAPI threadReceberMensagens(PVOID);
+void WINAPI threadClientHandler(PVOID);
 
-void WINAPI threadEnviarMensagens(PVOID);
+void WINAPI threadReadHandler(PVOID);
+
+void WINAPI threadMessageHandler(PVOID);
 
 #endif

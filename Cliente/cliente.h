@@ -4,12 +4,6 @@
 #define BOLSASO_CLIENTE_H
 
 #include "..\Servidor\constantes.h"
-#include <windows.h>
-#include <tchar.h>
-#include <io.h>
-#include <fcntl.h>
-#include <stdio.h>
-#include <string.h>
 
 // funções da plataforma
 DWORD verificaComando(TCHAR*);
@@ -28,4 +22,10 @@ void comandoBalance();
 void comandoWallet();
 
 void comandoExit();
+
+// funções de threads
+void WINAPI threadConnectionHandlerCliente(LPVOID);
+
+void WINAPI threadMessageHandlerCliente(LPVOID);
+
 #endif
