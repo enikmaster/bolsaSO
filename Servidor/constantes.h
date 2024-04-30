@@ -15,6 +15,8 @@
 #define TAM_NOME 50 // tamanho máximo de um nome
 #define TAM_PASSWORD 50 // tamanho máximo de uma password
 #define TAM_REGISTRY 100 // tamanho máximo de uma key do registo
+#define CONNECTING_STATE 0 // estado em ligação
+#define READING_STATE 1 // estado em leitura
 
 // Nomes
 #define NOME_SHARED_MEMORY _T("Dados_Partilhados")
@@ -44,11 +46,11 @@
 #define ERRO_PIPE_BUSY _T("[ERRO] O named pipe está ocupado\n")
 #define ERRO_BROKEN_PIPE _T("[ERRO] A conexão foi interrompida\n")
 #define ERRO_SET_PIPE_STATE _T("[ERRO] Erro ao definir o estado do named pipe\n")
-#define ERRO_MEM_ALLOC _T("[ERRO] Erro a alocar memória\n")
 #define ERRO_LEITURA_MSG _T("[ERRO] Erro ao ler a mensagem\n")
 #define ERRO_ESCRITA_MSG _T("[ERRO] Erro ao escrever a mensagem\n")
 #define ERRO_INVALID_MSG _T("[ERRO] Mensagem inválida\n")
 #define ERRO_MEMORIA _T("[ERRO] Erro ao alocar memória\n")
+#define ERRO_REGISTRY _T("[ERRO] Erro ao ler o registo\n")
 
 // Mensages de erro do administrador
 #define ERRO_ADDC _T("[ERRO] Erro ao adicionar a empresa\n")
@@ -167,7 +169,7 @@ struct Sync {
     HANDLE hSemBolsa;
     HANDLE hMtxBolsa;
     CRITICAL_SECTION csContinuar;
-    CRITICAL_SECTION csListaPipes;
+    CRITICAL_SECTION csLimClientes;
     CRITICAL_SECTION csEmpresas;
     CRITICAL_SECTION csUtilizadores;
 };
@@ -182,15 +184,31 @@ struct DataTransferObject {
     DWORD numUtilizadores;
     Utilizador utilizadores[TAM_MAX_USERS];
     DWORD limiteClientes;
-    DWORD numPipes;
-    HANDLE hPipes[TAM_MAX_USERS];
+    //HANDLE pipes[TAM_MAX_USERS];
+    //DWORD numPipes;
     BOOL continuar;
 };
+
+typedef struct PipeInstance PipeInstance;
+struct PipeInstance {
+    OVERLAPPED ov;
+    //OVERLAPPED ovWrite;
+    //Mensagem mensagemRead;
+    //DWORD bytesLidos;
+    //Mensagem mensagemWrite;
+    //DWORD bytesEscritos;
+    //DWORD dwState;
+    HANDLE hPipe;
+	//BOOL fConnected;
+};
+
 
 // Estrutura para lidar com threads
 typedef struct ThreadData ThreadData;
 struct ThreadData {
-	DataTransferObject* dto;
-	DWORD pipeIndex;
-    Mensagem mensagem;
+    DataTransferObject* dto;
+    //PipeInstance pipeInst;
+    HANDLE hPipeInst;
+    //DWORD pipeIndex; // não é necessário
+    BOOL livre; // indica se a thread está livre para ser usada
 };

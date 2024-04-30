@@ -26,7 +26,9 @@ void comandoExit();
 // funções de threads
 void WINAPI threadConnectionHandlerCliente(LPVOID);
 
-void WINAPI threadMessageHandlerCliente(LPVOID);
+void messageHandlerCliente(LPVOID);
+
+void PrintLastError(TCHAR*, DWORD);
 
 // funções de tratamento de mensagens no cliente
 void mensagemRLogin();
@@ -51,7 +53,7 @@ void mensagemResume();
 
 void mensagemLoad();
 
-void mensagemClose();
+void mensagemCloseC();
 
 void mensagemExit();
 

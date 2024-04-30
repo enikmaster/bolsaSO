@@ -151,12 +151,13 @@ BOOL inicializarDTO(DataTransferObject* dto) {
 
 	// criar os critical sections
 	InitializeCriticalSection(&dto->pSync->csContinuar);
-	InitializeCriticalSection(&dto->pSync->csListaPipes);
+	InitializeCriticalSection(&dto->pSync->csLimClientes);
 	InitializeCriticalSection(&dto->pSync->csEmpresas);
 	InitializeCriticalSection(&dto->pSync->csUtilizadores);
 
 	dto->dadosP = (DadosPartilhados*)dto->pView;
 	dto->dadosP->numEmpresas = 0;
+	dto->continuar = TRUE;
 
 	return TRUE;
 }
@@ -164,12 +165,12 @@ BOOL inicializarDTO(DataTransferObject* dto) {
 void terminarDTO(DataTransferObject* dto) {
 	// garantir que saiu das secções críticas
 	LeaveCriticalSection(&dto->pSync->csContinuar);
-	LeaveCriticalSection(&dto->pSync->csListaPipes);
+	LeaveCriticalSection(&dto->pSync->csLimClientes);
 	LeaveCriticalSection(&dto->pSync->csEmpresas);
 	LeaveCriticalSection(&dto->pSync->csUtilizadores);
 	// apagar os CriticalSections
 	DeleteCriticalSection(&dto->pSync->csContinuar);
-	DeleteCriticalSection(&dto->pSync->csListaPipes);
+	DeleteCriticalSection(&dto->pSync->csLimClientes);
 	DeleteCriticalSection(&dto->pSync->csEmpresas);
 	DeleteCriticalSection(&dto->pSync->csUtilizadores);
 	// libertar o semáforo
@@ -182,29 +183,6 @@ void terminarDTO(DataTransferObject* dto) {
 	CloseHandle(dto->pSync->hMtxBolsa);
 	free(dto->pSync);
 	
-}
-
-BOOL instanciarNamedPipe(DataTransferObject* dto) {
-	// criar o named pipe
-	if(dto->numPipes >= dto->limiteClientes) {
-		_tprintf_s(ERRO_MAX_CLIENTES);
-		return FALSE;
-	}
-	dto->hPipes[dto->numPipes] = CreateNamedPipe(
-		NOME_NAMED_PIPE,
-		PIPE_ACCESS_DUPLEX | FILE_FLAG_OVERLAPPED,
-		PIPE_TYPE_MESSAGE | PIPE_READMODE_MESSAGE | PIPE_WAIT,
-		TAM_MAX_USERS,
-		sizeof(Mensagem) * 2,
-		sizeof(Mensagem) * 2,
-		0,
-		NULL);
-	if (dto->hPipes[dto->numPipes] == INVALID_HANDLE_VALUE) {
-		_tprintf_s(ERRO_CREATE_NAMED_PIPE);
-		return FALSE;
-	}
-	dto->numPipes++;
-	return TRUE;
 }
 
 // comandos do servidor
@@ -244,7 +222,7 @@ void comandoListc(DataTransferObject* dto) {
 BOOL comandoStock(DataTransferObject* dto, const TCHAR* nomeEmpresa, const double valorAcao) {
 	system("cls");
 	EnterCriticalSection(&dto->pSync->csEmpresas);
-	for (DWORD i = 0; i < &(dto->dadosP->numEmpresas); ++i) {
+	for (DWORD i = 0; i < &dto->dadosP->numEmpresas; ++i) {
 		if (_tcscmp(nomeEmpresa, dto->dadosP->empresas[i].nome) == 0) {
 			dto->dadosP->empresas[i].valorAcao = valorAcao;
 			LeaveCriticalSection(&dto->pSync->csEmpresas);
@@ -322,9 +300,12 @@ BOOL comandoLoad(DataTransferObject* dto, TCHAR* nomeFicheiro) {
 	return FALSE;
 }
 
-void comandoClose() {
+BOOL comandoClose(DataTransferObject* dto) {
 	system("cls");
+
 	// TODO: avisar todos os clientes que o servidor vai fechar
 	// TODO: mais qq coisa que seja necessária
+
+	return FALSE;
 }
 

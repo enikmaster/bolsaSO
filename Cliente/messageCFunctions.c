@@ -23,6 +23,6 @@ void mensagemResume(){}
 
 void mensagemLoad(){}
 
-void mensagemClose(){}
+void mensagemCloseC(){}
 
 void mensagemExit(){}

@@ -16,7 +16,9 @@ int _tmain(int argc, TCHAR** argv)
 		ExitProcess(-1);
 	}
 
-	HANDLE hThread = CreateThread(NULL, 0, threadConnectionHandlerCliente, NULL, 0, NULL);
+	PipeInstance pInst = { 0 };
+
+	HANDLE hThread = CreateThread(NULL, 0, threadConnectionHandlerCliente, &pInst, 0, NULL);
 	if (hThread == NULL) {
 		_tprintf_s(ERRO_CREATE_THREAD);
 		ExitProcess(-1);

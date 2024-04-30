@@ -22,8 +22,15 @@ int _tmain(int argc, TCHAR** argv) {
 		ExitProcess(-1);
 	}
 	dto.limiteClientes = lerCriarRegistryKey();
+	if(dto.limiteClientes == 0) {
+		_tprintf_s(ERRO_REGISTRY);
+		terminarDTO(&dto);
+		ExitProcess(-1);
+	}
+	if(dto.limiteClientes > TAM_MAX_USERS)
+		dto.limiteClientes = TAM_MAX_USERS;
 	dto.numUtilizadores = lerUtilizadores(&dto, argv[1]);
-	dto.numPipes = 0;
+	//dto.numPipes = 0;
 
 	HANDLE hThread = CreateThread(NULL, 0, threadConnectionHandler, &dto,	0, NULL);
 	if (hThread == NULL) {
@@ -129,8 +136,7 @@ int _tmain(int argc, TCHAR** argv) {
 			break;
 		case 7: // comando close
 			_tprintf_s(_T("[INFO] Comando close\n")); // para apagar
-			comandoClose(); // TODO: passar o dto por referência
-			repetir = FALSE;
+			repetir = comandoClose(&dto);
 			break;
 		case 0:
 		default: // comando inválido
