@@ -59,11 +59,11 @@ void mensagemLoad();
 void mensagemClose();
 
 // funções das threads
-void WINAPI threadConnectionHandler(PVOID);
+void WINAPI threadComandosAdminHandler(PVOID);
 
 void WINAPI threadClientHandler(PVOID);
 
-void WINAPI threadReadHandler(PVOID);
+void WINAPI threadBoardHandler(PVOID);
 
 void messageHandler(PVOID, Mensagem);
 

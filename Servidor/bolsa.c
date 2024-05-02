@@ -30,125 +30,94 @@ int _tmain(int argc, TCHAR** argv) {
 	if(dto.limiteClientes > TAM_MAX_USERS)
 		dto.limiteClientes = TAM_MAX_USERS;
 	dto.numUtilizadores = lerUtilizadores(&dto, argv[1]);
-	//dto.numPipes = 0;
 
-	HANDLE hThread = CreateThread(NULL, 0, threadConnectionHandler, &dto,	0, NULL);
-	if (hThread == NULL) {
+	// inicializar a lista de estruturas com o limite máximo de utilizadores
+	ThreadData listaTD[TAM_MAX_USERS];
+	// zerar a lista de estruturas
+	memset(listaTD, 0, sizeof(listaTD));
+	
+	// indica que todas as estruturas estão livres até ao limite de clientes possiveis
+	DWORD i;
+	for(i = 0; i < TAM_MAX_USERS; i++) {
+		listaTD[i].livre = i < dto.limiteClientes;
+		listaTD[i].dto = &dto;
+	}
+
+	HANDLE hThreads[2];
+	// lançar thread para lidar com os comandos de admin
+	hThreads[0] = CreateThread(NULL, 0, threadComandosAdminHandler, &listaTD, 0, NULL);
+	if (hThreads[0] == NULL) {
+		_tprintf_s(ERRO_CREATE_THREAD);
+		terminarDTO(&dto);
+		ExitProcess(-1);
+	}
+	// lançar thread para lidar com o Board
+	hThreads[1] = CreateThread(NULL, 0, threadBoardHandler, &dto, 0, NULL);
+	if (hThreads[1] == NULL) {
 		_tprintf_s(ERRO_CREATE_THREAD);
 		terminarDTO(&dto);
 		ExitProcess(-1);
 	}
 
-	DWORD controlo = 0;
-	TCHAR comando[TAM_COMANDO];
-	TCHAR comandoTemp[TAM_COMANDO];
-	TCHAR argumento1[TAM_COMANDO];
-	TCHAR argumento2[TAM_COMANDO];
-	TCHAR argumento3[TAM_COMANDO];
-	TCHAR failSafe[TAM_COMANDO];
-	BOOL repetir = TRUE;
-	int numArgumentos;
-	while(repetir) {
-		memset(comandoTemp, 0, sizeof(comando));
-		memset(argumento1, 0, sizeof(argumento1));
-		memset(argumento2, 0, sizeof(argumento2));
-		memset(argumento3, 0, sizeof(argumento3));
-		memset(failSafe, 0, sizeof(failSafe));
-		_tprintf_s(_T("Comando: "));
-		_fgetts(comando, sizeof(comando)/sizeof(comando[0]), stdin);
-		comando[_tcslen(comando) - 1] = _T('\0');
-		controlo = verificaComando(comando);
-		numArgumentos = 0;
-		switch (controlo) {
-		case 1: // comando addc
-			numArgumentos = _stscanf_s(
-				comando,									  // buffer de onde ler
-				_T("%s %s %s %s %s"),                         // formato para "partir" a string
-				comandoTemp, (unsigned)_countof(comandoTemp), // variável onde guardar o comando + tamanho do buffer
-				argumento1, (unsigned)_countof(argumento1),   // variável onde guardar o 1º argumento + tamanho do buffer
-				argumento2, (unsigned)_countof(argumento2),   // variável onde guardar o 2º argumento + tamanho do buffer
-				argumento3, (unsigned)_countof(argumento3),   // variável onde guardar o 3º argumento + tamanho do buffer
-				failSafe, (unsigned)_countof(failSafe));      // variável de segurança + tamanho do buffer (se preenchida o num de argumentos estará a mais)
-			if(numArgumentos != 4) {
-				_tprintf_s(ERRO_INVALID_N_ARGS);
-			} else {
-				DWORD numeroAcoes = _tstoi(argumento2);
-				double precoAcao = _tstof(argumento3);
-				comandoAddc(&dto, argumento1, numeroAcoes, precoAcao)
-				? _tprintf_s(INFO_ADDC)
-				: _tprintf_s(ERRO_ADDC);
-			}
-			break;
-		case 2: // comando listc
-			comandoListc(&dto);
-			break;
-		case 3: // comando stock
-			numArgumentos = _stscanf_s(
-				comando,
-				_T("%s %s %s %s"),
-				comandoTemp, (unsigned)_countof(comandoTemp),
-				argumento1, (unsigned)_countof(argumento1),
-				argumento2, (unsigned)_countof(argumento2),
-				failSafe, (unsigned)_countof(failSafe));
-			if (numArgumentos != 3) {
-				_tprintf_s(ERRO_INVALID_N_ARGS);
-			} else {
-				double valorAcao = _tstof(argumento2);
-				comandoStock(&dto, argumento1, valorAcao)
-				? _tprintf_s(INFO_STOCK)
-				: _tprintf_s(ERRO_STOCK);
-			}
-			break;
-		case 4: // comando users
-			comandoUsers(&dto);
-			break;
-		case 5: // comando pause
-			_tprintf_s(_T("[INFO] Comando pause\n")); // para apagar
-			numArgumentos = _stscanf_s(
-				comando,
-				_T("%s %s %s"),
-				comandoTemp, (unsigned)_countof(comandoTemp),
-				argumento1, (unsigned)_countof(argumento1),
-				failSafe, (unsigned)_countof(failSafe));
-			if (numArgumentos != 2) {
-				_tprintf_s(ERRO_INVALID_N_ARGS);
-			} else {
-				DWORD numeroSegundos = _tstoi(argumento1);
-				comandoPause(numeroSegundos);
-				// TODO: falta qq coisa mas não sei o que é para já
-				//	fazer SuspendThread e ResumeThread
-			}
-			break;
-		case 6: // comando load
-			numArgumentos = _stscanf_s(
-				comando,
-				_T("%s %s %s"),
-				comandoTemp, (unsigned)_countof(comandoTemp),
-				argumento1, (unsigned)_countof(argumento1),
-				failSafe, (unsigned)_countof(failSafe));
-			if (numArgumentos != 2) {
-				_tprintf_s(ERRO_INVALID_N_ARGS);
-			} else {
-				comandoLoad(&dto, argumento1)
-					? _tprintf_s(INFO_LOAD)
-					: _tprintf_s(ERRO_LOAD);
-			}
-			break;
-		case 7: // comando close
-			_tprintf_s(_T("[INFO] Comando close\n")); // para apagar
-			repetir = comandoClose(&dto);
-			break;
-		case 0:
-		default: // comando inválido
-			_tprintf_s(ERRO_INVALID_CMD);
-			break;
+	// criar a thread para lidar com as conexões
+	BOOL continuar = TRUE;
+	while (continuar) {
+		// encontrar a primeira posição livre da lista
+		for (i = 0; i < dto.limiteClientes; ++i)
+			if (listaTD[i].livre)
+				break;
+		// TODO: alterar este bloco de código em baixo
+		if (i == dto.limiteClientes) {
+			_tprintf_s(ERRO_MAX_CLIENTES);
+			continue;
 		}
-	};
+		// criar uma instância do named pipe
+		listaTD[i].hPipeInst = CreateNamedPipe(
+			NOME_NAMED_PIPE,
+			PIPE_ACCESS_DUPLEX | FILE_FLAG_OVERLAPPED,
+			PIPE_TYPE_MESSAGE | PIPE_READMODE_MESSAGE | PIPE_WAIT,
+			dto.limiteClientes,
+			sizeof(Mensagem) * 2,
+			sizeof(Mensagem) * 2,
+			0,
+			NULL);
+		if(listaTD[i].hPipeInst == INVALID_HANDLE_VALUE) {
+			_tprintf_s(ERRO_CREATE_NAMED_PIPE);
+			continue;
+		}
+		// conectar o named pipe
+		BOOL fConnected = ConnectNamedPipe(listaTD[i].hPipeInst, NULL) ? TRUE : (GetLastError() == ERROR_PIPE_CONNECTED);
+		if (fConnected != 0) {
+			// lançar a thread para tratar o cliente
+			HANDLE hThread = CreateThread(NULL, 0, threadClientHandler, &listaTD[i], 0, NULL);
+			if (hThread == NULL) {
+				_tprintf_s(ERRO_CREATE_THREAD);
+				CloseHandle(listaTD[i].hPipeInst);
+				continue;
+			}
+			// indicar que a posição da lista de ThreadData está ocupada
+			listaTD[i].livre = FALSE;
+			_tprintf_s(INFO_CLIENTE_CONECTADO);
+		} else {
+			_tprintf_s(ERRO_CONNECT_NAMED_PIPE);
+			CloseHandle(listaTD[i].hPipeInst);
+		}
+
+		// caso seja para fechar tudo
+		EnterCriticalSection(&dto.pSync->csContinuar);
+		continuar = dto.continuar;
+		LeaveCriticalSection(&dto.pSync->csContinuar);
+	}
+
+	// TODO: como lidar com as threads de cliente?
+	//		 WaitForSingleObject para cada cliente? não faz sentido...
 
 	// esperar que as threads terminem
-	if (WaitForSingleObject(hThread, INFINITE) != WAIT_OBJECT_0)
+	if (WaitForMultipleObjects(2, hThreads, TRUE, INFINITE) != WAIT_OBJECT_0)
 		_tprintf_s(ERRO_ESPERAR_THREADS);
-	CloseHandle(hThread);
+	for(DWORD t = 0; t < 2; t++)
+		CloseHandle(hThreads[t]);
+	//CloseHandle(hThread);
 	terminarDTO(&dto);
 
 	ExitProcess(0);

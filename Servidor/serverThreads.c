@@ -1,80 +1,194 @@
 #include "servidor.h"
 
 // funções das threads
-void WINAPI threadConnectionHandler(PVOID p) {
-	DataTransferObject* dto = (DataTransferObject* )p;
-	DWORD limiteClientes = 0;
-	
-	EnterCriticalSection(&dto->pSync->csLimClientes);
-	limiteClientes = dto->limiteClientes;
-	LeaveCriticalSection(&dto->pSync->csLimClientes);
+void WINAPI threadComandosAdminHandler(PVOID p) {
+	ThreadData* td = (ThreadData*)p;
 
-	DWORD numULigados = 0;
-	BOOL continuar = TRUE;
-
-	// inicializar a lista de estruturas
-	ThreadData listaTD[TAM_MAX_USERS];
-	// zerar a lista de estruturas
-	memset(listaTD, 0, sizeof(listaTD));
-	// indica que todas as estruturas estão livres até ao limite de clientes possiveis
-	for(DWORD i = 0; i < TAM_MAX_USERS; i++)
-		listaTD[i].livre = i < limiteClientes;
-	
-	DWORD i;
-	while(continuar){
-		// encontrar a primeira posição livre da lista
-		for(i = 0; i<limiteClientes ;++i)
-			if(listaTD[i].livre)
-				break;
-
-		// TODO: alterar este bloco de código em baixo
-		if(i == limiteClientes) {
-			_tprintf_s(ERRO_MAX_CLIENTES);
-			continue;
-		}
-		
-		// criar uma instância do named pipe
-		listaTD[i].hPipeInst = CreateNamedPipe(
-			NOME_NAMED_PIPE,
-			PIPE_ACCESS_DUPLEX | FILE_FLAG_OVERLAPPED,
-			PIPE_TYPE_MESSAGE | PIPE_READMODE_MESSAGE | PIPE_WAIT,
-			limiteClientes,
-			sizeof(Mensagem) * 2,
-			sizeof(Mensagem) * 2,
-			0,
-			NULL);
-		if (listaTD[i].hPipeInst == INVALID_HANDLE_VALUE) {
-			_tprintf_s(ERRO_CREATE_NAMED_PIPE);
-			continue;
-		}
-		listaTD[i].dto = dto;
-		// conectar o named pipe
-		// BOOL fConnected = ConnectNamedPipe(listaTD[i].pipeInst.hPipeInst, &listaTD[i].pipeInst.ov) ? TRUE : (GetLastError() == ERROR_PIPE_CONNECTED);
-		BOOL fConnected = ConnectNamedPipe(listaTD[i].hPipeInst, NULL) ? TRUE : (GetLastError() == ERROR_PIPE_CONNECTED);
-		// if (fConnected == 0) {
-		if (fConnected != 0) {
-			// lançar a thread para tratar o cliente
-			HANDLE hThread = CreateThread(NULL, 0, threadClientHandler, &listaTD[i], 0, NULL);
-			if (hThread == NULL) {
-				_tprintf_s(ERRO_CREATE_THREAD);
-				CloseHandle(listaTD[i].hPipeInst);
-				continue;
+	DWORD controlo = 0;
+	TCHAR comando[TAM_COMANDO];
+	TCHAR comandoTemp[TAM_COMANDO];
+	TCHAR argumento1[TAM_COMANDO];
+	TCHAR argumento2[TAM_COMANDO];
+	TCHAR argumento3[TAM_COMANDO];
+	TCHAR failSafe[TAM_COMANDO];
+	BOOL repetir = TRUE;
+	int numArgumentos;
+	while (repetir) {
+		memset(comandoTemp, 0, sizeof(comando));
+		memset(argumento1, 0, sizeof(argumento1));
+		memset(argumento2, 0, sizeof(argumento2));
+		memset(argumento3, 0, sizeof(argumento3));
+		memset(failSafe, 0, sizeof(failSafe));
+		_tprintf_s(_T("Comando: "));
+		_fgetts(comando, sizeof(comando) / sizeof(comando[0]), stdin);
+		comando[_tcslen(comando) - 1] = _T('\0');
+		controlo = verificaComando(comando);
+		numArgumentos = 0;
+		switch (controlo) {
+		case 1: // comando addc
+			numArgumentos = _stscanf_s(
+				comando,									  // buffer de onde ler
+				_T("%s %s %s %s %s"),                         // formato para "partir" a string
+				comandoTemp, (unsigned)_countof(comandoTemp), // variável onde guardar o comando + tamanho do buffer
+				argumento1, (unsigned)_countof(argumento1),   // variável onde guardar o 1º argumento + tamanho do buffer
+				argumento2, (unsigned)_countof(argumento2),   // variável onde guardar o 2º argumento + tamanho do buffer
+				argumento3, (unsigned)_countof(argumento3),   // variável onde guardar o 3º argumento + tamanho do buffer
+				failSafe, (unsigned)_countof(failSafe));      // variável de segurança + tamanho do buffer (se preenchida o num de argumentos estará a mais)
+			if (numArgumentos != 4) {
+				_tprintf_s(ERRO_INVALID_N_ARGS);
 			}
-			// indicar que a estrutura está ocupada
-			// (para o ciclo 'for' do início)
-			listaTD[i].livre = FALSE;
-			_tprintf_s(_T("thread cliente criada e lançada\n"));
+			else {
+				DWORD numeroAcoes = _tstoi(argumento2);
+				double precoAcao = _tstof(argumento3);
+				comandoAddc(td->dto, argumento1, numeroAcoes, precoAcao)
+					? _tprintf_s(INFO_ADDC)
+					: _tprintf_s(ERRO_ADDC);
+			}
+			break;
+		case 2: // comando listc
+			comandoListc(td->dto);
+			break;
+		case 3: // comando stock
+			numArgumentos = _stscanf_s(
+				comando,
+				_T("%s %s %s %s"),
+				comandoTemp, (unsigned)_countof(comandoTemp),
+				argumento1, (unsigned)_countof(argumento1),
+				argumento2, (unsigned)_countof(argumento2),
+				failSafe, (unsigned)_countof(failSafe));
+			if (numArgumentos != 3) {
+				_tprintf_s(ERRO_INVALID_N_ARGS);
+			}
+			else {
+				double valorAcao = _tstof(argumento2);
+				comandoStock(td->dto, argumento1, valorAcao)
+					? _tprintf_s(INFO_STOCK)
+					: _tprintf_s(ERRO_STOCK);
+			}
+			break;
+		case 4: // comando users
+			comandoUsers(td->dto);
+			break;
+		case 5: // comando pause
+			_tprintf_s(_T("[INFO] Comando pause\n")); // para apagar
+			numArgumentos = _stscanf_s(
+				comando,
+				_T("%s %s %s"),
+				comandoTemp, (unsigned)_countof(comandoTemp),
+				argumento1, (unsigned)_countof(argumento1),
+				failSafe, (unsigned)_countof(failSafe));
+			if (numArgumentos != 2) {
+				_tprintf_s(ERRO_INVALID_N_ARGS);
+			}
+			else {
+				DWORD numeroSegundos = _tstoi(argumento1);
+				comandoPause(numeroSegundos);
+				// TODO: falta qq coisa mas não sei o que é para já
+				//	fazer SuspendThread e ResumeThread
+			}
+			break;
+		case 6: // comando load
+			numArgumentos = _stscanf_s(
+				comando,
+				_T("%s %s %s"),
+				comandoTemp, (unsigned)_countof(comandoTemp),
+				argumento1, (unsigned)_countof(argumento1),
+				failSafe, (unsigned)_countof(failSafe));
+			if (numArgumentos != 2) {
+				_tprintf_s(ERRO_INVALID_N_ARGS);
+			}
+			else {
+				comandoLoad(td->dto, argumento1)
+					? _tprintf_s(INFO_LOAD)
+					: _tprintf_s(ERRO_LOAD);
+			}
+			break;
+		case 7: // comando close
+			_tprintf_s(_T("[INFO] Comando close\n")); // para apagar
+			repetir = comandoClose(td->dto);
+			break;
+		case 0:
+		default: // comando inválido
+			_tprintf_s(ERRO_INVALID_CMD);
+			break;
 		}
-		else {
-			_tprintf_s(ERRO_CONNECT_NAMED_PIPE);
-			CloseHandle(listaTD[i].hPipeInst);
-		}
-
-		EnterCriticalSection(&dto->pSync->csContinuar);
-		continuar = dto->continuar;
-		LeaveCriticalSection(&dto->pSync->csContinuar);
-	}
+	};
 }
+
+//void WINAPI threadConnectionHandler(PVOID p) {
+//	DataTransferObject* dto = (DataTransferObject* )p;
+//	DWORD limiteClientes = 0;
+//	
+//	EnterCriticalSection(&dto->pSync->csLimClientes);
+//	limiteClientes = dto->limiteClientes;
+//	LeaveCriticalSection(&dto->pSync->csLimClientes);
+//
+//	DWORD numULigados = 0;
+//	BOOL continuar = TRUE;
+//
+//	// inicializar a lista de estruturas
+//	ThreadData listaTD[TAM_MAX_USERS];
+//	// zerar a lista de estruturas
+//	memset(listaTD, 0, sizeof(listaTD));
+//	// indica que todas as estruturas estão livres até ao limite de clientes possiveis
+//	for(DWORD i = 0; i < TAM_MAX_USERS; i++)
+//		listaTD[i].livre = i < limiteClientes;
+//	
+//	DWORD i;
+//	while(continuar){
+//		// encontrar a primeira posição livre da lista
+//		for(i = 0; i<limiteClientes ;++i)
+//			if(listaTD[i].livre)
+//				break;
+//
+//		// TODO: alterar este bloco de código em baixo
+//		if(i == limiteClientes) {
+//			_tprintf_s(ERRO_MAX_CLIENTES);
+//			continue;
+//		}
+//		
+//		// criar uma instância do named pipe
+//		listaTD[i].hPipeInst = CreateNamedPipe(
+//			NOME_NAMED_PIPE,
+//			PIPE_ACCESS_DUPLEX | FILE_FLAG_OVERLAPPED,
+//			PIPE_TYPE_MESSAGE | PIPE_READMODE_MESSAGE | PIPE_WAIT,
+//			limiteClientes,
+//			sizeof(Mensagem) * 2,
+//			sizeof(Mensagem) * 2,
+//			0,
+//			NULL);
+//		if (listaTD[i].hPipeInst == INVALID_HANDLE_VALUE) {
+//			_tprintf_s(ERRO_CREATE_NAMED_PIPE);
+//			continue;
+//		}
+//		listaTD[i].dto = dto;
+//		// conectar o named pipe
+//		// BOOL fConnected = ConnectNamedPipe(listaTD[i].pipeInst.hPipeInst, &listaTD[i].pipeInst.ov) ? TRUE : (GetLastError() == ERROR_PIPE_CONNECTED);
+//		BOOL fConnected = ConnectNamedPipe(listaTD[i].hPipeInst, NULL) ? TRUE : (GetLastError() == ERROR_PIPE_CONNECTED);
+//		// if (fConnected == 0) {
+//		if (fConnected != 0) {
+//			// lançar a thread para tratar o cliente
+//			HANDLE hThread = CreateThread(NULL, 0, threadClientHandler, &listaTD[i], 0, NULL);
+//			if (hThread == NULL) {
+//				_tprintf_s(ERRO_CREATE_THREAD);
+//				CloseHandle(listaTD[i].hPipeInst);
+//				continue;
+//			}
+//			// indicar que a estrutura está ocupada
+//			// (para o ciclo 'for' do início)
+//			listaTD[i].livre = FALSE;
+//			_tprintf_s(_T("thread cliente criada e lançada\n"));
+//		}
+//		else {
+//			_tprintf_s(ERRO_CONNECT_NAMED_PIPE);
+//			CloseHandle(listaTD[i].hPipeInst);
+//		}
+//
+//		EnterCriticalSection(&dto->pSync->csContinuar);
+//		continuar = dto->continuar;
+//		LeaveCriticalSection(&dto->pSync->csContinuar);
+//	}
+//}
 
 void WINAPI threadClientHandler(PVOID p) {
 	ThreadData* td = (ThreadData*)p;
@@ -143,6 +257,14 @@ void WINAPI threadClientHandler(PVOID p) {
 	CloseHandle(hPipe);
 	// fechar o handle do evento
 	CloseHandle(ov.hEvent);
+
+	// sair da thread
+	ExitThread(0);
+}
+
+void WINAPI threadBoardHandler(PVOID p) {
+	DataTransferObject* dto = (DataTransferObject*)p;
+	// TODO: Marques, faz isto!
 }
 
 // funções de tratamento de mensagens

@@ -70,6 +70,7 @@
 #define INFO_LOGIN _T("[INFO] Login efetuado com sucesso\n")
 #define INFO_LISTC _T("Nome: %s \tAções disponíveis: %lu \tPreço atual por ação: %.2lf\n")
 #define INFO_USERS _T("Username: %s \tSaldo: %lf \tEstado: %s\n")
+#define INFO_CLIENTE_CONECTADO _T("[INFO] Cliente conectado, thread criada e lançada\n")
 
 // Mensagens de debug
 #define DEBUGGER _T("\n[DEBUG] Estou aqui\n")
@@ -184,31 +185,13 @@ struct DataTransferObject {
     DWORD numUtilizadores;
     Utilizador utilizadores[TAM_MAX_USERS];
     DWORD limiteClientes;
-    //HANDLE pipes[TAM_MAX_USERS];
-    //DWORD numPipes;
     BOOL continuar;
 };
-
-typedef struct PipeInstance PipeInstance;
-struct PipeInstance {
-    OVERLAPPED ov;
-    //OVERLAPPED ovWrite;
-    //Mensagem mensagemRead;
-    //DWORD bytesLidos;
-    //Mensagem mensagemWrite;
-    //DWORD bytesEscritos;
-    //DWORD dwState;
-    HANDLE hPipe;
-	//BOOL fConnected;
-};
-
 
 // Estrutura para lidar com threads
 typedef struct ThreadData ThreadData;
 struct ThreadData {
     DataTransferObject* dto;
-    //PipeInstance pipeInst;
     HANDLE hPipeInst;
-    //DWORD pipeIndex; // não é necessário
     BOOL livre; // indica se a thread está livre para ser usada
 };
