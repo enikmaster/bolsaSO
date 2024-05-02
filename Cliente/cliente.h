@@ -23,10 +23,14 @@ void comandoWallet();
 
 void comandoExit();
 
-// funções de threads
-void WINAPI threadConnectionHandlerCliente(LPVOID);
+BOOL enviarMensagem(HANDLE, Mensagem);
 
-void WINAPI threadMessageHandlerCliente(LPVOID);
+// funções de threads
+void WINAPI threadComandosClienteHandler(PVOID);
+
+void messageHandlerCliente(Mensagem);
+
+void PrintLastError(TCHAR*, DWORD);
 
 // funções de tratamento de mensagens no cliente
 void mensagemRLogin();
@@ -51,7 +55,7 @@ void mensagemResume();
 
 void mensagemLoad();
 
-void mensagemClose();
+void mensagemCloseC();
 
 void mensagemExit();
 

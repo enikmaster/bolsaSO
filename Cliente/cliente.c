@@ -16,111 +16,84 @@ int _tmain(int argc, TCHAR** argv)
 		ExitProcess(-1);
 	}
 
-	HANDLE hThread = CreateThread(NULL, 0, threadConnectionHandlerCliente, NULL, 0, NULL);
-	if (hThread == NULL) {
-		_tprintf_s(ERRO_CREATE_THREAD);
+	// criar named pipe
+	HANDLE hPipe = CreateFile(
+		NOME_NAMED_PIPE,
+		GENERIC_READ | GENERIC_WRITE,
+		0,
+		NULL,
+		OPEN_EXISTING,
+		0 | FILE_FLAG_OVERLAPPED,
+		NULL
+	);
+	// verificar se a criação do named pipe foi bem sucedida
+	if (hPipe == INVALID_HANDLE_VALUE) {
+		_tprintf_s(ERRO_CONNECT_NAMED_PIPE);
+		ExitProcess(-1);
+	}
+	// verificar se a conexão foi bem sucedida
+	if (GetLastError() == ERROR_PIPE_BUSY) {
+		_tprintf_s(ERRO_PIPE_BUSY);
+		CloseHandle(hPipe);
 		ExitProcess(-1);
 	}
 
-	DWORD controlo = 0;
-	TCHAR comando[TAM_COMANDO];
-	TCHAR comandoTemp[TAM_COMANDO];
-	TCHAR argumento1[TAM_COMANDO];
-	TCHAR argumento2[TAM_COMANDO];
-	TCHAR failSafe[TAM_COMANDO];
-	BOOL repetir = TRUE;
-	BOOL logado = FALSE;
-	int numArgumentos;
-	while(repetir) {
-		memset(comandoTemp, 0, sizeof(comandoTemp));
-		memset(argumento1, 0, sizeof(argumento1));
-		memset(argumento2, 0, sizeof(argumento2));
-		memset(failSafe, 0, sizeof(failSafe));
-		logado ? _tprintf_s(_T("Comando: ")) : _tprintf_s(_T("Efetue login primeiro\nComando:  "));
-		_fgetts(comando, sizeof(comando)/sizeof(comando[0]), stdin);
-		comando[_tcslen(comando) - 1] = _T('\0');
-		controlo = verificaComando(comando);
-		numArgumentos = 0;
-		switch (controlo) {
-		case 1: // comando login
-			if (!logado) {
-				numArgumentos = _stscanf_s(comando, _T("%s %s %s %s"),
-					comandoTemp, (unsigned)_countof(comandoTemp),
-					argumento1, (unsigned)_countof(argumento1),
-					argumento2, (unsigned)_countof(argumento2),
-					failSafe, (unsigned)_countof(failSafe));
-				if (numArgumentos != 3)
-					_tprintf_s(ERRO_INVALID_N_ARGS);
-				else {
-					logado = comandoLogin(argumento1, argumento2);
-					logado ? _tprintf_s(INFO_LOGIN) : _tprintf_s(ERRO_LOGIN);
-				}
-			} else {
-				_tprintf_s(ERRO_ALREADY_LOGIN);
-			}
-			
-			break;
-		case 2: // comando listc
-			if (logado)
-				comandoListc();
-			else
-				_tprintf_s(ERRO_NO_LOGIN);
-			break;
-		case 3: // comando buy
-			if(logado) {
-				numArgumentos = _stscanf_s(comando, _T("%s %s %s %s"),
-					comandoTemp, (unsigned)_countof(comandoTemp),
-					argumento1, (unsigned)_countof(argumento1),
-					argumento2, (unsigned)_countof(argumento2),
-					failSafe, (unsigned)_countof(failSafe));
-				if (numArgumentos != 3)
-					_tprintf_s(ERRO_INVALID_N_ARGS);
-				else
-					comandoBuy(argumento1, _tstoi(argumento2));
-			} else {
-				_tprintf_s(ERRO_NO_LOGIN);
-			}
-			break;
-		case 4: // comando sell
-			if (logado) {
-				numArgumentos = _stscanf_s(comando, _T("%s %s %s %s"),
-					comandoTemp, (unsigned)_countof(comandoTemp),
-					argumento1, (unsigned)_countof(argumento1),
-					argumento2, (unsigned)_countof(argumento2),
-					failSafe, (unsigned)_countof(failSafe));
-				if (numArgumentos != 3)
-					_tprintf_s(ERRO_INVALID_N_ARGS);
-				else
-					comandoSell(argumento1, _tstoi(argumento2));
-			} else {
-				_tprintf_s(ERRO_NO_LOGIN);
-			}
-			break;
-		case 5: // comando balance
-			if(logado)
-				comandoBalance();
-			else
-				_tprintf_s(ERRO_NO_LOGIN);
-			break;
-		case 6: // comando wallet
-			if(logado)
-				comandoWallet();
-			else
-				_tprintf_s(ERRO_NO_LOGIN);
-			break;
-		case 7: // comando exit
-			_tprintf_s(_T("[INFO] Comando exit\n"));
-			comandoExit();
-			repetir = FALSE;
-			break;
-		case 0: // comando inválido
-		default:
-			_tprintf_s(ERRO_INVALID_CMD);
+	// definir o modo de leitura do named pipe
+	DWORD dwMode = PIPE_READMODE_MESSAGE;
+	BOOL fSuccess = SetNamedPipeHandleState(hPipe, &dwMode, NULL, NULL);
+	if (!fSuccess) {
+		_tprintf_s(ERRO_SET_PIPE_STATE);
+		CloseHandle(hPipe);
+		ExitProcess(-1);
+	}
+
+	// criar uma instância de OVERLAPPED
+	OVERLAPPED ov = { 0 };
+	// criar um evento para a instância de OVERLAPPED
+	ov.hEvent = CreateEvent(NULL, TRUE, FALSE, NULL);
+	if (ov.hEvent == NULL) {
+		_tprintf_s(ERRO_CREATE_EVENT);
+		CloseHandle(hPipe);
+		ExitProcess(-1);
+	}
+
+	// thread para lidar com os comandos do cliente
+	HANDLE hThread = CreateThread(NULL, 0, threadComandosClienteHandler, &hPipe, 0, NULL);
+	if (hThread == NULL) {
+		_tprintf_s(ERRO_CREATE_THREAD);
+		CloseHandle(ov.hEvent);
+		CloseHandle(hPipe);
+		ExitProcess(-1);
+	}
+
+	DWORD bytesLidos;
+	Mensagem mensagemRead = { 0 };
+	BOOL continuar = TRUE;
+
+	while (continuar) {
+		// limpar a mensagem
+		ZeroMemory(&mensagemRead, sizeof(Mensagem));
+		// reiniciar o evento
+		ResetEvent(ov.hEvent);
+		// ler a mensagem
+		fSuccess = ReadFile(hPipe, &mensagemRead, sizeof(Mensagem), &bytesLidos, &ov);
+		// esperar que o evento seja sinalizado
+		WaitForSingleObject(ov.hEvent, INFINITE);
+		// verificar se a leitura foi bem sucedida
+		if (!GetOverlappedResult(hPipe, &ov, &bytesLidos, FALSE)) {
+			_tprintf_s(ERRO_READ_PIPE);
 			break;
 		}
-	};
-
+		// lidar com a mensagem
+		messageHandlerCliente(mensagemRead);
+	}
+	// esperar que a thread termine
 	WaitForSingleObject(hThread, INFINITE);
+	
+	FlushFileBuffers(hPipe);
+	DisconnectNamedPipe(hPipe);
+	
+	CloseHandle(hPipe);
 	CloseHandle(hThread);
 
 	ExitProcess(0);

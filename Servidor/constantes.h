@@ -15,6 +15,8 @@
 #define TAM_NOME 50 // tamanho máximo de um nome
 #define TAM_PASSWORD 50 // tamanho máximo de uma password
 #define TAM_REGISTRY 100 // tamanho máximo de uma key do registo
+#define CONNECTING_STATE 0 // estado em ligação
+#define READING_STATE 1 // estado em leitura
 
 // Nomes
 #define NOME_SHARED_MEMORY _T("Dados_Partilhados")
@@ -44,11 +46,11 @@
 #define ERRO_PIPE_BUSY _T("[ERRO] O named pipe está ocupado\n")
 #define ERRO_BROKEN_PIPE _T("[ERRO] A conexão foi interrompida\n")
 #define ERRO_SET_PIPE_STATE _T("[ERRO] Erro ao definir o estado do named pipe\n")
-#define ERRO_MEM_ALLOC _T("[ERRO] Erro a alocar memória\n")
 #define ERRO_LEITURA_MSG _T("[ERRO] Erro ao ler a mensagem\n")
 #define ERRO_ESCRITA_MSG _T("[ERRO] Erro ao escrever a mensagem\n")
 #define ERRO_INVALID_MSG _T("[ERRO] Mensagem inválida\n")
 #define ERRO_MEMORIA _T("[ERRO] Erro ao alocar memória\n")
+#define ERRO_REGISTRY _T("[ERRO] Erro ao ler o registo\n")
 
 // Mensages de erro do administrador
 #define ERRO_ADDC _T("[ERRO] Erro ao adicionar a empresa\n")
@@ -68,6 +70,7 @@
 #define INFO_LOGIN _T("[INFO] Login efetuado com sucesso\n")
 #define INFO_LISTC _T("Nome: %s \tAções disponíveis: %lu \tPreço atual por ação: %.2lf\n")
 #define INFO_USERS _T("Username: %s \tSaldo: %lf \tEstado: %s\n")
+#define INFO_CLIENTE_CONECTADO _T("[INFO] Cliente conectado, thread criada e lançada\n")
 
 // Mensagens de debug
 #define DEBUGGER _T("\n[DEBUG] Estou aqui\n")
@@ -167,7 +170,7 @@ struct Sync {
     HANDLE hSemBolsa;
     HANDLE hMtxBolsa;
     CRITICAL_SECTION csContinuar;
-    CRITICAL_SECTION csListaPipes;
+    CRITICAL_SECTION csLimClientes;
     CRITICAL_SECTION csEmpresas;
     CRITICAL_SECTION csUtilizadores;
 };
@@ -182,15 +185,13 @@ struct DataTransferObject {
     DWORD numUtilizadores;
     Utilizador utilizadores[TAM_MAX_USERS];
     DWORD limiteClientes;
-    DWORD numPipes;
-    HANDLE hPipes[TAM_MAX_USERS];
     BOOL continuar;
 };
 
 // Estrutura para lidar com threads
 typedef struct ThreadData ThreadData;
 struct ThreadData {
-	DataTransferObject* dto;
-	DWORD pipeIndex;
-    Mensagem mensagem;
+    DataTransferObject* dto;
+    HANDLE hPipeInst;
+    BOOL livre; // indica se a thread está livre para ser usada
 };

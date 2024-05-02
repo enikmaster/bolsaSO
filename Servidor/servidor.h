@@ -16,8 +16,6 @@ void terminarDTO(DataTransferObject*);
 
 DWORD verificaComando(const TCHAR*);
 
-BOOL instanciarNamedPipe(DataTransferObject*);
-
 // comandos do servidor
 BOOL comandoAddc(DataTransferObject*, const TCHAR*, const DWORD, const double);
 
@@ -31,18 +29,18 @@ void comandoPause(DWORD);
 
 BOOL comandoLoad(DataTransferObject*, TCHAR*);
 
-void comandoClose();
+BOOL comandoClose(DataTransferObject*);
 
 // funções de tratamento de mensagens
-void mensagemLogin(ThreadData*);
+void mensagemLogin(ThreadData*, Mensagem);
 
-void mensagemListc(DataTransferObject*, DWORD);
+void mensagemListc(DataTransferObject*);
 
 void mensagemBuy(ThreadData*);
 
 void mensagemSell();
 
-void mensagemBalance();
+void mensagemBalance(ThreadData*);
 
 void mensagemWallet();
 
@@ -61,12 +59,16 @@ void mensagemLoad();
 void mensagemClose();
 
 // funções das threads
-void WINAPI threadConnectionHandler(PVOID);
+void WINAPI threadComandosAdminHandler(PVOID);
 
 void WINAPI threadClientHandler(PVOID);
 
-void WINAPI threadReadHandler(PVOID);
+void WINAPI threadBoardHandler(PVOID);
 
-void WINAPI threadMessageHandler(PVOID);
+void messageHandler(PVOID, Mensagem);
+
+BOOL ConnectToNewClient(HANDLE, LPOVERLAPPED);
+
+void PrintLastError(TCHAR*, DWORD);
 
 #endif

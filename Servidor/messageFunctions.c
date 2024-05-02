@@ -1,8 +1,9 @@
 #include "servidor.h"
 
 // funções de tratamento de mensagens
-void mensagemLogin(ThreadData* td) {
-	pUtilizador uLocais = (pUtilizador)malloc(TAM_MAX_USERS * sizeof(Utilizador));
+void mensagemLogin(ThreadData* td, Mensagem mensagem) {
+	_tprintf_s(DEBUGGER);
+	/*pUtilizador uLocais = (pUtilizador)malloc(TAM_MAX_USERS * sizeof(Utilizador));
 	if (uLocais == NULL) {
 		_tprintf_s(ERRO_MEMORIA);
 		return;
@@ -32,11 +33,11 @@ void mensagemLogin(ThreadData* td) {
 	BOOL fSuccess = WriteFile(td->dto->hPipes[td->pipeIndex], &resposta, sizeof(Mensagem), &bytesEscritos, NULL);
 	if (!fSuccess || bytesEscritos == 0)
 		_tprintf_s(ERRO_ESCRITA_MSG);
-	free(uLocais);
+	free(uLocais);*/
 }
 
-void mensagemListc(DataTransferObject* dto, DWORD pipeIndex) {
-	Mensagem resposta = { 0 };
+void mensagemListc(DataTransferObject* dto) {
+	/*Mensagem resposta = { 0 };
 	resposta.TipoM = TMensagem_R_LISTC;
 	EnterCriticalSection(&dto->pSync->csEmpresas);
 	CopyMemory(resposta.empresas, dto->dadosP->empresas, sizeof(Empresa) * dto->dadosP->numEmpresas);
@@ -44,11 +45,11 @@ void mensagemListc(DataTransferObject* dto, DWORD pipeIndex) {
 	DWORD bytesEscritos;
 	BOOL fSuccess = WriteFile(dto->hPipes[pipeIndex], &resposta, sizeof(Mensagem), &bytesEscritos, NULL);
 	if (!fSuccess || bytesEscritos == 0)
-		_tprintf_s(ERRO_ESCRITA_MSG);
+		_tprintf_s(ERRO_ESCRITA_MSG);*/
 }
 
 void mensagemBuy(ThreadData* td) {
-	DWORD numEmpresas;
+	/*DWORD numEmpresas;
 	DWORD numUtilizadores;
 	Mensagem mensagem = { 0 };
 	mensagem.TipoM = TMensagem_R_BUY;
@@ -160,15 +161,59 @@ void mensagemBuy(ThreadData* td) {
 	mensagem.sucesso = TRUE;
 	BOOL fSucess = WriteFile(td->dto->hPipes[td->pipeIndex], &mensagem, sizeof(Mensagem), &bytesEscritos, NULL);
 	if (!fSucess || !bytesEscritos)
-		_tprintf_s(ERRO_ESCRITA_MSG);
+		_tprintf_s(ERRO_ESCRITA_MSG); */
 }
 
 void mensagemSell() {
 	// TODO: mensagemSell
 }
 
-void mensagemBalance() {
+void mensagemBalance(ThreadData* td) {
+	/*
 	// TODO: mensagemBalance
+	// ao receber um pedido de saldo devo passar por vários passos:
+	// 1. Verificar se o utilizador existe
+	// 2. Criar mensagem de resposta com o saldo do utilizador
+	// 3. Enviar a resposta ao cliente
+	// recebo por mensagem o nome do utilizador e o tipo de mensagem
+	DWORD numUtilizadores;
+	pUtilizador uLocais = (pUtilizador)malloc(TAM_MAX_USERS * sizeof(Utilizador));
+	if (uLocais == NULL) {
+		_tprintf_s(ERRO_MEMORIA);
+		return;
+	}
+
+	EnterCriticalSection(&td->dto->pSync->csUtilizadores);
+	numUtilizadores = td->dto->numUtilizadores;
+	CopyMemory(uLocais, td->dto->utilizadores, sizeof(Utilizador) * numUtilizadores);
+	LeaveCriticalSection(&td->dto->pSync->csUtilizadores);
+		
+	Mensagem mensagem = { 0 };
+	mensagem.TipoM = TMensagem_R_BALANCE;
+	DWORD bytesEscritos;
+
+	DWORD indexUtilizador = 0;
+	for (; indexUtilizador < numUtilizadores; ++indexUtilizador) {
+		if (_tcscmp(uLocais[indexUtilizador].username, td->mensagem.nome) == 0) {
+			break;
+		}
+	}
+	if(indexUtilizador == numUtilizadores) {
+		// utilizador não existe
+		mensagem.sucesso = FALSE;
+		BOOL fSucess = WriteFile(td->dto->hPipes[td->pipeIndex], &mensagem, sizeof(Mensagem), &bytesEscritos, NULL);
+		if (!fSucess || !bytesEscritos)
+			_tprintf_s(ERRO_ESCRITA_MSG);
+		free(uLocais);
+		return;
+	}
+	// utilizador existe
+	mensagem.sucesso = TRUE;
+	mensagem.valor = uLocais[indexUtilizador].saldo;
+	BOOL fSucess = WriteFile(td->dto->hPipes[td->pipeIndex], &mensagem, sizeof(Mensagem), &bytesEscritos, NULL);
+	if (!fSucess || !bytesEscritos)
+		_tprintf_s(ERRO_ESCRITA_MSG);
+	free(uLocais);*/
 }
 
 void mensagemWallet() {

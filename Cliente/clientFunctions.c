@@ -33,11 +33,13 @@ DWORD verificaComando(TCHAR* comando) {
 }
 
 // comandos do cliente
-BOOL comandoLogin(TCHAR* username, TCHAR* password) {
-	// TODO: fazer lógica de login depois de implementar a comunicação com o servidor
-	//	envia uma mensagem para o servidor com o username e password
-	//	recebe uma mensagem do servidor com a resposta
-	return TRUE;
+BOOL comandoLogin(HANDLE hPipe, TCHAR* username, TCHAR* password) {
+	Mensagem mensagem = { 0 };
+	mensagem.TipoM = TMensagem_LOGIN;
+	memcpy(mensagem.nome, username, _tcslen(username) * sizeof(TCHAR));
+	memcpy(mensagem.password, password, _tcslen(password) * sizeof(TCHAR));
+	
+	return enviarMensagem(hPipe, mensagem);
 }
 
 void comandoListc() {
@@ -68,4 +70,22 @@ void comandoWallet() {
 void comandoExit() {
 	// TODO: fazer a lógica
 	//	envia uma mensagem para o servidor a pedir o logout
+}
+
+BOOL enviarMensagem(HANDLE hPipe, Mensagem mensagem) {
+	DWORD bytesEscritos;
+	OVERLAPPED ov = { 0 };
+	ov.hEvent = CreateEvent(NULL, TRUE, FALSE, NULL);
+	if (ov.hEvent == NULL) {
+		_tprintf_s(ERRO_CREATE_EVENT);
+		return FALSE;
+	}
+	BOOL fSuccess = WriteFile(hPipe, &mensagem, sizeof(Mensagem), &bytesEscritos, &ov);
+	WaitForSingleObject(hPipe, INFINITE);
+	BOOL ovResult = GetOverlappedResult(hPipe, &ov, &bytesEscritos, FALSE);
+	if (!ovResult || bytesEscritos == 0) {
+		_tprintf_s(ERRO_ESCRITA_MSG);
+		return FALSE;
+	}
+	return TRUE;
 }
