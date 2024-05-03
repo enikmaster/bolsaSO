@@ -58,6 +58,8 @@ void mensagemLoad();
 
 void mensagemClose();
 
+BOOL enviarMensagem(HANDLE, Mensagem);
+
 // funções das threads
 void WINAPI threadComandosAdminHandler(PVOID);
 

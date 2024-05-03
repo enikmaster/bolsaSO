@@ -1,7 +1,11 @@
 #include "cliente.h"
 
 // funções de tratamento de mensagens no cliente
-void mensagemRLogin(){}
+void mensagemRLogin(Mensagem mensagem){
+	system("cls");
+	_tprintf_s(mensagem.sucesso ? INFO_LOGIN : ERRO_LOGIN);
+	_tprintf_s(COMANDO);
+}
 
 void mensagemRListc(){}
 

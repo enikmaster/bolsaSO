@@ -15,8 +15,7 @@
 #define TAM_NOME 50 // tamanho máximo de um nome
 #define TAM_PASSWORD 50 // tamanho máximo de uma password
 #define TAM_REGISTRY 100 // tamanho máximo de uma key do registo
-#define CONNECTING_STATE 0 // estado em ligação
-#define READING_STATE 1 // estado em leitura
+#define COMANDO _T("Comando:  ")
 
 // Nomes
 #define NOME_SHARED_MEMORY _T("Dados_Partilhados")

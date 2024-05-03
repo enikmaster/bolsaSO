@@ -9,7 +9,7 @@
 DWORD verificaComando(TCHAR*);
 
 // comandos do cliente
-BOOL comandoLogin(TCHAR*, TCHAR*);
+BOOL comandoLogin(HANDLE*, TCHAR*, TCHAR*);
 
 void comandoListc();
 
@@ -23,7 +23,7 @@ void comandoWallet();
 
 void comandoExit();
 
-BOOL enviarMensagem(HANDLE, Mensagem);
+BOOL enviarMensagem(HANDLE*, Mensagem);
 
 // funções de threads
 void WINAPI threadComandosClienteHandler(PVOID);
@@ -33,7 +33,7 @@ void messageHandlerCliente(Mensagem);
 void PrintLastError(TCHAR*, DWORD);
 
 // funções de tratamento de mensagens no cliente
-void mensagemRLogin();
+void mensagemRLogin(Mensagem);
 
 void mensagemRListc();
 

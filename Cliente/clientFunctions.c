@@ -33,7 +33,7 @@ DWORD verificaComando(TCHAR* comando) {
 }
 
 // comandos do cliente
-BOOL comandoLogin(HANDLE hPipe, TCHAR* username, TCHAR* password) {
+BOOL comandoLogin(HANDLE* hPipe, TCHAR* username, TCHAR* password) {
 	Mensagem mensagem = { 0 };
 	mensagem.TipoM = TMensagem_LOGIN;
 	memcpy(mensagem.nome, username, _tcslen(username) * sizeof(TCHAR));
@@ -72,7 +72,7 @@ void comandoExit() {
 	//	envia uma mensagem para o servidor a pedir o logout
 }
 
-BOOL enviarMensagem(HANDLE hPipe, Mensagem mensagem) {
+BOOL enviarMensagem(HANDLE* hPipe, Mensagem mensagem) {
 	DWORD bytesEscritos;
 	OVERLAPPED ov = { 0 };
 	ov.hEvent = CreateEvent(NULL, TRUE, FALSE, NULL);
@@ -80,9 +80,9 @@ BOOL enviarMensagem(HANDLE hPipe, Mensagem mensagem) {
 		_tprintf_s(ERRO_CREATE_EVENT);
 		return FALSE;
 	}
-	BOOL fSuccess = WriteFile(hPipe, &mensagem, sizeof(Mensagem), &bytesEscritos, &ov);
-	WaitForSingleObject(hPipe, INFINITE);
-	BOOL ovResult = GetOverlappedResult(hPipe, &ov, &bytesEscritos, FALSE);
+	BOOL fSuccess = WriteFile(*hPipe, &mensagem, sizeof(Mensagem), &bytesEscritos, &ov);
+	//WaitForSingleObject(*hPipe, INFINITE);
+	BOOL ovResult = GetOverlappedResult(*hPipe, &ov, &bytesEscritos, FALSE);
 	if (!ovResult || bytesEscritos == 0) {
 		_tprintf_s(ERRO_ESCRITA_MSG);
 		return FALSE;

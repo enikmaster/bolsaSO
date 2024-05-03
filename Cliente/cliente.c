@@ -74,18 +74,66 @@ int _tmain(int argc, TCHAR** argv)
 		// limpar a mensagem
 		ZeroMemory(&mensagemRead, sizeof(Mensagem));
 		// reiniciar o evento
+		ov.Offset = 0;
+		ov.OffsetHigh = 0;
 		ResetEvent(ov.hEvent);
 		// ler a mensagem
 		fSuccess = ReadFile(hPipe, &mensagemRead, sizeof(Mensagem), &bytesLidos, &ov);
 		// esperar que o evento seja sinalizado
 		WaitForSingleObject(ov.hEvent, INFINITE);
 		// verificar se a leitura foi bem sucedida
-		if (!GetOverlappedResult(hPipe, &ov, &bytesLidos, FALSE)) {
-			_tprintf_s(ERRO_READ_PIPE);
-			break;
+		if(fSuccess || bytesLidos != 0) {
+			if (!GetOverlappedResult(hPipe, &ov, &bytesLidos, FALSE)) {
+				_tprintf_s(ERRO_READ_PIPE);
+				break;
+			}
 		}
 		// lidar com a mensagem
-		messageHandlerCliente(mensagemRead);
+		// messageHandlerCliente(mensagemRead);
+		switch (mensagemRead.TipoM) {
+		case TMensagem_R_LOGIN:
+			mensagemRLogin(mensagemRead);
+			break;
+		case TMensagem_R_LISTC:
+			mensagemRListc();
+			break;
+		case TMensagem_R_BUY:
+			mensagemRBuy();
+			break;
+		case TMensagem_R_SELL:
+			mensagemRSell();
+			break;
+		case TMensagem_R_BALANCE:
+			mensagemRBalance();
+			break;
+		case TMensagem_R_WALLET:
+			mensagemRWallet();
+			break;
+		case TMensagem_ADDC:
+			mensagemAddc();
+			break;
+		case TMensagem_STOCK:
+			mensagemStock();
+			break;
+		case TMensagem_PAUSE:
+			mensagemPause();
+			break;
+		case TMensagem_RESUME:
+			mensagemResume();
+			break;
+		case TMensagem_LOAD:
+			mensagemLoad();
+			break;
+		case TMensagem_CLOSE:
+			mensagemCloseC();
+			break;
+		case TMensagem_EXIT:
+			mensagemExit();
+			break;
+		default:
+			_tprintf_s(ERRO_INVALID_MSG);
+			break;
+		}
 	}
 	// esperar que a thread termine
 	WaitForSingleObject(hThread, INFINITE);
