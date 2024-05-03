@@ -2,38 +2,41 @@
 
 // funções de tratamento de mensagens
 void mensagemLogin(ThreadData* td, Mensagem mensagem) {
-	_tprintf_s(DEBUGGER);
-	/*pUtilizador uLocais = (pUtilizador)malloc(TAM_MAX_USERS * sizeof(Utilizador));
+	pUtilizador uLocais = (pUtilizador)malloc(TAM_MAX_USERS * sizeof(Utilizador));
 	if (uLocais == NULL) {
 		_tprintf_s(ERRO_MEMORIA);
 		return;
-	}
+	};
 
-	EnterCriticalSection(&td->dto->pSync->csUtilizadores);
-	DWORD numUtilizadores = td->dto->numUtilizadores;
-	CopyMemory(uLocais, td->dto->utilizadores, sizeof(Utilizador) * numUtilizadores);
-	LeaveCriticalSection(&td->dto->pSync->csUtilizadores);
-
+	// gerar mensagem de resposta
 	Mensagem resposta = { 0 };
 	resposta.TipoM = TMensagem_R_LOGIN;
 	resposta.sucesso = FALSE;
-	DWORD bytesEscritos;
+	resposta.continuar = TRUE;
+
+	DWORD numUtilizadores;
+	HANDLE hPipe;
+	EnterCriticalSection(&td->dto->pSync->csUtilizadores);
+	hPipe = td->hPipeInst;
+	numUtilizadores = td->dto->numUtilizadores;
+	memcpy(uLocais, td->dto->utilizadores, sizeof(Utilizador) * numUtilizadores);
+	LeaveCriticalSection(&td->dto->pSync->csUtilizadores);
 
 	for (DWORD i = 0; i < numUtilizadores; ++i) {
-		if (_tcscmp(uLocais[i].username, td->mensagem.nome) == 0) {
-			if (_tcscmp(uLocais[i].password, td->mensagem.password) == 0) {
+		if (_tcscmp(uLocais[i].username, mensagem.nome) == 0) {
+			if (_tcscmp(uLocais[i].password, mensagem.password) == 0) {
 				if (!uLocais[i].logado) {
+					EnterCriticalSection(&td->dto->pSync->csUtilizadores);
+					td->dto->utilizadores[i].logado = TRUE;
+					LeaveCriticalSection(&td->dto->pSync->csUtilizadores);
 					resposta.sucesso = TRUE;
 					break;
 				}
 			}
 		}
 	}
-
-	BOOL fSuccess = WriteFile(td->dto->hPipes[td->pipeIndex], &resposta, sizeof(Mensagem), &bytesEscritos, NULL);
-	if (!fSuccess || bytesEscritos == 0)
-		_tprintf_s(ERRO_ESCRITA_MSG);
-	free(uLocais);*/
+	enviarMensagem(hPipe, resposta);
+	free(uLocais);
 }
 
 void mensagemListc(DataTransferObject* dto) {
@@ -246,4 +249,21 @@ void mensagemLoad() {
 
 void mensagemClose() {
 	// TODO: mensagemClose
+}
+
+BOOL enviarMensagem(HANDLE hPipe, Mensagem mensagem) {
+	DWORD bytesEscritos;
+	OVERLAPPED ov = { 0 };
+	ov.hEvent = CreateEvent(NULL, TRUE, FALSE, NULL);
+	if (ov.hEvent == NULL) {
+		_tprintf_s(ERRO_CREATE_EVENT);
+		return FALSE;
+	}
+	BOOL fSuccess = WriteFile(hPipe, &mensagem, sizeof(Mensagem), &bytesEscritos, &ov);
+	BOOL ovResult = GetOverlappedResult(hPipe, &ov, &bytesEscritos, FALSE);
+	if (!ovResult || bytesEscritos == 0) {
+		_tprintf_s(ERRO_ESCRITA_MSG);
+		return FALSE;
+	}
+	return TRUE;
 }

@@ -16,13 +16,15 @@ void WINAPI threadComandosClienteHandler(PVOID p) {
 		memset(argumento1, 0, sizeof(argumento1));
 		memset(argumento2, 0, sizeof(argumento2));
 		memset(failSafe, 0, sizeof(failSafe));
-		logado ? _tprintf_s(_T("Comando: ")) : _tprintf_s(_T("Efetue login primeiro\nComando:  "));
+		if(!logado) 
+			_tprintf_s(_T("Efetue login primeiro\nComando:  "));
 		_fgetts(comando, sizeof(comando) / sizeof(comando[0]), stdin);
 		comando[_tcslen(comando) - 1] = _T('\0');
 		controlo = verificaComando(comando);
 		numArgumentos = 0;
 		switch (controlo) {
 		case 1: // comando login
+			system("cls");
 			if (!logado) {
 				numArgumentos = _stscanf_s(comando, _T("%s %s %s %s"),
 					comandoTemp, (unsigned)_countof(comandoTemp),
@@ -33,7 +35,6 @@ void WINAPI threadComandosClienteHandler(PVOID p) {
 					_tprintf_s(ERRO_INVALID_N_ARGS);
 				else {
 					logado = comandoLogin(hPipe, argumento1, argumento2);
-					logado ? _tprintf_s(INFO_LOGIN) : _tprintf_s(ERRO_LOGIN);
 				}
 			}
 			else {
@@ -180,12 +181,12 @@ void WINAPI threadComandosClienteHandler(PVOID p) {
 	CloseHandle(ov.hEvent);
 }*/
 
-void messageHandlerCliente(Mensagem mensagem) {
+/*void messageHandlerCliente(Mensagem mensagem) {
 	// Mensagens recebidas pelo cliente vindas do servidor
 	// Mensagens com prefixo R_ são respostas do servidor
 	switch (mensagem.TipoM) {
 	case TMensagem_R_LOGIN:
-		mensagemRLogin();
+		mensagemRLogin(mensagem);
 		break;
 	case TMensagem_R_LISTC:
 		mensagemRListc();
@@ -227,7 +228,7 @@ void messageHandlerCliente(Mensagem mensagem) {
 		_tprintf_s(ERRO_INVALID_MSG);
 		break;
 	}
-}
+}*/
 
 void PrintLastError(TCHAR* part, DWORD id) {
 	PTSTR buffer;

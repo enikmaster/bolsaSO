@@ -203,18 +203,20 @@ void WINAPI threadClientHandler(PVOID p) {
 
 	Mensagem mensagemRead = { 0 };
 	DWORD bytesLidos;
+
 	HANDLE hPipe = td->hPipeInst;
 	BOOL continuar = TRUE;
 
 	while (continuar) {
-		// zerar a estrutura overlapped
-		ZeroMemory(&ov, sizeof(OVERLAPPED));
 		// zerar a mensagem
 		ZeroMemory(&mensagemRead, sizeof(Mensagem));
-		// reset do evento
+		mensagemRead.continuar = TRUE;
+		// reset do ov
+		ov.Offset = 0;
+		ov.OffsetHigh = 0;
 		ResetEvent(ov.hEvent);
 		// ler a mensagem do named pipe
-		ReadFile(
+		BOOL fSuccess = ReadFile(
 			td->hPipeInst, // handle do named pipe
 			&mensagemRead,	// buffer de leitura
 			sizeof(Mensagem),	// número de bytes a ler
@@ -243,10 +245,38 @@ void WINAPI threadClientHandler(PVOID p) {
 //		}
 		// leitura imediata
 //		HANDLE hThread = CreateThread(NULL, 0, threadMessageHandler, &td, 0, NULL);
-		messageHandler(&td, mensagemRead);
+		
+		switch (mensagemRead.TipoM) {
+		case TMensagem_LOGIN:
+			mensagemLogin(td, mensagemRead);
+			break;
+		case TMensagem_LISTC:
+			mensagemListc(td->dto);
+			break;
+		case TMensagem_BUY:
+			mensagemBuy(td);
+			break;
+		case TMensagem_SELL:
+			mensagemSell();
+			break;
+		case TMensagem_BALANCE:
+			mensagemBalance(td);
+			break;
+		case TMensagem_WALLET:
+			mensagemWallet();
+			break;
+		case TMensagem_EXIT:
+			mensagemExit();
+			break;
+		default:
+			_tprintf_s(ERRO_INVALID_MSG);
+			break;
+		}
+		
+		//messageHandler(td, mensagemRead);
 
 		//EnterCriticalSection(&dto->pSync->csContinuar);
-		continuar = mensagemRead.continuar;
+		//continuar = mensagemRead.continuar;
 		//LeaveCriticalSection(&dto->pSync->csContinuar);
 	}
 	// limpar os dados do buffer
@@ -268,9 +298,9 @@ void WINAPI threadBoardHandler(PVOID p) {
 }
 
 // funções de tratamento de mensagens
-void messageHandler(PVOID p, Mensagem mensagem) {
+void messageHandler(ThreadData* td, Mensagem mensagem) {
 	// TODO: tratamento de mensagens
-	ThreadData* td = (ThreadData*)p;
+	// ThreadData* td = (ThreadData*)p;
 	//DWORD pipeIndex = td->pipeIndex;
 
 	switch (mensagem.TipoM) {
