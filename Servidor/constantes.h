@@ -68,8 +68,10 @@
 #define INFO_STOCK _T("[INFO] Valor alterado com sucesso\n")
 #define INFO_LOGIN _T("[INFO] Login efetuado com sucesso\n")
 #define INFO_LISTC _T("Nome: %s \tAções disponíveis: %lu \tPreço atual por ação: %.2lf\n")
+#define INFO_LISTC_VAZIA _T("[INFO] Não existem empresas disponíveis\n")
 #define INFO_USERS _T("Username: %s \tSaldo: %lf \tEstado: %s\n")
 #define INFO_CLIENTE_CONECTADO _T("[INFO] Cliente conectado, thread criada e lançada\n")
+#define INFO_SALDO _T("[INFO] Saldo atual: %.2lf\n")
 
 // Mensagens de debug
 #define DEBUGGER _T("\n[DEBUG] Estou aqui\n")

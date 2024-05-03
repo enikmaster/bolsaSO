@@ -248,7 +248,7 @@ void WINAPI threadClientHandler(PVOID p) {
 			mensagemSell();
 			break;
 		case TMensagem_BALANCE:
-			mensagemBalance(td);
+			mensagemBalance(td, mensagemRead);
 			break;
 		case TMensagem_WALLET:
 			mensagemWallet();
@@ -305,7 +305,7 @@ void messageHandler(ThreadData* td, Mensagem mensagem) {
 		mensagemSell();
 		break;
 	case TMensagem_BALANCE:
-		mensagemBalance(td);
+		mensagemBalance(td, mensagem);
 		break;
 	case TMensagem_WALLET:
 		mensagemWallet();

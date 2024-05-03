@@ -172,52 +172,44 @@ void mensagemSell() {
 	// TODO: mensagemSell
 }
 
-void mensagemBalance(ThreadData* td) {
-	/*
-	// TODO: mensagemBalance
-	// ao receber um pedido de saldo devo passar por vários passos:
-	// 1. Verificar se o utilizador existe
-	// 2. Criar mensagem de resposta com o saldo do utilizador
-	// 3. Enviar a resposta ao cliente
-	// recebo por mensagem o nome do utilizador e o tipo de mensagem
-	DWORD numUtilizadores;
+void mensagemBalance(ThreadData* td, Mensagem mensagem) {
 	pUtilizador uLocais = (pUtilizador)malloc(TAM_MAX_USERS * sizeof(Utilizador));
 	if (uLocais == NULL) {
 		_tprintf_s(ERRO_MEMORIA);
 		return;
 	}
 
-	EnterCriticalSection(&td->dto->pSync->csUtilizadores);
-	numUtilizadores = td->dto->numUtilizadores;
-	CopyMemory(uLocais, td->dto->utilizadores, sizeof(Utilizador) * numUtilizadores);
-	LeaveCriticalSection(&td->dto->pSync->csUtilizadores);
-		
-	Mensagem mensagem = { 0 };
-	mensagem.TipoM = TMensagem_R_BALANCE;
-	DWORD bytesEscritos;
+	// gerar mensagem de resposta
+	Mensagem resposta = { 0 };
+	resposta.TipoM = TMensagem_R_BALANCE;
 
-	DWORD indexUtilizador = 0;
-	for (; indexUtilizador < numUtilizadores; ++indexUtilizador) {
-		if (_tcscmp(uLocais[indexUtilizador].username, td->mensagem.nome) == 0) {
+	DWORD numUtilizadores;
+	HANDLE hPipe;
+	EnterCriticalSection(&td->dto->pSync->csUtilizadores);
+	hPipe = td->hPipeInst;
+	numUtilizadores = td->dto->numUtilizadores;
+	memcpy(uLocais, td->dto->utilizadores, sizeof(Utilizador) * numUtilizadores);
+	LeaveCriticalSection(&td->dto->pSync->csUtilizadores);
+	DWORD i = 0;
+	for(; i < numUtilizadores; ++i) {
+		if (_tcscmp(uLocais[i].username, mensagem.nome) == 0) {
 			break;
 		}
 	}
-	if(indexUtilizador == numUtilizadores) {
+
+	if (i == numUtilizadores) {
 		// utilizador não existe
-		mensagem.sucesso = FALSE;
-		BOOL fSucess = WriteFile(td->dto->hPipes[td->pipeIndex], &mensagem, sizeof(Mensagem), &bytesEscritos, NULL);
-		if (!fSucess || !bytesEscritos)
-			_tprintf_s(ERRO_ESCRITA_MSG);
+		resposta.sucesso = FALSE;
+		enviarMensagem(hPipe, resposta);
 		free(uLocais);
 		return;
 	}
-	// utilizador existe
 	mensagem.sucesso = TRUE;
-	mensagem.valor = uLocais[indexUtilizador].saldo;
-	BOOL fSucess = WriteFile(td->dto->hPipes[td->pipeIndex], &mensagem, sizeof(Mensagem), &bytesEscritos, NULL);
-	if (!fSucess || !bytesEscritos)
-		_tprintf_s(ERRO_ESCRITA_MSG);
-	free(uLocais);*/
+	EnterCriticalSection(&td->dto->pSync->csUtilizadores);
+	resposta.valor = td->dto->utilizadores[i].saldo;
+	LeaveCriticalSection(&td->dto->pSync->csUtilizadores);
+	enviarMensagem(hPipe, resposta);
+	free(uLocais);
 }
 
 void mensagemWallet() {
