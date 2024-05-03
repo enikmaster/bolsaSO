@@ -42,9 +42,10 @@ BOOL comandoLogin(HANDLE* hPipe, TCHAR* username, TCHAR* password) {
 	return enviarMensagem(hPipe, mensagem);
 }
 
-void comandoListc() {
-	// TODO: fazer a lógica
-	//	envia uma mensagem para o servidor a pedir a lista de empresas
+void comandoListc(HANDLE* hPipe) {
+	Mensagem mensagem = { 0 };
+	mensagem.TipoM = TMensagem_LISTC;
+	enviarMensagem(hPipe, mensagem);
 }
 
 void comandoBuy(TCHAR* empresa, DWORD numAcoes) {

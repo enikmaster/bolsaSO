@@ -2,12 +2,17 @@
 
 // funções de tratamento de mensagens no cliente
 void mensagemRLogin(Mensagem mensagem){
-	system("cls");
 	_tprintf_s(mensagem.sucesso ? INFO_LOGIN : ERRO_LOGIN);
 	_tprintf_s(COMANDO);
 }
 
-void mensagemRListc(){}
+void mensagemRListc(Mensagem mensagem){
+	_tprintf_s(_T("Empresas disponíveis:\n"));
+	for (DWORD i = 0; i < mensagem.quantidade; ++i) {
+		_tprintf_s(_T("%s\n"), mensagem.empresas[i].nome);
+	}
+	_tprintf_s(COMANDO);
+}
 
 void mensagemRBuy(){}
 

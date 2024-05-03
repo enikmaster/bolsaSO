@@ -12,7 +12,6 @@ void mensagemLogin(ThreadData* td, Mensagem mensagem) {
 	Mensagem resposta = { 0 };
 	resposta.TipoM = TMensagem_R_LOGIN;
 	resposta.sucesso = FALSE;
-	resposta.continuar = TRUE;
 
 	DWORD numUtilizadores;
 	HANDLE hPipe;
@@ -39,16 +38,18 @@ void mensagemLogin(ThreadData* td, Mensagem mensagem) {
 	free(uLocais);
 }
 
-void mensagemListc(DataTransferObject* dto) {
-	/*Mensagem resposta = { 0 };
+void mensagemListc(ThreadData* td) {
+	Mensagem resposta = { 0 };
 	resposta.TipoM = TMensagem_R_LISTC;
-	EnterCriticalSection(&dto->pSync->csEmpresas);
-	CopyMemory(resposta.empresas, dto->dadosP->empresas, sizeof(Empresa) * dto->dadosP->numEmpresas);
-	LeaveCriticalSection(&dto->pSync->csEmpresas);
-	DWORD bytesEscritos;
-	BOOL fSuccess = WriteFile(dto->hPipes[pipeIndex], &resposta, sizeof(Mensagem), &bytesEscritos, NULL);
-	if (!fSuccess || bytesEscritos == 0)
-		_tprintf_s(ERRO_ESCRITA_MSG);*/
+	
+	HANDLE hPipe;
+	EnterCriticalSection(&td->dto->pSync->csEmpresas);
+	hPipe = td->hPipeInst;
+	resposta.quantidade = td->dto->dadosP->numEmpresas;
+	memcpy(resposta.empresas, td->dto->dadosP->empresas, sizeof(Empresa) * td->dto->dadosP->numEmpresas);
+	LeaveCriticalSection(&td->dto->pSync->csEmpresas);
+
+	enviarMensagem(hPipe, resposta); //enviarMensagem( para_onde, o_quê);
 }
 
 void mensagemBuy(ThreadData* td) {
