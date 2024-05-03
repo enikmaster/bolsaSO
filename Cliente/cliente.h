@@ -11,7 +11,7 @@ DWORD verificaComando(TCHAR*);
 // comandos do cliente
 BOOL comandoLogin(HANDLE*, TCHAR*, TCHAR*);
 
-void comandoListc();
+void comandoListc(HANDLE*);
 
 void comandoBuy(TCHAR*, DWORD);
 
@@ -35,7 +35,7 @@ void PrintLastError(TCHAR*, DWORD);
 // funções de tratamento de mensagens no cliente
 void mensagemRLogin(Mensagem);
 
-void mensagemRListc();
+void mensagemRListc(Mensagem);
 
 void mensagemRBuy();
 

@@ -222,24 +222,12 @@ void WINAPI threadClientHandler(PVOID p) {
 			sizeof(Mensagem),	// número de bytes a ler
 			&bytesLidos,	// número de bytes lidos
 			&ov);	// estrutura overlapped)
-//		if (!fSuccess || bytesLidos == 0) {
-//			// verifica se a leitura falhou
-//			DWORD erro = GetLastError();
-//			PrintLastError(_T("CODE"), GetLastError());
-//			if (GetLastError() != ERROR_IO_PENDING) {
-//				_tprintf_s(ERRO_READ_PIPE);
-//				//CloseHandle(&td->pipeInst.ov.hEvent);
-//				//CloseHandle(hPipe);
-//				break;
-//			}
-			// leitura pendente
+		// leitura pendente
 		WaitForSingleObject(ov.hEvent, INFINITE);
 		// verifica se a leitura foi bem sucedida
 		BOOL ovResult = GetOverlappedResult(hPipe, &ov, &bytesLidos, FALSE);
 		if (!ovResult || bytesLidos == 0) {
 			_tprintf_s(ERRO_READ_PIPE);
-			//CloseHandle(ov.hEvent);
-			//CloseHandle(hPipe);
 			break;
 		}
 //		}
@@ -251,7 +239,7 @@ void WINAPI threadClientHandler(PVOID p) {
 			mensagemLogin(td, mensagemRead);
 			break;
 		case TMensagem_LISTC:
-			mensagemListc(td->dto);
+			mensagemListc(td);
 			break;
 		case TMensagem_BUY:
 			mensagemBuy(td);

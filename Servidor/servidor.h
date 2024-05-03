@@ -34,7 +34,7 @@ BOOL comandoClose(DataTransferObject*);
 // funções de tratamento de mensagens
 void mensagemLogin(ThreadData*, Mensagem);
 
-void mensagemListc(DataTransferObject*);
+void mensagemListc(ThreadData*);
 
 void mensagemBuy(ThreadData*);
 

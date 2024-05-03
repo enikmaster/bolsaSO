@@ -95,7 +95,7 @@ int _tmain(int argc, TCHAR** argv)
 			mensagemRLogin(mensagemRead);
 			break;
 		case TMensagem_R_LISTC:
-			mensagemRListc();
+			mensagemRListc(mensagemRead);
 			break;
 		case TMensagem_R_BUY:
 			mensagemRBuy();
@@ -134,6 +134,8 @@ int _tmain(int argc, TCHAR** argv)
 			_tprintf_s(ERRO_INVALID_MSG);
 			break;
 		}
+		if(mensagemRead.TipoM == TMensagem_CLOSE || mensagemRead.TipoM == TMensagem_EXIT)
+			continuar = mensagemRead.continuar;
 	}
 	// esperar que a thread termine
 	WaitForSingleObject(hThread, INFINITE);
