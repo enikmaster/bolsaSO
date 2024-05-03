@@ -10,6 +10,7 @@ void WINAPI threadComandosClienteHandler(PVOID p) {
 	TCHAR failSafe[TAM_COMANDO];
 	BOOL repetir = TRUE;
 	BOOL logado = FALSE;
+	TCHAR username[TAM_NOME];
 	int numArgumentos;
 	while (repetir) {
 		memset(comandoTemp, 0, sizeof(comandoTemp));
@@ -35,6 +36,8 @@ void WINAPI threadComandosClienteHandler(PVOID p) {
 					_tprintf_s(ERRO_INVALID_N_ARGS);
 				else {
 					logado = comandoLogin(hPipe, argumento1, argumento2);
+					if(logado)
+						_tcscpy_s(username, TAM_NOME, argumento1);
 				}
 			}
 			else {
@@ -82,7 +85,7 @@ void WINAPI threadComandosClienteHandler(PVOID p) {
 			break;
 		case 5: // comando balance
 			if (logado)
-				comandoBalance();
+				comandoBalance(hPipe, username);
 			else
 				_tprintf_s(ERRO_NO_LOGIN);
 			break;

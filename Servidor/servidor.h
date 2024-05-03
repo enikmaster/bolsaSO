@@ -40,7 +40,7 @@ void mensagemBuy(ThreadData*);
 
 void mensagemSell();
 
-void mensagemBalance(ThreadData*);
+void mensagemBalance(ThreadData*, Mensagem);
 
 void mensagemWallet();
 

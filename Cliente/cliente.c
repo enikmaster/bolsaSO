@@ -104,7 +104,7 @@ int _tmain(int argc, TCHAR** argv)
 			mensagemRSell();
 			break;
 		case TMensagem_R_BALANCE:
-			mensagemRBalance();
+			mensagemRBalance(mensagemRead);
 			break;
 		case TMensagem_R_WALLET:
 			mensagemRWallet();

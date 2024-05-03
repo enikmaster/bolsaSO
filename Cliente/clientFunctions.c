@@ -58,9 +58,11 @@ void comandoSell(TCHAR* empresa, DWORD numAcoes) {
 	//	envia uma mensagem para o servidor a pedir a venda de ações
 }
 
-void comandoBalance() {
-	// TODO: fazer a lógica
-	//	envia uma mensagem para o servidor a pedir o saldo
+void comandoBalance(HANDLE* hPipe, TCHAR* username) {
+	Mensagem mensagem = { 0 };
+	mensagem.TipoM = TMensagem_BALANCE;
+	memcpy(mensagem.nome, username, _tcslen(username) * sizeof(TCHAR));
+	enviarMensagem(hPipe, mensagem);
 }
 
 void comandoWallet() {

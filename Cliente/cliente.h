@@ -17,7 +17,7 @@ void comandoBuy(TCHAR*, DWORD);
 
 void comandoSell(TCHAR*, DWORD);
 
-void comandoBalance();
+void comandoBalance(HANDLE*, TCHAR*);
 
 void comandoWallet();
 
@@ -41,7 +41,7 @@ void mensagemRBuy();
 
 void mensagemRSell();
 
-void mensagemRBalance();
+void mensagemRBalance(Mensagem);
 
 void mensagemRWallet();
 
