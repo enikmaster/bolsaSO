@@ -37,6 +37,7 @@ void WINAPI threadComandosClienteHandler(PVOID p) {
 				else {
 					comandoLogin(hPipe, argumento1, argumento2);
 					memcpy(username, argumento1, _tcslen(argumento1) * sizeof(TCHAR));
+					username[_tcslen(argumento1)] = _T('\0');
 				}
 			}
 			else {
@@ -66,7 +67,7 @@ void WINAPI threadComandosClienteHandler(PVOID p) {
 				_tprintf_s(ERRO_NO_LOGIN);
 			}
 			break;
-		case 4: // comando sell
+		case 4: // comando sell TODO
 			if (cd->logado) {
 				numArgumentos = _stscanf_s(comando, _T("%s %s %s %s"),
 					comandoTemp, (unsigned)_countof(comandoTemp),
@@ -76,7 +77,7 @@ void WINAPI threadComandosClienteHandler(PVOID p) {
 				if (numArgumentos != 3)
 					_tprintf_s(ERRO_INVALID_N_ARGS);
 				else
-					comandoSell(argumento1, _tstoi(argumento2));
+					comandoSell(hPipe, username, argumento1, _tstoi(argumento2));
 			}
 			else {
 				_tprintf_s(ERRO_NO_LOGIN);
@@ -88,15 +89,14 @@ void WINAPI threadComandosClienteHandler(PVOID p) {
 			else
 				_tprintf_s(ERRO_NO_LOGIN);
 			break;
-		case 6: // comando wallet
+		case 6: // comando wallet TODO
 			if (cd->logado)
-				comandoWallet();
+				comandoWallet(hPipe, username);
 			else
 				_tprintf_s(ERRO_NO_LOGIN);
 			break;
-		case 7: // comando exit
-			_tprintf_s(_T("[INFO] Comando exit\n"));
-			comandoExit();
+		case 7: // comando exit TODO
+			comandoExit(hPipe, username);
 			repetir = FALSE;
 			break;
 		case 0: // comando inválido

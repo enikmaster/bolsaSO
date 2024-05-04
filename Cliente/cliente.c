@@ -105,34 +105,34 @@ int _tmain(int argc, TCHAR** argv)
 			mensagemRBuy(mensagemRead);
 			break;
 		case TMensagem_R_SELL:
-			mensagemRSell();
+			mensagemRSell(mensagemRead);
 			break;
 		case TMensagem_R_BALANCE:
 			mensagemRBalance(mensagemRead);
 			break;
 		case TMensagem_R_WALLET:
-			mensagemRWallet();
+			mensagemRWallet(mensagemRead);
 			break;
 		case TMensagem_ADDC:
-			mensagemAddc();
+			mensagemAddc(mensagemRead);
 			break;
 		case TMensagem_STOCK:
-			mensagemStock();
+			mensagemStock(mensagemRead);
 			break;
 		case TMensagem_PAUSE:
-			mensagemPause();
+			mensagemPause(mensagemRead);
 			break;
 		case TMensagem_RESUME:
-			mensagemResume();
+			mensagemResume(mensagemRead);
 			break;
 		case TMensagem_LOAD:
-			mensagemLoad();
+			mensagemLoad(mensagemRead);
 			break;
 		case TMensagem_CLOSE:
-			continuar = mensagemCloseC();
+			continuar = mensagemCloseC(mensagemRead);
 			break;
 		case TMensagem_EXIT:
-			continuar = mensagemExit();
+			continuar = mensagemExit(mensagemRead);
 			break;
 		default:
 			_tprintf_s(ERRO_INVALID_MSG);

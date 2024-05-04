@@ -51,6 +51,7 @@ DWORD lerUtilizadores(DataTransferObject* dto, const TCHAR* nomeFicheiro) {
 			uLocal[i].username, (unsigned)_countof(uLocal[i].username),
 			uLocal[i].password, (unsigned)_countof(uLocal[i].password),
 			&(uLocal[i].saldo));
+		uLocal[i].numEmpresasAcoes = 0;
 		uLocal[i++].logado = FALSE;
 	};
 	fclose(file);
