@@ -52,120 +52,122 @@ void mensagemListc(ThreadData* td) {
 	enviarMensagem(hPipe, resposta); //enviarMensagem( para_onde, o_quê);
 }
 
-void mensagemBuy(ThreadData* td) {
-	/*DWORD numEmpresas;
+void mensagemBuy(ThreadData* td, Mensagem mensagemRead) {
+	DWORD numEmpresas;
 	DWORD numUtilizadores;
 	Mensagem mensagem = { 0 };
 	mensagem.TipoM = TMensagem_R_BUY;
 	DWORD bytesEscritos;
 	DWORD indexEmpresa = 0;
+	double totalCompra = 0;
+	BOOL empresaAcaoAtualizada = FALSE;
+	DWORD numEmpresasAcoes = 0;
+	DWORD indexEA = 0;
+	double taxaVariacao = 1;
 	// 1. Verificar se a empresa existe
 	EnterCriticalSection(&td->dto->pSync->csEmpresas);
-		numEmpresas = td->dto->dadosP->numEmpresas;
-		for (indexEmpresa; indexEmpresa < numEmpresas; ++indexEmpresa) {
-			if (_tcscmp(td->mensagem.nome, td->dto->dadosP->empresas[indexEmpresa].nome) == 0) {
-				break;
-			}
+	numEmpresas = td->dto->dadosP->numEmpresas;
+	for (indexEmpresa; indexEmpresa < numEmpresas; ++indexEmpresa)
+		if (_tcscmp(mensagemRead.empresa, td->dto->dadosP->empresas[indexEmpresa].nome) == 0)
+			break;
+	// a empresa não existe
+	if (indexEmpresa == numEmpresas) {
+		LeaveCriticalSection(&td->dto->pSync->csEmpresas);
+		mensagem.sucesso = FALSE;
+		// Enviar resposta insucesso ao cliente
+		enviarMensagem(td->hPipeInst, mensagem);
+		return;
+	}
+	// a empresa existe
+	// 2. Verificar se o utilizador tem saldo suficiente
+	DWORD indexUtilizador = 0;
+	EnterCriticalSection(&td->dto->pSync->csUtilizadores);
+	numUtilizadores = td->dto->numUtilizadores;
+	for (indexUtilizador; indexUtilizador < numUtilizadores; ++indexUtilizador) {
+		if (_tcscmp(mensagemRead.nome, td->dto->utilizadores[indexUtilizador].username) == 0) {
+			break;
 		}
-		// a empresa não existe
-		if (indexEmpresa == numEmpresas) {
-			LeaveCriticalSection(&td->dto->pSync->csEmpresas);
-			mensagem.sucesso = FALSE;
-			BOOL fSuccess = WriteFile(td->dto->hPipes[td->pipeIndex], &mensagem, sizeof(Mensagem), &bytesEscritos, NULL);
-			if (!fSuccess || !bytesEscritos)
-				_tprintf_s(ERRO_ESCRITA_MSG);
-			return;
-		}
-		// a empresa existe
-		// 2. Verificar se o utilizador tem saldo suficiente
-		DWORD indexUtilizador = 0;
-		EnterCriticalSection(&td->dto->pSync->csUtilizadores);
-			numUtilizadores = td->dto->numUtilizadores;
-			for (indexUtilizador; indexUtilizador < numUtilizadores; ++indexUtilizador) {
-				if (_tcscmp(td->mensagem.nome, td->dto->utilizadores[indexUtilizador].username) == 0) {
-					break;
-				}
-			}
-			// o utilizador não existe
-			if(indexUtilizador == numUtilizadores) {
-				LeaveCriticalSection(&td->dto->pSync->csUtilizadores);
-				LeaveCriticalSection(&td->dto->pSync->csEmpresas);
-				mensagem.sucesso = FALSE;
-				BOOL fSucess = WriteFile(td->dto->hPipes[td->pipeIndex], &mensagem, sizeof(Mensagem), &bytesEscritos, NULL);
-				if (!fSucess || !bytesEscritos)
-					_tprintf_s(ERRO_ESCRITA_MSG);
-				return;
-			}
-			// o utilizador existe
-			// 3. Verificar se a quantidade de ações é válida (oferta inicial)
-			if (td->mensagem.quantidade > &td->dto->dadosP->empresas[indexEmpresa].quantidadeAcoes) {
-				// quantidade superior ao disponível na empresa
-				LeaveCriticalSection(&td->dto->pSync->csUtilizadores);
-				LeaveCriticalSection(&td->dto->pSync->csEmpresas);
-				mensagem.sucesso = FALSE;
-				BOOL fSucess = WriteFile(td->dto->hPipes[td->pipeIndex], &mensagem, sizeof(Mensagem), &bytesEscritos, NULL);
-				if (!fSucess || !bytesEscritos)
-					_tprintf_s(ERRO_ESCRITA_MSG);
-				return;
-			}
-			// TODO: tem de se acrescentar um array de ofertas de vendas para as ações dos utilizadores
-
-			// quantidade válida
-			double totalCompra = td->mensagem.quantidade * td->dto->dadosP->empresas[indexEmpresa].valorAcao;
-			if (totalCompra > td->dto->utilizadores[indexUtilizador].saldo) {
-				// saldo insuficiente
-				LeaveCriticalSection(&td->dto->pSync->csUtilizadores);
-				LeaveCriticalSection(&td->dto->pSync->csEmpresas);
-				mensagem.sucesso = FALSE;
-				BOOL fSucess = WriteFile(td->dto->hPipes[td->pipeIndex], &mensagem, sizeof(Mensagem), &bytesEscritos, NULL);
-				if (!fSucess || !bytesEscritos)
-					_tprintf_s(ERRO_ESCRITA_MSG);
-				return;
-			}
-			// saldo suficiente
-			// 4. Atualizar a carteira de ações do utilizador
-			BOOL empresaAcaoAtualizada = FALSE;
-			DWORD numEmpresasAcoes = td->dto->utilizadores[indexUtilizador].numEmpresasAcoes;
-			DWORD indexEA = 0;
-			for (; indexEA < numEmpresasAcoes; ++indexEA) {
-				if (_tcscmp(td->dto->utilizadores[indexUtilizador].carteiraAcoes[indexEA].nomeEmpresa, td->mensagem.nome) == 0) {
-					// empresa já existe na carteira de ações do utilizador
-					// aumenta a quantidade de ações
-					td->dto->utilizadores[indexUtilizador].carteiraAcoes[indexEA].quantidadeAcoes += td->mensagem.quantidade;
-					// diminui a quantidade de ações na empresa
-					td->dto->dadosP->empresas[indexEmpresa].quantidadeAcoes -= td->mensagem.quantidade;
-					// atualiza o saldo do utilizador
-					td->dto->utilizadores[indexUtilizador].saldo -= totalCompra;
-					empresaAcaoAtualizada = TRUE;
-					break;
-				}
-			}
-			// a empresa não existe na carteira de ações do utilizador
-			if(numEmpresasAcoes == TAM_MAX_EMPRESA_ACAO && !empresaAcaoAtualizada) {
-				// carteira de ações cheia
-				LeaveCriticalSection(&td->dto->pSync->csUtilizadores);
-				LeaveCriticalSection(&td->dto->pSync->csEmpresas);
-				mensagem.sucesso = FALSE;
-				BOOL fSucess = WriteFile(td->dto->hPipes[td->pipeIndex], &mensagem, sizeof(Mensagem), &bytesEscritos, NULL);
-				if (!fSucess || !bytesEscritos)
-					_tprintf_s(ERRO_ESCRITA_MSG);
-				return;
-			}
-
-			// acrescentar uma EmpresaAcao à carteira de ações do utilizador
-			td->dto->utilizadores[indexUtilizador].carteiraAcoes[indexEA].quantidadeAcoes = td->mensagem.quantidade;
-			_tcscpy_s(td->dto->utilizadores[indexUtilizador].carteiraAcoes[indexEA].nomeEmpresa, TAM_NOME, td->mensagem.nome);
-			td->dto->dadosP->empresas[indexEmpresa].quantidadeAcoes -= td->mensagem.quantidade;
-			td->dto->utilizadores[indexUtilizador].numEmpresasAcoes++;
+	}
+	// o utilizador não existe
+	if(indexUtilizador == numUtilizadores) {
+		LeaveCriticalSection(&td->dto->pSync->csUtilizadores);
+		LeaveCriticalSection(&td->dto->pSync->csEmpresas);
+		mensagem.sucesso = FALSE;
+		// Enviar resposta insucesso ao cliente
+		enviarMensagem(td->hPipeInst, mensagem);
+		return;
+	}
+	// o utilizador existe
+	// 3. Verificar se a quantidade de ações é válida (oferta inicial)
+	if (mensagemRead.quantidade > &td->dto->dadosP->empresas[indexEmpresa].quantidadeAcoes) {
+		// quantidade superior ao disponível na empresa
+		LeaveCriticalSection(&td->dto->pSync->csUtilizadores);
+		LeaveCriticalSection(&td->dto->pSync->csEmpresas);
+		mensagem.sucesso = FALSE;
+		// Enviar resposta insucesso ao cliente
+		enviarMensagem(td->hPipeInst, mensagem);
+		return;
+	}
+	// quantidade válida
+	totalCompra = mensagemRead.quantidade * td->dto->dadosP->empresas[indexEmpresa].valorAcao;
+	if (totalCompra > td->dto->utilizadores[indexUtilizador].saldo) {
+		// saldo insuficiente
+		LeaveCriticalSection(&td->dto->pSync->csUtilizadores);
+		LeaveCriticalSection(&td->dto->pSync->csEmpresas);
+		mensagem.sucesso = FALSE;
+		// Enviar resposta insucesso ao cliente
+		enviarMensagem(td->hPipeInst, mensagem);
+		return;
+	}
+	// saldo suficiente
+	// 4. Atualizar a carteira de ações do utilizador
+	for (indexEA = 0; indexEA < numEmpresasAcoes; ++indexEA) {
+		if (_tcscmp(td->dto->utilizadores[indexUtilizador].carteiraAcoes[indexEA].nomeEmpresa, mensagemRead.empresa) == 0) {
+			// empresa já existe na carteira de ações do utilizador
+			// aumenta a quantidade de ações
+			td->dto->utilizadores[indexUtilizador].carteiraAcoes[indexEA].quantidadeAcoes += mensagemRead.quantidade;
+			// alterar o valor das ações
+			taxaVariacao += td->dto->dadosP->empresas[indexEmpresa].quantidadeAcoes / mensagemRead.quantidade;
+			td->dto->dadosP->empresas[indexEmpresa].valorAcao *= taxaVariacao;
+			// diminui a quantidade de ações na empresa
+			td->dto->dadosP->empresas[indexEmpresa].quantidadeAcoes -= mensagemRead.quantidade;
+			// atualiza o saldo do utilizador
 			td->dto->utilizadores[indexUtilizador].saldo -= totalCompra;
 			empresaAcaoAtualizada = TRUE;
-			// 6. Enviar resposta ao cliente
+			//td->dto->dadosP->empresas[indexEmpresa].valorAcao *= taxaVariacao;
+			break;
+		}
+	}
+	// a empresa não existe na carteira de ações do utilizador
+	if(numEmpresasAcoes == TAM_MAX_EMPRESA_ACAO && !empresaAcaoAtualizada) {
+		// carteira de ações cheia
 		LeaveCriticalSection(&td->dto->pSync->csUtilizadores);
+		LeaveCriticalSection(&td->dto->pSync->csEmpresas);
+		mensagem.sucesso = FALSE;
+		// Enviar resposta insucesso ao cliente
+		enviarMensagem(td->hPipeInst, mensagem);
+		return;
+	}
+	// 5. acrescentar uma EmpresaAcao à carteira de ações do utilizador
+	td->dto->utilizadores[indexUtilizador].carteiraAcoes[indexEA].quantidadeAcoes = mensagemRead.quantidade;
+	memcpy(td->dto->utilizadores[indexUtilizador].carteiraAcoes[indexEA].nomeEmpresa, mensagemRead.empresa, _tcslen(mensagemRead.empresa) * sizeof(TCHAR));
+	// alterar o valor das ações
+	taxaVariacao += (double)mensagemRead.quantidade / (double)td->dto->dadosP->empresas[indexEmpresa].quantidadeAcoes;
+	td->dto->dadosP->empresas[indexEmpresa].valorAcao *= taxaVariacao;
+	// diminui a quantidade de ações na empresa
+	td->dto->dadosP->empresas[indexEmpresa].quantidadeAcoes -= mensagemRead.quantidade;
+	// atualiza o numero de ações na carteira de ações do utilizador
+	td->dto->utilizadores[indexUtilizador].numEmpresasAcoes++;
+	// atualiza o saldo do utilizador
+	td->dto->utilizadores[indexUtilizador].saldo -= totalCompra;
+	empresaAcaoAtualizada = TRUE;
+	// 6. Enviar resposta sucesso ao cliente
+	LeaveCriticalSection(&td->dto->pSync->csUtilizadores);
 	LeaveCriticalSection(&td->dto->pSync->csEmpresas);
 	mensagem.sucesso = TRUE;
-	BOOL fSucess = WriteFile(td->dto->hPipes[td->pipeIndex], &mensagem, sizeof(Mensagem), &bytesEscritos, NULL);
-	if (!fSucess || !bytesEscritos)
-		_tprintf_s(ERRO_ESCRITA_MSG); */
+	memcpy(mensagem.empresa, mensagemRead.empresa, _tcslen(mensagemRead.empresa) * sizeof(TCHAR));
+	
+	enviarMensagem(td->hPipeInst, mensagem);
 }
 
 void mensagemSell() {

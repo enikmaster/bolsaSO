@@ -242,7 +242,7 @@ void WINAPI threadClientHandler(PVOID p) {
 			mensagemListc(td);
 			break;
 		case TMensagem_BUY:
-			mensagemBuy(td);
+			mensagemBuy(td, mensagemRead);
 			break;
 		case TMensagem_SELL:
 			mensagemSell();
@@ -299,7 +299,7 @@ void messageHandler(ThreadData* td, Mensagem mensagem) {
 		mensagemListc(td->dto);
 		break;
 	case TMensagem_BUY:
-		mensagemBuy(td);
+		mensagemBuy(td, mensagem);
 		break;
 	case TMensagem_SELL:
 		mensagemSell();

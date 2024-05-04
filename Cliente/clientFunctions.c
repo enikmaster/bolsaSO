@@ -48,9 +48,13 @@ void comandoListc(HANDLE* hPipe) {
 	enviarMensagem(hPipe, mensagem);
 }
 
-void comandoBuy(TCHAR* empresa, DWORD numAcoes) {
-	// TODO: fazer a lógica
-	//	envia uma mensagem para o servidor a pedir a compra de ações
+void comandoBuy(HANDLE* hPipe, TCHAR* nome, TCHAR* empresa, DWORD numAcoes) {
+	Mensagem mensagem = { 0 };
+	mensagem.TipoM = TMensagem_BUY;
+	memcpy(mensagem.nome, nome, _tcslen(nome) * sizeof(TCHAR));
+	memcpy(mensagem.empresa, empresa, _tcslen(empresa) * sizeof(TCHAR));
+	mensagem.quantidade = numAcoes;
+	enviarMensagem(hPipe, mensagem);
 }
 
 void comandoSell(TCHAR* empresa, DWORD numAcoes) {

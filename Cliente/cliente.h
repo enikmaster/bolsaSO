@@ -13,7 +13,7 @@ BOOL comandoLogin(HANDLE*, TCHAR*, TCHAR*);
 
 void comandoListc(HANDLE*);
 
-void comandoBuy(TCHAR*, DWORD);
+void comandoBuy(HANDLE*, TCHAR*, TCHAR*, DWORD);
 
 void comandoSell(TCHAR*, DWORD);
 
@@ -37,7 +37,7 @@ void mensagemRLogin(Mensagem);
 
 void mensagemRListc(Mensagem);
 
-void mensagemRBuy();
+void mensagemRBuy(Mensagem);
 
 void mensagemRSell();
 
@@ -55,8 +55,8 @@ void mensagemResume();
 
 void mensagemLoad();
 
-void mensagemCloseC();
+BOOL mensagemCloseC();
 
-void mensagemExit();
+BOOL mensagemExit();
 
 #endif

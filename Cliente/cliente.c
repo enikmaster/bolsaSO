@@ -89,7 +89,6 @@ int _tmain(int argc, TCHAR** argv)
 			}
 		}
 		// lidar com a mensagem
-		// messageHandlerCliente(mensagemRead);
 		switch (mensagemRead.TipoM) {
 		case TMensagem_R_LOGIN:
 			mensagemRLogin(mensagemRead);
@@ -98,7 +97,7 @@ int _tmain(int argc, TCHAR** argv)
 			mensagemRListc(mensagemRead);
 			break;
 		case TMensagem_R_BUY:
-			mensagemRBuy();
+			mensagemRBuy(mensagemRead);
 			break;
 		case TMensagem_R_SELL:
 			mensagemRSell();
@@ -125,17 +124,15 @@ int _tmain(int argc, TCHAR** argv)
 			mensagemLoad();
 			break;
 		case TMensagem_CLOSE:
-			mensagemCloseC();
+			continuar = mensagemCloseC();
 			break;
 		case TMensagem_EXIT:
-			mensagemExit();
+			continuar = mensagemExit();
 			break;
 		default:
 			_tprintf_s(ERRO_INVALID_MSG);
 			break;
 		}
-		if(mensagemRead.TipoM == TMensagem_CLOSE || mensagemRead.TipoM == TMensagem_EXIT)
-			continuar = mensagemRead.continuar;
 	}
 	// esperar que a thread termine
 	WaitForSingleObject(hThread, INFINITE);
