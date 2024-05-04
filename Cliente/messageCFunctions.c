@@ -39,7 +39,17 @@ void mensagemRBalance(Mensagem mensagem){
 	_tprintf_s(COMANDO);
 }
 
-void mensagemRWallet(Mensagem mensagem){}
+void mensagemRWallet(Mensagem mensagem){
+	if(mensagem.quantidade != 0) {
+		_tprintf_s(_T("-- Carteira de Ações:\n"));
+		for (DWORD i = 0; i < mensagem.quantidade; ++i) {
+			_tprintf_s(INFO_WALLET, mensagem.carteiraAcoes[i].nomeEmpresa, mensagem.carteiraAcoes[i].quantidadeAcoes);
+		}
+	} else {
+		_tprintf_s(INFO_WALLET_VAZIA);
+	}
+	_tprintf_s(COMANDO);
+}
 
 void mensagemAddc(Mensagem mensagem){}
 

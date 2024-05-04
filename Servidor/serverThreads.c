@@ -173,7 +173,7 @@ void WINAPI threadClientHandler(PVOID p) {
 			mensagemBalance(td, mensagemRead);
 			break;
 		case TMensagem_WALLET:
-			mensagemWallet();
+			mensagemWallet(td, mensagemRead);
 			break;
 		case TMensagem_EXIT:
 			mensagemExit();

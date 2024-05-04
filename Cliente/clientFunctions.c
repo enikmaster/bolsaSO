@@ -73,9 +73,11 @@ void comandoBalance(HANDLE* hPipe, TCHAR* username) {
 	enviarMensagem(hPipe, mensagem);
 }
 
-void comandoWallet() {
-	// TODO: fazer a lógica
-	//	envia uma mensagem para o servidor a pedir a carteira de ações
+void comandoWallet(HANDLE* hPipe, TCHAR* username) {
+	Mensagem mensagem = { 0 };
+	mensagem.TipoM = TMensagem_WALLET;
+	memcpy(mensagem.nome, username, (_tcslen(username) + 1)* sizeof(TCHAR));
+	enviarMensagem(hPipe, mensagem);
 }
 
 void comandoExit() {
