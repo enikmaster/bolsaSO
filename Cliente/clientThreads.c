@@ -61,7 +61,7 @@ void WINAPI threadComandosClienteHandler(PVOID p) {
 				if (numArgumentos != 3)
 					_tprintf_s(ERRO_INVALID_N_ARGS);
 				else
-					comandoBuy(argumento1, _tstoi(argumento2));
+					comandoBuy(hPipe, username, argumento1, _tstoi(argumento2));
 			}
 			else {
 				_tprintf_s(ERRO_NO_LOGIN);

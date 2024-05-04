@@ -36,7 +36,7 @@ void mensagemLogin(ThreadData*, Mensagem);
 
 void mensagemListc(ThreadData*);
 
-void mensagemBuy(ThreadData*);
+void mensagemBuy(ThreadData*, Mensagem);
 
 void mensagemSell();
 
@@ -68,8 +68,6 @@ void WINAPI threadClientHandler(PVOID);
 void WINAPI threadBoardHandler(PVOID);
 
 void messageHandler(PVOID, Mensagem);
-
-BOOL ConnectToNewClient(HANDLE, LPOVERLAPPED);
 
 void PrintLastError(TCHAR*, DWORD);
 

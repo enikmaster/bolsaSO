@@ -61,6 +61,7 @@
 #define ERRO_NO_LOGIN _T("[ERRO] Efetue o login primeiro\n")
 #define ERRO_ALREADY_LOGIN _T("[ERRO] Já efetuou login\n")
 #define ERRO_EMPRESA_NAO_EXISTE _T("[ERRO] A empresa não existe\n")
+#define ERRO_COMPRA _T("[ERRO] Não foi possível efetuar a compra\n")
 
 // Mensagens de informação
 #define INFO_ADDC _T("[INFO] Empresa adicionada com sucesso\n")
@@ -72,6 +73,7 @@
 #define INFO_USERS _T("Username: %s \tSaldo: %lf \tEstado: %s\n")
 #define INFO_CLIENTE_CONECTADO _T("[INFO] Cliente conectado, thread criada e lançada\n")
 #define INFO_SALDO _T("[INFO] Saldo atual: %.2lf\n")
+#define INFO_COMPRA _T("[INFO] Compra de acões da empresa %s efetuada com sucesso\n")
 
 // Mensagens de debug
 #define DEBUGGER _T("\n[DEBUG] Estou aqui\n")
@@ -142,12 +144,12 @@ struct DetalhesTransacao {
     double precoPorAcao;
 };
 
-
 // Estrutura para comunicação entre cliente e servidor
 typedef struct Mensagem Mensagem, * pMensagem;
 struct Mensagem {
     TipoMensagem TipoM;
     TCHAR nome[TAM_NOME];
+    TCHAR empresa[TAM_NOME];
     TCHAR password[TAM_PASSWORD];
     BOOL sucesso;
     DWORD quantidade;

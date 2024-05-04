@@ -10,7 +10,7 @@ void mensagemRListc(Mensagem mensagem){
 	if(mensagem.quantidade != 0) {
 		_tprintf_s(_T("Empresas disponíveis:\n"));
 		for (DWORD i = 0; i < mensagem.quantidade; ++i) {
-			_tprintf_s(_T("%s\n"), mensagem.empresas[i].nome);
+			_tprintf_s(INFO_LISTC, mensagem.empresas[i].nome, mensagem.empresas[i].quantidadeAcoes, mensagem.empresas[i].valorAcao);
 		}
 	} else {
 		_tprintf_s(INFO_LISTC_VAZIA);
@@ -18,7 +18,13 @@ void mensagemRListc(Mensagem mensagem){
 	_tprintf_s(COMANDO);
 }
 
-void mensagemRBuy(){}
+void mensagemRBuy(Mensagem mensagem){
+	if (mensagem.sucesso)
+		_tprintf_s(INFO_COMPRA, mensagem.empresa);
+	else
+		_tprintf_s(ERRO_COMPRA);
+	_tprintf_s(COMANDO);
+}
 
 void mensagemRSell(){}
 
@@ -39,6 +45,10 @@ void mensagemResume(){}
 
 void mensagemLoad(){}
 
-void mensagemCloseC(){}
+BOOL mensagemCloseC() {
+	return FALSE;
+}
 
-void mensagemExit(){}
+BOOL mensagemExit() {
+	return FALSE;
+}
