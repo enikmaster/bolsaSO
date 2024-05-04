@@ -39,7 +39,7 @@ BOOL comandoLogin(HANDLE* hPipe, TCHAR* username, TCHAR* password) {
 	memcpy(mensagem.nome, username, _tcslen(username) * sizeof(TCHAR));
 	memcpy(mensagem.password, password, _tcslen(password) * sizeof(TCHAR));
 	
-	return enviarMensagem(hPipe, mensagem);
+	enviarMensagem(hPipe, mensagem);
 }
 
 void comandoListc(HANDLE* hPipe) {
@@ -88,7 +88,6 @@ BOOL enviarMensagem(HANDLE* hPipe, Mensagem mensagem) {
 		return FALSE;
 	}
 	BOOL fSuccess = WriteFile(*hPipe, &mensagem, sizeof(Mensagem), &bytesEscritos, &ov);
-	//WaitForSingleObject(*hPipe, INFINITE);
 	BOOL ovResult = GetOverlappedResult(*hPipe, &ov, &bytesEscritos, FALSE);
 	if (!ovResult || bytesEscritos == 0) {
 		_tprintf_s(ERRO_ESCRITA_MSG);

@@ -191,10 +191,17 @@ struct DataTransferObject {
     BOOL continuar;
 };
 
-// Estrutura para lidar com threads
+// Estrutura para lidar com threads no servidor
 typedef struct ThreadData ThreadData;
 struct ThreadData {
     DataTransferObject* dto;
     HANDLE hPipeInst;
     BOOL livre; // indica se a thread está livre para ser usada
+};
+
+// Estrutura para lidar com threads no cliente
+typedef struct ClienteData ClienteData;
+struct ClienteData {
+	HANDLE hPipe;
+    BOOL logado;
 };
