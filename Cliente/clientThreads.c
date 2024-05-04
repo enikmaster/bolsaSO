@@ -67,7 +67,7 @@ void WINAPI threadComandosClienteHandler(PVOID p) {
 				_tprintf_s(ERRO_NO_LOGIN);
 			}
 			break;
-		case 4: // comando sell TODO
+		case 4: // comando sell
 			if (cd->logado) {
 				numArgumentos = _stscanf_s(comando, _T("%s %s %s %s"),
 					comandoTemp, (unsigned)_countof(comandoTemp),

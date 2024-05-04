@@ -317,8 +317,38 @@ void mensagemBalance(ThreadData* td, Mensagem mensagem) {
 	free(uLocais);
 }
 
-void mensagemWallet() {
-	// TODO: mensagemWallet
+void mensagemWallet(ThreadData* td, Mensagem mensagem) {
+	Mensagem resposta = { 0 };
+	resposta.TipoM = TMensagem_R_WALLET;
+	DWORD numUtilizadores;
+	DWORD numEmpresaAcao;
+	DWORD indexUtilizador = 0;
+	DWORD indexEA = 0;
+	EnterCriticalSection(&td->dto->pSync->csUtilizadores);
+	numUtilizadores = td->dto->numUtilizadores;
+	for (indexUtilizador; indexUtilizador < numUtilizadores; ++indexUtilizador) {
+		if (_tcscmp(mensagem.nome, td->dto->utilizadores[indexUtilizador].username) == 0) {
+			break;
+		}
+	}
+	// o utilizador não existe
+	if (indexUtilizador == numUtilizadores) {
+		LeaveCriticalSection(&td->dto->pSync->csUtilizadores);
+		resposta.sucesso = FALSE;
+		// Enviar resposta insucesso ao cliente
+		enviarMensagem(td->hPipeInst, resposta);
+		return;
+	}
+	// o utilizador existe
+	numEmpresaAcao = td->dto->utilizadores[indexUtilizador].numEmpresasAcoes;
+	for (indexEA; indexEA < numEmpresaAcao; ++indexEA) {
+		memcpy(resposta.carteiraAcoes[indexEA].nomeEmpresa, td->dto->utilizadores[indexUtilizador].carteiraAcoes[indexEA].nomeEmpresa, (_tcslen(td->dto->utilizadores[indexUtilizador].carteiraAcoes[indexEA].nomeEmpresa) + 1) * sizeof(TCHAR));
+		resposta.carteiraAcoes[indexEA].quantidadeAcoes = td->dto->utilizadores[indexUtilizador].carteiraAcoes[indexEA].quantidadeAcoes;
+	}
+	LeaveCriticalSection(&td->dto->pSync->csUtilizadores);
+	resposta.quantidade = numEmpresaAcao;
+	resposta.sucesso = TRUE;
+	enviarMensagem(td->hPipeInst, resposta);
 }
 
 void mensagemExit() {
