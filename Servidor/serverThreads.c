@@ -115,81 +115,6 @@ void WINAPI threadComandosAdminHandler(PVOID p) {
 	};
 }
 
-//void WINAPI threadConnectionHandler(PVOID p) {
-//	DataTransferObject* dto = (DataTransferObject* )p;
-//	DWORD limiteClientes = 0;
-//	
-//	EnterCriticalSection(&dto->pSync->csLimClientes);
-//	limiteClientes = dto->limiteClientes;
-//	LeaveCriticalSection(&dto->pSync->csLimClientes);
-//
-//	DWORD numULigados = 0;
-//	BOOL continuar = TRUE;
-//
-//	// inicializar a lista de estruturas
-//	ThreadData listaTD[TAM_MAX_USERS];
-//	// zerar a lista de estruturas
-//	memset(listaTD, 0, sizeof(listaTD));
-//	// indica que todas as estruturas estão livres até ao limite de clientes possiveis
-//	for(DWORD i = 0; i < TAM_MAX_USERS; i++)
-//		listaTD[i].livre = i < limiteClientes;
-//	
-//	DWORD i;
-//	while(continuar){
-//		// encontrar a primeira posição livre da lista
-//		for(i = 0; i<limiteClientes ;++i)
-//			if(listaTD[i].livre)
-//				break;
-//
-//		// TODO: alterar este bloco de código em baixo
-//		if(i == limiteClientes) {
-//			_tprintf_s(ERRO_MAX_CLIENTES);
-//			continue;
-//		}
-//		
-//		// criar uma instância do named pipe
-//		listaTD[i].hPipeInst = CreateNamedPipe(
-//			NOME_NAMED_PIPE,
-//			PIPE_ACCESS_DUPLEX | FILE_FLAG_OVERLAPPED,
-//			PIPE_TYPE_MESSAGE | PIPE_READMODE_MESSAGE | PIPE_WAIT,
-//			limiteClientes,
-//			sizeof(Mensagem) * 2,
-//			sizeof(Mensagem) * 2,
-//			0,
-//			NULL);
-//		if (listaTD[i].hPipeInst == INVALID_HANDLE_VALUE) {
-//			_tprintf_s(ERRO_CREATE_NAMED_PIPE);
-//			continue;
-//		}
-//		listaTD[i].dto = dto;
-//		// conectar o named pipe
-//		// BOOL fConnected = ConnectNamedPipe(listaTD[i].pipeInst.hPipeInst, &listaTD[i].pipeInst.ov) ? TRUE : (GetLastError() == ERROR_PIPE_CONNECTED);
-//		BOOL fConnected = ConnectNamedPipe(listaTD[i].hPipeInst, NULL) ? TRUE : (GetLastError() == ERROR_PIPE_CONNECTED);
-//		// if (fConnected == 0) {
-//		if (fConnected != 0) {
-//			// lançar a thread para tratar o cliente
-//			HANDLE hThread = CreateThread(NULL, 0, threadClientHandler, &listaTD[i], 0, NULL);
-//			if (hThread == NULL) {
-//				_tprintf_s(ERRO_CREATE_THREAD);
-//				CloseHandle(listaTD[i].hPipeInst);
-//				continue;
-//			}
-//			// indicar que a estrutura está ocupada
-//			// (para o ciclo 'for' do início)
-//			listaTD[i].livre = FALSE;
-//			_tprintf_s(_T("thread cliente criada e lançada\n"));
-//		}
-//		else {
-//			_tprintf_s(ERRO_CONNECT_NAMED_PIPE);
-//			CloseHandle(listaTD[i].hPipeInst);
-//		}
-//
-//		EnterCriticalSection(&dto->pSync->csContinuar);
-//		continuar = dto->continuar;
-//		LeaveCriticalSection(&dto->pSync->csContinuar);
-//	}
-//}
-
 void WINAPI threadClientHandler(PVOID p) {
 	ThreadData* td = (ThreadData*)p;
 	DataTransferObject* dto = td->dto;
@@ -230,10 +155,7 @@ void WINAPI threadClientHandler(PVOID p) {
 			_tprintf_s(ERRO_READ_PIPE);
 			break;
 		}
-//		}
 		// leitura imediata
-//		HANDLE hThread = CreateThread(NULL, 0, threadMessageHandler, &td, 0, NULL);
-		
 		switch (mensagemRead.TipoM) {
 		case TMensagem_LOGIN:
 			mensagemLogin(td, mensagemRead);
@@ -245,7 +167,7 @@ void WINAPI threadClientHandler(PVOID p) {
 			mensagemBuy(td, mensagemRead);
 			break;
 		case TMensagem_SELL:
-			mensagemSell();
+			mensagemSell(td, mensagemRead);
 			break;
 		case TMensagem_BALANCE:
 			mensagemBalance(td, mensagemRead);
@@ -260,8 +182,6 @@ void WINAPI threadClientHandler(PVOID p) {
 			_tprintf_s(ERRO_INVALID_MSG);
 			break;
 		}
-		
-		//messageHandler(td, mensagemRead);
 
 		//EnterCriticalSection(&dto->pSync->csContinuar);
 		//continuar = mensagemRead.continuar;
@@ -283,40 +203,6 @@ void WINAPI threadClientHandler(PVOID p) {
 void WINAPI threadBoardHandler(PVOID p) {
 	DataTransferObject* dto = (DataTransferObject*)p;
 	// TODO: Marques, faz isto!
-}
-
-// funções de tratamento de mensagens
-void messageHandler(ThreadData* td, Mensagem mensagem) {
-	// TODO: tratamento de mensagens
-	// ThreadData* td = (ThreadData*)p;
-	//DWORD pipeIndex = td->pipeIndex;
-
-	switch (mensagem.TipoM) {
-	case TMensagem_LOGIN:
-		mensagemLogin(td, mensagem);
-		break;
-	case TMensagem_LISTC:
-		mensagemListc(td->dto);
-		break;
-	case TMensagem_BUY:
-		mensagemBuy(td, mensagem);
-		break;
-	case TMensagem_SELL:
-		mensagemSell();
-		break;
-	case TMensagem_BALANCE:
-		mensagemBalance(td, mensagem);
-		break;
-	case TMensagem_WALLET:
-		mensagemWallet();
-		break;
-	case TMensagem_EXIT:
-		mensagemExit();
-		break;
-	default:
-		_tprintf_s(ERRO_INVALID_MSG);
-		break;
-	}
 }
 
 void PrintLastError(TCHAR* part, DWORD id) {

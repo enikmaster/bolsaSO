@@ -26,29 +26,35 @@ void mensagemRBuy(Mensagem mensagem){
 	_tprintf_s(COMANDO);
 }
 
-void mensagemRSell(){}
+void mensagemRSell(Mensagem mensagem){
+	if (mensagem.sucesso)
+		_tprintf_s(INFO_VENDA, mensagem.empresa);
+	else
+		_tprintf_s(ERRO_VENDA);
+	_tprintf_s(COMANDO);
+}
 
 void mensagemRBalance(Mensagem mensagem){
 	_tprintf_s(INFO_SALDO, mensagem.valor);
 	_tprintf_s(COMANDO);
 }
 
-void mensagemRWallet(){}
+void mensagemRWallet(Mensagem mensagem){}
 
-void mensagemAddc(){}
+void mensagemAddc(Mensagem mensagem){}
 
-void mensagemStock(){}
+void mensagemStock(Mensagem mensagem){}
 
-void mensagemPause(){}
+void mensagemPause(Mensagem mensagem){}
 
-void mensagemResume(){}
+void mensagemResume(Mensagem mensagem){}
 
-void mensagemLoad(){}
+void mensagemLoad(Mensagem mensagem){}
 
-BOOL mensagemCloseC() {
+BOOL mensagemCloseC(Mensagem mensagem) {
 	return FALSE;
 }
 
-BOOL mensagemExit() {
+BOOL mensagemExit(Mensagem mensagem) {
 	return FALSE;
 }

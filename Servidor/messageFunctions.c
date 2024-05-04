@@ -121,6 +121,7 @@ void mensagemBuy(ThreadData* td, Mensagem mensagemRead) {
 	}
 	// saldo suficiente
 	// 4. Atualizar a carteira de ações do utilizador
+	numEmpresasAcoes = td->dto->utilizadores[indexUtilizador].numEmpresasAcoes;
 	for (indexEA = 0; indexEA < numEmpresasAcoes; ++indexEA) {
 		if (_tcscmp(td->dto->utilizadores[indexUtilizador].carteiraAcoes[indexEA].nomeEmpresa, mensagemRead.empresa) == 0) {
 			// empresa já existe na carteira de ações do utilizador
@@ -150,7 +151,8 @@ void mensagemBuy(ThreadData* td, Mensagem mensagemRead) {
 	}
 	// 5. acrescentar uma EmpresaAcao à carteira de ações do utilizador
 	td->dto->utilizadores[indexUtilizador].carteiraAcoes[indexEA].quantidadeAcoes = mensagemRead.quantidade;
-	memcpy(td->dto->utilizadores[indexUtilizador].carteiraAcoes[indexEA].nomeEmpresa, mensagemRead.empresa, _tcslen(mensagemRead.empresa) * sizeof(TCHAR));
+	memcpy(td->dto->utilizadores[indexUtilizador].carteiraAcoes[indexEA].nomeEmpresa, mensagemRead.empresa, (_tcslen(mensagemRead.empresa) + 1) * sizeof(TCHAR));
+	
 	// alterar o valor das ações
 	taxaVariacao += (double)mensagemRead.quantidade / (double)td->dto->dadosP->empresas[indexEmpresa].quantidadeAcoes;
 	td->dto->dadosP->empresas[indexEmpresa].valorAcao *= taxaVariacao;
@@ -165,13 +167,114 @@ void mensagemBuy(ThreadData* td, Mensagem mensagemRead) {
 	LeaveCriticalSection(&td->dto->pSync->csUtilizadores);
 	LeaveCriticalSection(&td->dto->pSync->csEmpresas);
 	mensagem.sucesso = TRUE;
-	memcpy(mensagem.empresa, mensagemRead.empresa, _tcslen(mensagemRead.empresa) * sizeof(TCHAR));
+	memcpy(mensagem.empresa, mensagemRead.empresa, (_tcslen(mensagemRead.empresa) + 1) * sizeof(TCHAR));
 	
 	enviarMensagem(td->hPipeInst, mensagem);
 }
 
-void mensagemSell() {
-	// TODO: mensagemSell
+void mensagemSell(ThreadData* td, Mensagem mensagemRead) {
+	Mensagem resposta = { 0 };
+	resposta.TipoM = TMensagem_R_SELL;
+	DWORD numEmpresas;
+	DWORD numUtilizadores;
+	DWORD indexEmpresa = 0;
+	DWORD indexUtilizador = 0;
+	double totalVenda = 0;
+	double taxaVariacao = 1;
+	BOOL empresaAcaoAtualizada = FALSE;
+	DWORD numEmpresasAcoes = 0;
+	DWORD indexEA = 0;
+	// 1. Verificar se a empresa existe
+	EnterCriticalSection(&td->dto->pSync->csEmpresas);
+	numEmpresas = td->dto->dadosP->numEmpresas;
+	for (indexEmpresa; indexEmpresa < numEmpresas; ++indexEmpresa)
+		if (_tcscmp(mensagemRead.empresa, td->dto->dadosP->empresas[indexEmpresa].nome) == 0)
+			break;
+	// a empresa não existe
+	if (indexEmpresa == numEmpresas) {
+		LeaveCriticalSection(&td->dto->pSync->csEmpresas);
+		resposta.sucesso = FALSE;
+		// Enviar resposta insucesso ao cliente
+		enviarMensagem(td->hPipeInst, resposta);
+		return;
+	}
+	// a empresa existe
+	// 2. Verificar se o utilizador existe
+	EnterCriticalSection(&td->dto->pSync->csUtilizadores);
+	numUtilizadores = td->dto->numUtilizadores;
+	for (indexUtilizador; indexUtilizador < numUtilizadores; ++indexUtilizador) {
+		if (_tcscmp(mensagemRead.nome, td->dto->utilizadores[indexUtilizador].username) == 0) {
+			break;
+		}
+	}
+	// o utilizador não existe
+	if (indexUtilizador == numUtilizadores) {
+		LeaveCriticalSection(&td->dto->pSync->csUtilizadores);
+		LeaveCriticalSection(&td->dto->pSync->csEmpresas);
+		resposta.sucesso = FALSE;
+		// Enviar resposta insucesso ao cliente
+		enviarMensagem(td->hPipeInst, resposta);
+		return;
+	}
+	// o utilizador existe
+	// 3. Verificar se a empresa existe na carteira de ações do utilizador
+	numEmpresasAcoes = td->dto->utilizadores[indexUtilizador].numEmpresasAcoes;
+	for(indexEA = 0; indexEA < numEmpresasAcoes; ++indexEA) {
+		if (_tcscmp(td->dto->utilizadores[indexUtilizador].carteiraAcoes[indexEA].nomeEmpresa, mensagemRead.empresa) == 0) {
+			break;
+		}
+	}
+	// a empresa não existe na carteira de ações do utilizador
+	if (indexEA == numEmpresasAcoes) {
+		LeaveCriticalSection(&td->dto->pSync->csUtilizadores);
+		LeaveCriticalSection(&td->dto->pSync->csEmpresas);
+		resposta.sucesso = FALSE;
+		// Enviar resposta insucesso ao cliente
+		enviarMensagem(td->hPipeInst, resposta);
+		return;
+	}
+	// a empresa existe na carteira de ações do utilizador
+	// 4. Verificar se a quantidade de ações é válida
+	if (mensagemRead.quantidade > td->dto->utilizadores[indexUtilizador].carteiraAcoes[indexEA].quantidadeAcoes) {
+		// quantidade superior ao disponível na carteira de ações do utilizador
+		LeaveCriticalSection(&td->dto->pSync->csUtilizadores);
+		LeaveCriticalSection(&td->dto->pSync->csEmpresas);
+		resposta.sucesso = FALSE;
+		// Enviar resposta insucesso ao cliente
+		enviarMensagem(td->hPipeInst, resposta);
+		return;
+	}
+	// quantidade válida
+	totalVenda = mensagemRead.quantidade * td->dto->dadosP->empresas[indexEmpresa].valorAcao;
+	if (td->dto->dadosP->empresas[indexEmpresa].quantidadeAcoes == 0) {
+		// a empresa não tem ações
+		taxaVariacao++;
+	} else {
+		taxaVariacao = (double)mensagemRead.quantidade / (double)td->dto->dadosP->empresas[indexEmpresa].quantidadeAcoes;
+		if(taxaVariacao > 1) {
+			taxaVariacao = 1 / taxaVariacao;
+		}
+	}
+	// 5. Atualizar a carteira de ações do utilizador
+	td->dto->utilizadores[indexUtilizador].carteiraAcoes[indexEA].quantidadeAcoes -= mensagemRead.quantidade;
+	if(td->dto->utilizadores[indexUtilizador].carteiraAcoes[indexEA].quantidadeAcoes == 0) {
+		// remover a empresa da carteira de ações do utilizador
+		for(DWORD i = indexEA; i < numEmpresasAcoes - 1; ++i) {
+			td->dto->utilizadores[indexUtilizador].carteiraAcoes[i] = td->dto->utilizadores[indexUtilizador].carteiraAcoes[i + 1];
+		}
+		td->dto->utilizadores[indexUtilizador].numEmpresasAcoes--;
+	}
+	td->dto->utilizadores[indexUtilizador].saldo += totalVenda;
+	// 6. Atualizar o valor das ações da empresa
+	td->dto->dadosP->empresas[indexEmpresa].valorAcao -= td->dto->dadosP->empresas[indexEmpresa].valorAcao * taxaVariacao;
+	td->dto->dadosP->empresas[indexEmpresa].quantidadeAcoes += mensagemRead.quantidade;
+	// 7. Enviar resposta sucesso ao cliente
+	LeaveCriticalSection(&td->dto->pSync->csUtilizadores);
+	LeaveCriticalSection(&td->dto->pSync->csEmpresas);
+	resposta.sucesso = TRUE;
+	memcpy(resposta.empresa, mensagemRead.empresa, (_tcslen(mensagemRead.empresa) + 1) * sizeof(TCHAR));
+	
+	enviarMensagem(td->hPipeInst, resposta);
 }
 
 void mensagemBalance(ThreadData* td, Mensagem mensagem) {

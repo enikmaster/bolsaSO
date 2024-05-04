@@ -15,20 +15,18 @@ void comandoListc(HANDLE*);
 
 void comandoBuy(HANDLE*, TCHAR*, TCHAR*, DWORD);
 
-void comandoSell(TCHAR*, DWORD);
+void comandoSell(HANDLE*, TCHAR*, TCHAR*, DWORD);
 
 void comandoBalance(HANDLE*, TCHAR*);
 
-void comandoWallet();
+void comandoWallet(HANDLE*, TCHAR*);
 
-void comandoExit();
+void comandoExit(HANDLE*, TCHAR*);
 
 BOOL enviarMensagem(HANDLE*, Mensagem);
 
 // funções de threads
 void WINAPI threadComandosClienteHandler(PVOID);
-
-void messageHandlerCliente(Mensagem);
 
 void PrintLastError(TCHAR*, DWORD);
 
@@ -39,24 +37,24 @@ void mensagemRListc(Mensagem);
 
 void mensagemRBuy(Mensagem);
 
-void mensagemRSell();
+void mensagemRSell(Mensagem);
 
 void mensagemRBalance(Mensagem);
 
-void mensagemRWallet();
+void mensagemRWallet(Mensagem);
 
-void mensagemAddc();
+void mensagemAddc(Mensagem);
 
-void mensagemStock();
+void mensagemStock(Mensagem);
 
-void mensagemPause();
+void mensagemPause(Mensagem);
 
-void mensagemResume();
+void mensagemResume(Mensagem);
 
-void mensagemLoad();
+void mensagemLoad(Mensagem);
 
-BOOL mensagemCloseC();
+BOOL mensagemCloseC(Mensagem);
 
-BOOL mensagemExit();
+BOOL mensagemExit(Mensagem);
 
 #endif

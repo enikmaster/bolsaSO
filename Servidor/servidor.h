@@ -38,7 +38,7 @@ void mensagemListc(ThreadData*);
 
 void mensagemBuy(ThreadData*, Mensagem);
 
-void mensagemSell();
+void mensagemSell(ThreadData*, Mensagem);
 
 void mensagemBalance(ThreadData*, Mensagem);
 
@@ -66,8 +66,6 @@ void WINAPI threadComandosAdminHandler(PVOID);
 void WINAPI threadClientHandler(PVOID);
 
 void WINAPI threadBoardHandler(PVOID);
-
-void messageHandler(PVOID, Mensagem);
 
 void PrintLastError(TCHAR*, DWORD);
 

@@ -1,7 +1,8 @@
 #include "cliente.h"
 
 void WINAPI threadComandosClienteHandler(PVOID p) {
-	HANDLE* hPipe = (HANDLE*)p;
+	ClienteData* cd = (ClienteData*)p;
+	HANDLE hPipe = &cd->hPipe;
 	DWORD controlo = 0;
 	TCHAR comando[TAM_COMANDO];
 	TCHAR comandoTemp[TAM_COMANDO];
@@ -9,7 +10,6 @@ void WINAPI threadComandosClienteHandler(PVOID p) {
 	TCHAR argumento2[TAM_COMANDO];
 	TCHAR failSafe[TAM_COMANDO];
 	BOOL repetir = TRUE;
-	BOOL logado = FALSE;
 	TCHAR username[TAM_NOME];
 	int numArgumentos;
 	while (repetir) {
@@ -17,7 +17,7 @@ void WINAPI threadComandosClienteHandler(PVOID p) {
 		memset(argumento1, 0, sizeof(argumento1));
 		memset(argumento2, 0, sizeof(argumento2));
 		memset(failSafe, 0, sizeof(failSafe));
-		if(!logado) 
+		if(!cd->logado) 
 			_tprintf_s(_T("Efetue login primeiro\nComando:  "));
 		_fgetts(comando, sizeof(comando) / sizeof(comando[0]), stdin);
 		comando[_tcslen(comando) - 1] = _T('\0');
@@ -26,7 +26,7 @@ void WINAPI threadComandosClienteHandler(PVOID p) {
 		system("cls");
 		switch (controlo) {
 		case 1: // comando login
-			if (!logado) {
+			if (!cd->logado) {
 				numArgumentos = _stscanf_s(comando, _T("%s %s %s %s"),
 					comandoTemp, (unsigned)_countof(comandoTemp),
 					argumento1, (unsigned)_countof(argumento1),
@@ -35,9 +35,9 @@ void WINAPI threadComandosClienteHandler(PVOID p) {
 				if (numArgumentos != 3)
 					_tprintf_s(ERRO_INVALID_N_ARGS);
 				else {
-					logado = comandoLogin(hPipe, argumento1, argumento2);
-					if(logado)
-						_tcscpy_s(username, TAM_NOME, argumento1);
+					comandoLogin(hPipe, argumento1, argumento2);
+					memcpy(username, argumento1, _tcslen(argumento1) * sizeof(TCHAR));
+					username[_tcslen(argumento1)] = _T('\0');
 				}
 			}
 			else {
@@ -46,13 +46,13 @@ void WINAPI threadComandosClienteHandler(PVOID p) {
 
 			break;
 		case 2: // comando listc
-			if (logado)
+			if (cd->logado)
 				comandoListc(hPipe);
 			else
 				_tprintf_s(ERRO_NO_LOGIN);
 			break;
 		case 3: // comando buy
-			if (logado) {
+			if (cd->logado) {
 				numArgumentos = _stscanf_s(comando, _T("%s %s %s %s"),
 					comandoTemp, (unsigned)_countof(comandoTemp),
 					argumento1, (unsigned)_countof(argumento1),
@@ -67,8 +67,8 @@ void WINAPI threadComandosClienteHandler(PVOID p) {
 				_tprintf_s(ERRO_NO_LOGIN);
 			}
 			break;
-		case 4: // comando sell
-			if (logado) {
+		case 4: // comando sell TODO
+			if (cd->logado) {
 				numArgumentos = _stscanf_s(comando, _T("%s %s %s %s"),
 					comandoTemp, (unsigned)_countof(comandoTemp),
 					argumento1, (unsigned)_countof(argumento1),
@@ -77,27 +77,26 @@ void WINAPI threadComandosClienteHandler(PVOID p) {
 				if (numArgumentos != 3)
 					_tprintf_s(ERRO_INVALID_N_ARGS);
 				else
-					comandoSell(argumento1, _tstoi(argumento2));
+					comandoSell(hPipe, username, argumento1, _tstoi(argumento2));
 			}
 			else {
 				_tprintf_s(ERRO_NO_LOGIN);
 			}
 			break;
 		case 5: // comando balance
-			if (logado)
+			if (cd->logado)
 				comandoBalance(hPipe, username);
 			else
 				_tprintf_s(ERRO_NO_LOGIN);
 			break;
-		case 6: // comando wallet
-			if (logado)
-				comandoWallet();
+		case 6: // comando wallet TODO
+			if (cd->logado)
+				comandoWallet(hPipe, username);
 			else
 				_tprintf_s(ERRO_NO_LOGIN);
 			break;
-		case 7: // comando exit
-			_tprintf_s(_T("[INFO] Comando exit\n"));
-			comandoExit();
+		case 7: // comando exit TODO
+			comandoExit(hPipe, username);
 			repetir = FALSE;
 			break;
 		case 0: // comando inválido

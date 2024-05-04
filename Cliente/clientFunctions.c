@@ -36,10 +36,10 @@ DWORD verificaComando(TCHAR* comando) {
 BOOL comandoLogin(HANDLE* hPipe, TCHAR* username, TCHAR* password) {
 	Mensagem mensagem = { 0 };
 	mensagem.TipoM = TMensagem_LOGIN;
-	memcpy(mensagem.nome, username, _tcslen(username) * sizeof(TCHAR));
-	memcpy(mensagem.password, password, _tcslen(password) * sizeof(TCHAR));
+	memcpy(mensagem.nome, username, (_tcslen(username) + 1) * sizeof(TCHAR));
+	memcpy(mensagem.password, password, (_tcslen(password) + 1) * sizeof(TCHAR));
 	
-	return enviarMensagem(hPipe, mensagem);
+	enviarMensagem(hPipe, mensagem);
 }
 
 void comandoListc(HANDLE* hPipe) {
@@ -51,21 +51,25 @@ void comandoListc(HANDLE* hPipe) {
 void comandoBuy(HANDLE* hPipe, TCHAR* nome, TCHAR* empresa, DWORD numAcoes) {
 	Mensagem mensagem = { 0 };
 	mensagem.TipoM = TMensagem_BUY;
-	memcpy(mensagem.nome, nome, _tcslen(nome) * sizeof(TCHAR));
-	memcpy(mensagem.empresa, empresa, _tcslen(empresa) * sizeof(TCHAR));
+	memcpy(mensagem.nome, nome, (_tcslen(nome) + 1) * sizeof(TCHAR));
+	memcpy(mensagem.empresa, empresa, (_tcslen(empresa) + 1) * sizeof(TCHAR));
 	mensagem.quantidade = numAcoes;
 	enviarMensagem(hPipe, mensagem);
 }
 
-void comandoSell(TCHAR* empresa, DWORD numAcoes) {
-	// TODO: fazer a lógica
-	//	envia uma mensagem para o servidor a pedir a venda de ações
+void comandoSell(HANDLE* hPipe, TCHAR* nome, TCHAR* empresa, DWORD numAcoes) {
+	Mensagem mensagem = { 0 };
+	mensagem.TipoM = TMensagem_SELL;
+	memcpy(mensagem.nome, nome, (_tcslen(nome) + 1) * sizeof(TCHAR));
+	memcpy(mensagem.empresa, empresa, (_tcslen(empresa) + 1) * sizeof(TCHAR));
+	mensagem.quantidade = numAcoes;
+	enviarMensagem(hPipe, mensagem);
 }
 
 void comandoBalance(HANDLE* hPipe, TCHAR* username) {
 	Mensagem mensagem = { 0 };
 	mensagem.TipoM = TMensagem_BALANCE;
-	memcpy(mensagem.nome, username, _tcslen(username) * sizeof(TCHAR));
+	memcpy(mensagem.nome, username, (_tcslen(username) + 1) * sizeof(TCHAR));
 	enviarMensagem(hPipe, mensagem);
 }
 
@@ -88,7 +92,6 @@ BOOL enviarMensagem(HANDLE* hPipe, Mensagem mensagem) {
 		return FALSE;
 	}
 	BOOL fSuccess = WriteFile(*hPipe, &mensagem, sizeof(Mensagem), &bytesEscritos, &ov);
-	//WaitForSingleObject(*hPipe, INFINITE);
 	BOOL ovResult = GetOverlappedResult(*hPipe, &ov, &bytesEscritos, FALSE);
 	if (!ovResult || bytesEscritos == 0) {
 		_tprintf_s(ERRO_ESCRITA_MSG);
