@@ -113,8 +113,8 @@ void WINAPI threadComandosAdminHandler(PVOID p) {
 			}
 			break;
 		case 7: // comando close
-			_tprintf_s(_T("[INFO] Comando close\n")); // para apagar
 			repetir = comandoClose(td->dto);
+			mensagemClose(td);
 			break;
 		case 0:
 		default: // comando inválido

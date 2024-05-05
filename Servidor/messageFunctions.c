@@ -412,8 +412,20 @@ void mensagemLoad(ThreadData* td, int numEmpresas) {
 	}
 }
 
-void mensagemClose() {
+void mensagemClose(ThreadData* td) {
+	Mensagem mensagem = { 0 };
+	mensagem.TipoM = TMensagem_CLOSE;
+	DWORD limiteClientes = 0;
+	EnterCriticalSection(&td->dto->pSync->csLimClientes);
+	limiteClientes = td->dto->limiteClientes;
+	LeaveCriticalSection(&td->dto->pSync->csLimClientes);
+	for(DWORD i = 0; i < td->dto->limiteClientes; ++i) {
+		if (!td[i].livre) {
+			enviarMensagem(td[i].hPipeInst, mensagem, td->dto->pSync->csWrite);
+		}
+	}
 	// TODO: mensagemClose
+	//       sinalizar as threads
 }
 
 BOOL enviarMensagem(HANDLE hPipe, Mensagem mensagem, CRITICAL_SECTION csWrite) {

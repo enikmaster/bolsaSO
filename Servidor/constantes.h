@@ -78,6 +78,7 @@
 #define INFO_VENDA _T("[INFO] Venda de acões da empresa %s efetuada com sucesso\n")
 #define INFO_WALLET_VAZIA _T("[INFO] Carteira de ações vazia\n")
 #define INFO_WALLET _T("Empresa: %s \tQuantidade: %lu\n")
+#define INFO_CLOSEC _T("[INFO] O programa bolsa está a terminar e este também\n")
 
 // Mensagens de debug
 #define DEBUGGER _T("\n[DEBUG] Estou aqui\n")

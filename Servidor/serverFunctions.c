@@ -308,10 +308,9 @@ int comandoLoad(DataTransferObject* dto, TCHAR* nomeFicheiro) {
 
 BOOL comandoClose(DataTransferObject* dto) {
 	system("cls");
-
-	// TODO: avisar todos os clientes que o servidor vai fechar
-	// TODO: mais qq coisa que seja necessária
-
+	EnterCriticalSection(&dto->pSync->csContinuar);
+	dto->continuar = FALSE;
+	LeaveCriticalSection(&dto->pSync->csContinuar);
 	return FALSE;
 }
 
