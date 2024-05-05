@@ -217,6 +217,11 @@ void comandoListc(DataTransferObject* dto) {
 	for (DWORD i = 0; i < numEmpresasLocal; ++i) {
 		_tprintf_s(INFO_LISTC, eLocal[i].nome, eLocal[i].quantidadeAcoes, eLocal[i].valorAcao);
 	}
+
+	// Verificação de erro ao assinalar o evento
+	if (!SetEvent(dto->dadosP->hEvent)) {
+		_tprintf_s(_T("Erro ao assinalar o evento: %lu\n"), GetLastError());
+	}
 }
 
 BOOL comandoStock(DataTransferObject* dto, const TCHAR* nomeEmpresa, const double valorAcao) {

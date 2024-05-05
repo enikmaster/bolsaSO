@@ -264,7 +264,16 @@ void WINAPI threadClientHandler(PVOID p) {
 
 void WINAPI threadBoardHandler(PVOID p) {
 	DataTransferObject* dto = (DataTransferObject*)p;
-	// TODO: Marques, faz isto!
+	DadosPartilhados* pData = dto->dadosP;
+
+	//criar o evento de reset manual para o board
+	HANDLE hEvent = CreateEvent(NULL, TRUE, FALSE, NOME_EVENTO_BOARD);
+	if (hEvent == NULL) {
+		_tprintf_s(ERRO_CREATE_EVENT);
+		return;
+	}
+	
+	pData->hEvent = hEvent;
 }
 
 // funções de tratamento de mensagens
