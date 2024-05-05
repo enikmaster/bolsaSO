@@ -56,7 +56,10 @@ void mensagemAddc(Mensagem mensagem){
 	_tprintf_s(COMANDO);
 }
 
-void mensagemStock(Mensagem mensagem){}
+void mensagemStock(Mensagem mensagem){
+	_tprintf_s(INFO_STOCK, mensagem.empresa, mensagem.valor);
+	_tprintf_s(COMANDO);
+}
 
 void mensagemPause(Mensagem mensagem){}
 

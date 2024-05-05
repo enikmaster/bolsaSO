@@ -373,8 +373,20 @@ void mensagemAddc(ThreadData* td, TCHAR* empresa) {
 	}
 }
 
-void mensagemStock() {
-	// TODO: mensagemStock
+void mensagemStock(ThreadData* td, TCHAR* empresa, double valorAcao) {
+	Mensagem mensagem = { 0 };
+	mensagem.TipoM = TMensagem_STOCK;
+	DWORD limiteClientes = 0;
+	EnterCriticalSection(&td->dto->pSync->csLimClientes);
+	limiteClientes = td->dto->limiteClientes;
+	LeaveCriticalSection(&td->dto->pSync->csLimClientes);
+	memcpy(mensagem.empresa, empresa, (_tcslen(empresa) + 1) * sizeof(TCHAR));
+	mensagem.valor = valorAcao;
+	for (DWORD i = 0; i < limiteClientes; ++i) {
+		if (!td[i].livre) {
+			enviarMensagem(td[i].hPipeInst, mensagem, td->dto->pSync->csWrite);
+		}
+	}
 }
 
 void mensagemPause() {
