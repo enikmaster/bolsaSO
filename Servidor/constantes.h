@@ -66,7 +66,7 @@
 
 // Mensagens de informação
 #define INFO_ADDC _T("[INFO] A empresa %s foi adicionada à bolsa\n")
-#define INFO_LOAD _T("[INFO] Empresas carregadas com sucesso\n")
+#define INFO_LOAD _T("[INFO] Foram adicionadas %lu empresas com sucesso\n")
 #define INFO_STOCK _T("[INFO] Valor da empresa %s alterado com sucesso para %.2lf\n")
 #define INFO_LOGIN _T("[INFO] Login efetuado com sucesso\n")
 #define INFO_LISTC _T("Nome: %s \tAções disponíveis: %lu \tPreço atual por ação: %.2lf\n")
