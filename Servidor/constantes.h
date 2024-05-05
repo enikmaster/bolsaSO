@@ -24,6 +24,8 @@
 #define NOME_REGISTRY_KEY_NCLIENTES _T("SOFTWARE\\SO2\\NCLIENTES")
 #define NOME_NAMED_PIPE _T("\\\\.\\pipe\\Pipe_Servidor_Cliente")
 
+#define NOME_EVENTO_BOARD _T("EventoComunicacaoBolsa")
+
 // Mensagens de erro do sistema
 #define ERRO_INVALID_N_ARGS _T("[ERRO] Número de argumentos inválido\n")
 #define ERRO_INVALID_CMD _T("[ERRO] Comando inválido\n")
@@ -169,6 +171,7 @@ struct DadosPartilhados {
     Empresa empresas[TAM_MAX_EMPRESAS];
     DWORD numEmpresas;
     DetalhesTransacao ultimaTransacao;
+    HANDLE hEvent; // handle p evento de alteração da board
 };
 
 // Estrutura de mecanismos de sincorização
