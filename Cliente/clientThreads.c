@@ -89,7 +89,7 @@ void WINAPI threadComandosClienteHandler(PVOID p) {
 			else
 				_tprintf_s(ERRO_NO_LOGIN);
 			break;
-		case 6: // comando wallet TODO
+		case 6: // comando wallet
 			if (cd->logado)
 				comandoWallet(hPipe, username);
 			else

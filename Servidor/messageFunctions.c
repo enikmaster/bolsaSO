@@ -34,7 +34,7 @@ void mensagemLogin(ThreadData* td, Mensagem mensagem) {
 			}
 		}
 	}
-	enviarMensagem(hPipe, resposta);
+	enviarMensagem(hPipe, resposta, td->dto->pSync->csWrite);
 	free(uLocais);
 }
 
@@ -49,7 +49,7 @@ void mensagemListc(ThreadData* td) {
 	memcpy(resposta.empresas, td->dto->dadosP->empresas, sizeof(Empresa) * td->dto->dadosP->numEmpresas);
 	LeaveCriticalSection(&td->dto->pSync->csEmpresas);
 
-	enviarMensagem(hPipe, resposta); //enviarMensagem( para_onde, o_quê);
+	enviarMensagem(hPipe, resposta, td->dto->pSync->csWrite); //enviarMensagem( para_onde, o_quê);
 }
 
 void mensagemBuy(ThreadData* td, Mensagem mensagemRead) {
@@ -75,7 +75,7 @@ void mensagemBuy(ThreadData* td, Mensagem mensagemRead) {
 		LeaveCriticalSection(&td->dto->pSync->csEmpresas);
 		mensagem.sucesso = FALSE;
 		// Enviar resposta insucesso ao cliente
-		enviarMensagem(td->hPipeInst, mensagem);
+		enviarMensagem(td->hPipeInst, mensagem, td->dto->pSync->csWrite);
 		return;
 	}
 	// a empresa existe
@@ -94,7 +94,7 @@ void mensagemBuy(ThreadData* td, Mensagem mensagemRead) {
 		LeaveCriticalSection(&td->dto->pSync->csEmpresas);
 		mensagem.sucesso = FALSE;
 		// Enviar resposta insucesso ao cliente
-		enviarMensagem(td->hPipeInst, mensagem);
+		enviarMensagem(td->hPipeInst, mensagem, td->dto->pSync->csWrite);
 		return;
 	}
 	// o utilizador existe
@@ -105,7 +105,7 @@ void mensagemBuy(ThreadData* td, Mensagem mensagemRead) {
 		LeaveCriticalSection(&td->dto->pSync->csEmpresas);
 		mensagem.sucesso = FALSE;
 		// Enviar resposta insucesso ao cliente
-		enviarMensagem(td->hPipeInst, mensagem);
+		enviarMensagem(td->hPipeInst, mensagem, td->dto->pSync->csWrite);
 		return;
 	}
 	// quantidade válida
@@ -116,7 +116,7 @@ void mensagemBuy(ThreadData* td, Mensagem mensagemRead) {
 		LeaveCriticalSection(&td->dto->pSync->csEmpresas);
 		mensagem.sucesso = FALSE;
 		// Enviar resposta insucesso ao cliente
-		enviarMensagem(td->hPipeInst, mensagem);
+		enviarMensagem(td->hPipeInst, mensagem, td->dto->pSync->csWrite);
 		return;
 	}
 	// saldo suficiente
@@ -146,13 +146,16 @@ void mensagemBuy(ThreadData* td, Mensagem mensagemRead) {
 		LeaveCriticalSection(&td->dto->pSync->csEmpresas);
 		mensagem.sucesso = FALSE;
 		// Enviar resposta insucesso ao cliente
-		enviarMensagem(td->hPipeInst, mensagem);
+		enviarMensagem(td->hPipeInst, mensagem, td->dto->pSync->csWrite);
 		return;
 	}
 	// 5. acrescentar uma EmpresaAcao à carteira de ações do utilizador
-	td->dto->utilizadores[indexUtilizador].carteiraAcoes[indexEA].quantidadeAcoes = mensagemRead.quantidade;
-	memcpy(td->dto->utilizadores[indexUtilizador].carteiraAcoes[indexEA].nomeEmpresa, mensagemRead.empresa, (_tcslen(mensagemRead.empresa) + 1) * sizeof(TCHAR));
-	
+	if (!empresaAcaoAtualizada) {
+		// empresa não existe na carteira de ações do utilizador
+		// acrescentar uma EmpresaAcao à carteira de ações do utilizador
+		td->dto->utilizadores[indexUtilizador].carteiraAcoes[indexEA].quantidadeAcoes = mensagemRead.quantidade;
+		memcpy(td->dto->utilizadores[indexUtilizador].carteiraAcoes[indexEA].nomeEmpresa, mensagemRead.empresa, (_tcslen(mensagemRead.empresa) + 1) * sizeof(TCHAR));
+	}
 	// alterar o valor das ações
 	taxaVariacao += (double)mensagemRead.quantidade / (double)td->dto->dadosP->empresas[indexEmpresa].quantidadeAcoes;
 	td->dto->dadosP->empresas[indexEmpresa].valorAcao *= taxaVariacao;
@@ -169,7 +172,7 @@ void mensagemBuy(ThreadData* td, Mensagem mensagemRead) {
 	mensagem.sucesso = TRUE;
 	memcpy(mensagem.empresa, mensagemRead.empresa, (_tcslen(mensagemRead.empresa) + 1) * sizeof(TCHAR));
 	
-	enviarMensagem(td->hPipeInst, mensagem);
+	enviarMensagem(td->hPipeInst, mensagem, td->dto->pSync->csWrite);
 }
 
 void mensagemSell(ThreadData* td, Mensagem mensagemRead) {
@@ -195,7 +198,7 @@ void mensagemSell(ThreadData* td, Mensagem mensagemRead) {
 		LeaveCriticalSection(&td->dto->pSync->csEmpresas);
 		resposta.sucesso = FALSE;
 		// Enviar resposta insucesso ao cliente
-		enviarMensagem(td->hPipeInst, resposta);
+		enviarMensagem(td->hPipeInst, resposta, td->dto->pSync->csWrite);
 		return;
 	}
 	// a empresa existe
@@ -213,7 +216,7 @@ void mensagemSell(ThreadData* td, Mensagem mensagemRead) {
 		LeaveCriticalSection(&td->dto->pSync->csEmpresas);
 		resposta.sucesso = FALSE;
 		// Enviar resposta insucesso ao cliente
-		enviarMensagem(td->hPipeInst, resposta);
+		enviarMensagem(td->hPipeInst, resposta, td->dto->pSync->csWrite);
 		return;
 	}
 	// o utilizador existe
@@ -230,7 +233,7 @@ void mensagemSell(ThreadData* td, Mensagem mensagemRead) {
 		LeaveCriticalSection(&td->dto->pSync->csEmpresas);
 		resposta.sucesso = FALSE;
 		// Enviar resposta insucesso ao cliente
-		enviarMensagem(td->hPipeInst, resposta);
+		enviarMensagem(td->hPipeInst, resposta, td->dto->pSync->csWrite);
 		return;
 	}
 	// a empresa existe na carteira de ações do utilizador
@@ -241,7 +244,7 @@ void mensagemSell(ThreadData* td, Mensagem mensagemRead) {
 		LeaveCriticalSection(&td->dto->pSync->csEmpresas);
 		resposta.sucesso = FALSE;
 		// Enviar resposta insucesso ao cliente
-		enviarMensagem(td->hPipeInst, resposta);
+		enviarMensagem(td->hPipeInst, resposta, td->dto->pSync->csWrite);
 		return;
 	}
 	// quantidade válida
@@ -274,7 +277,7 @@ void mensagemSell(ThreadData* td, Mensagem mensagemRead) {
 	resposta.sucesso = TRUE;
 	memcpy(resposta.empresa, mensagemRead.empresa, (_tcslen(mensagemRead.empresa) + 1) * sizeof(TCHAR));
 	
-	enviarMensagem(td->hPipeInst, resposta);
+	enviarMensagem(td->hPipeInst, resposta, td->dto->pSync->csWrite);
 }
 
 void mensagemBalance(ThreadData* td, Mensagem mensagem) {
@@ -305,7 +308,7 @@ void mensagemBalance(ThreadData* td, Mensagem mensagem) {
 	if (i == numUtilizadores) {
 		// utilizador não existe
 		resposta.sucesso = FALSE;
-		enviarMensagem(hPipe, resposta);
+		enviarMensagem(hPipe, resposta, td->dto->pSync->csWrite);
 		free(uLocais);
 		return;
 	}
@@ -313,7 +316,7 @@ void mensagemBalance(ThreadData* td, Mensagem mensagem) {
 	EnterCriticalSection(&td->dto->pSync->csUtilizadores);
 	resposta.valor = td->dto->utilizadores[i].saldo;
 	LeaveCriticalSection(&td->dto->pSync->csUtilizadores);
-	enviarMensagem(hPipe, resposta);
+	enviarMensagem(hPipe, resposta, td->dto->pSync->csWrite);
 	free(uLocais);
 }
 
@@ -336,7 +339,7 @@ void mensagemWallet(ThreadData* td, Mensagem mensagem) {
 		LeaveCriticalSection(&td->dto->pSync->csUtilizadores);
 		resposta.sucesso = FALSE;
 		// Enviar resposta insucesso ao cliente
-		enviarMensagem(td->hPipeInst, resposta);
+		enviarMensagem(td->hPipeInst, resposta, td->dto->pSync->csWrite);
 		return;
 	}
 	// o utilizador existe
@@ -348,15 +351,26 @@ void mensagemWallet(ThreadData* td, Mensagem mensagem) {
 	LeaveCriticalSection(&td->dto->pSync->csUtilizadores);
 	resposta.quantidade = numEmpresaAcao;
 	resposta.sucesso = TRUE;
-	enviarMensagem(td->hPipeInst, resposta);
+	enviarMensagem(td->hPipeInst, resposta, td->dto->pSync->csWrite);
 }
 
 void mensagemExit() {
 	// TODO: mensagemExit
 }
 
-void mensagemAddc() {
-	// TODO: mensagemAddc
+void mensagemAddc(ThreadData* td, TCHAR* empresa) {
+	Mensagem mensagem = { 0 };
+	mensagem.TipoM = TMensagem_ADDC;
+	DWORD limiteClientes = 0;
+	EnterCriticalSection(&td->dto->pSync->csLimClientes);
+	limiteClientes = td->dto->limiteClientes;
+	LeaveCriticalSection(&td->dto->pSync->csLimClientes);
+	memcpy(mensagem.empresa, empresa, (_tcslen(empresa) + 1) * sizeof(TCHAR));
+	for (DWORD i = 0; i < limiteClientes; ++i) {
+		if (!td[i].livre) {
+			enviarMensagem(td[i].hPipeInst, mensagem, td->dto->pSync->csWrite);
+		}
+	}
 }
 
 void mensagemStock() {
@@ -379,7 +393,7 @@ void mensagemClose() {
 	// TODO: mensagemClose
 }
 
-BOOL enviarMensagem(HANDLE hPipe, Mensagem mensagem) {
+BOOL enviarMensagem(HANDLE hPipe, Mensagem mensagem, CRITICAL_SECTION csWrite) {
 	DWORD bytesEscritos;
 	OVERLAPPED ov = { 0 };
 	ov.hEvent = CreateEvent(NULL, TRUE, FALSE, NULL);
@@ -387,7 +401,10 @@ BOOL enviarMensagem(HANDLE hPipe, Mensagem mensagem) {
 		_tprintf_s(ERRO_CREATE_EVENT);
 		return FALSE;
 	}
-	BOOL fSuccess = WriteFile(hPipe, &mensagem, sizeof(Mensagem), &bytesEscritos, &ov);
+	BOOL fSuccess;
+	EnterCriticalSection(&csWrite);
+	fSuccess = WriteFile(hPipe, &mensagem, sizeof(Mensagem), &bytesEscritos, &ov);
+	LeaveCriticalSection(&csWrite);
 	BOOL ovResult = GetOverlappedResult(hPipe, &ov, &bytesEscritos, FALSE);
 	if (!ovResult || bytesEscritos == 0) {
 		_tprintf_s(ERRO_ESCRITA_MSG);

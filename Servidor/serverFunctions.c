@@ -155,6 +155,7 @@ BOOL inicializarDTO(DataTransferObject* dto) {
 	InitializeCriticalSection(&dto->pSync->csLimClientes);
 	InitializeCriticalSection(&dto->pSync->csEmpresas);
 	InitializeCriticalSection(&dto->pSync->csUtilizadores);
+	InitializeCriticalSection(&dto->pSync->csWrite);
 
 	dto->dadosP = (DadosPartilhados*)dto->pView;
 	dto->dadosP->numEmpresas = 0;
@@ -169,11 +170,13 @@ void terminarDTO(DataTransferObject* dto) {
 	LeaveCriticalSection(&dto->pSync->csLimClientes);
 	LeaveCriticalSection(&dto->pSync->csEmpresas);
 	LeaveCriticalSection(&dto->pSync->csUtilizadores);
+	LeaveCriticalSection(&dto->pSync->csWrite);
 	// apagar os CriticalSections
 	DeleteCriticalSection(&dto->pSync->csContinuar);
 	DeleteCriticalSection(&dto->pSync->csLimClientes);
 	DeleteCriticalSection(&dto->pSync->csEmpresas);
 	DeleteCriticalSection(&dto->pSync->csUtilizadores);
+	DeleteCriticalSection(&dto->pSync->csWrite);
 	// libertar o semáforo
 	ReleaseSemaphore(dto->pSync->hSemBolsa, 1, NULL);
 	// desmapear a memória partilhada
@@ -189,8 +192,9 @@ void terminarDTO(DataTransferObject* dto) {
 // comandos do servidor
 BOOL comandoAddc(DataTransferObject* dto, const TCHAR* nomeEmpresa, const DWORD numeroAcoes, const double precoAcao) {
 	system("cls");
+	DWORD numEmpresas = 0;
 	EnterCriticalSection(&dto->pSync->csEmpresas);
-	DWORD numEmpresas = dto->dadosP->numEmpresas;
+	numEmpresas = dto->dadosP->numEmpresas;
 	if (numEmpresas >= TAM_MAX_EMPRESAS) {
 		LeaveCriticalSection(&dto->pSync->csEmpresas);
 		return FALSE;

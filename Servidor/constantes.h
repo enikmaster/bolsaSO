@@ -65,7 +65,7 @@
 #define ERRO_VENDA _T("[ERRO] Não foi possível efetuar a venda\n")
 
 // Mensagens de informação
-#define INFO_ADDC _T("[INFO] Empresa adicionada com sucesso\n")
+#define INFO_ADDC _T("[INFO] A empresa %s foi adicionada à bolsa\n")
 #define INFO_LOAD _T("[INFO] Empresas carregadas com sucesso\n")
 #define INFO_STOCK _T("[INFO] Valor alterado com sucesso\n")
 #define INFO_LOGIN _T("[INFO] Login efetuado com sucesso\n")
@@ -180,6 +180,7 @@ struct Sync {
     CRITICAL_SECTION csLimClientes;
     CRITICAL_SECTION csEmpresas;
     CRITICAL_SECTION csUtilizadores;
+    CRITICAL_SECTION csWrite;
 };
 
 // Estrutura de dados partilhados entre threads do servidor

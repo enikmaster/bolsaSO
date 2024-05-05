@@ -40,9 +40,11 @@ void WINAPI threadComandosAdminHandler(PVOID p) {
 			else {
 				DWORD numeroAcoes = _tstoi(argumento2);
 				double precoAcao = _tstof(argumento3);
-				comandoAddc(td->dto, argumento1, numeroAcoes, precoAcao)
-					? _tprintf_s(INFO_ADDC)
-					: _tprintf_s(ERRO_ADDC);
+				if (comandoAddc(td->dto, argumento1, numeroAcoes, precoAcao)){
+					_tprintf_s(INFO_ADDC, argumento1);
+					mensagemAddc(td, argumento1);
+				} else
+					_tprintf_s(ERRO_ADDC);
 			}
 			break;
 		case 2: // comando listc

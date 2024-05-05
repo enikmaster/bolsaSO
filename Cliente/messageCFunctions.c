@@ -51,7 +51,10 @@ void mensagemRWallet(Mensagem mensagem){
 	_tprintf_s(COMANDO);
 }
 
-void mensagemAddc(Mensagem mensagem){}
+void mensagemAddc(Mensagem mensagem){
+	_tprintf_s(INFO_ADDC, mensagem.empresa);
+	_tprintf_s(COMANDO);
+}
 
 void mensagemStock(Mensagem mensagem){}
 
