@@ -103,9 +103,13 @@ void WINAPI threadComandosAdminHandler(PVOID p) {
 				_tprintf_s(ERRO_INVALID_N_ARGS);
 			}
 			else {
-				comandoLoad(td->dto, argumento1)
-					? _tprintf_s(INFO_LOAD)
-					: _tprintf_s(ERRO_LOAD);
+				int numLoad = comandoLoad(td->dto, argumento1);
+				if (numLoad == -1)
+					_tprintf_s(ERRO_LOAD);
+				else {
+					_tprintf_s(INFO_LOAD, numLoad);
+					mensagemLoad(td, numLoad);
+				}
 			}
 			break;
 		case 7: // comando close

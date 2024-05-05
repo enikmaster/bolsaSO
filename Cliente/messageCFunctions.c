@@ -65,7 +65,10 @@ void mensagemPause(Mensagem mensagem){}
 
 void mensagemResume(Mensagem mensagem){}
 
-void mensagemLoad(Mensagem mensagem){}
+void mensagemLoad(Mensagem mensagem){
+	_tprintf_s(INFO_LOAD, mensagem.quantidade);
+	_tprintf_s(COMANDO);
+}
 
 BOOL mensagemCloseC(Mensagem mensagem) {
 	return FALSE;

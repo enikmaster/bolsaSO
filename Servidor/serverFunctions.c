@@ -259,7 +259,7 @@ void comandoPause(DWORD numeroSegundos) {
 	// TODO: parar o servidor por um determinado tempo
 }
 
-BOOL comandoLoad(DataTransferObject* dto, TCHAR* nomeFicheiro) {
+int comandoLoad(DataTransferObject* dto, TCHAR* nomeFicheiro) {
 	system("cls");
 	DWORD numEmpresasLidas = 0;
 	Empresa eLocal[TAM_MAX_EMPRESAS];
@@ -269,7 +269,7 @@ BOOL comandoLoad(DataTransferObject* dto, TCHAR* nomeFicheiro) {
 		_tprintf_s(ERRO_OPEN_FILE);
 		if (file != NULL)
 			fclose(file);
-		return FALSE;
+		return -1;
 	}
 	TCHAR linha[MAX_PATH];
 	while (_fgetts(linha, sizeof(linha) / sizeof(linha[0]), file) != NULL) {
@@ -285,20 +285,21 @@ BOOL comandoLoad(DataTransferObject* dto, TCHAR* nomeFicheiro) {
 		numEmpresasLidas++;
 	};
 	fclose(file);
-
+	DWORD numEmpresasAteMax = 0;
 	EnterCriticalSection(&dto->pSync->csEmpresas);
-	if(TAM_MAX_EMPRESAS - dto->dadosP->numEmpresas > 0) {
-		if (numEmpresasLidas <= TAM_MAX_EMPRESAS - dto->dadosP->numEmpresas) {
+	numEmpresasAteMax = TAM_MAX_EMPRESAS - dto->dadosP->numEmpresas;
+	if(numEmpresasAteMax > 0) {
+		if (numEmpresasLidas <= numEmpresasAteMax) {
 			CopyMemory(&dto->dadosP->empresas[dto->dadosP->numEmpresas], eLocal, numEmpresasLidas * sizeof(Empresa));
 			dto->dadosP->numEmpresas += numEmpresasLidas;
 			LeaveCriticalSection(&dto->pSync->csEmpresas);
-			return TRUE;
+			return numEmpresasLidas;
 		}
-		if (numEmpresasLidas > TAM_MAX_EMPRESAS - dto->dadosP->numEmpresas) {
+		if (numEmpresasLidas > numEmpresasAteMax) {
 			CopyMemory(&dto->dadosP->empresas[dto->dadosP->numEmpresas], eLocal, (TAM_MAX_EMPRESAS - dto->dadosP->numEmpresas) * sizeof(Empresa));
 			dto->dadosP->numEmpresas = TAM_MAX_EMPRESAS;
 			LeaveCriticalSection(&dto->pSync->csEmpresas);
-			return TRUE;
+			return numEmpresasAteMax;
 		}
 	}
 	LeaveCriticalSection(&dto->pSync->csEmpresas);

@@ -397,8 +397,19 @@ void mensagemResume() {
 	// TODO: mensagemResume
 }
 
-void mensagemLoad() {
-	// TODO: mensagemLoad
+void mensagemLoad(ThreadData* td, int numEmpresas) {
+	Mensagem mensagem = { 0 };
+	mensagem.TipoM = TMensagem_LOAD;
+	DWORD limiteClientes = 0;
+	EnterCriticalSection(&td->dto->pSync->csLimClientes);
+	limiteClientes = td->dto->limiteClientes;
+	LeaveCriticalSection(&td->dto->pSync->csLimClientes);
+	mensagem.quantidade = numEmpresas;
+	for (DWORD i = 0; i < limiteClientes; ++i) {
+		if (!td[i].livre) {
+			enviarMensagem(td[i].hPipeInst, mensagem, td->dto->pSync->csWrite);
+		}
+	}
 }
 
 void mensagemClose() {

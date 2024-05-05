@@ -27,7 +27,7 @@ void comandoUsers(DataTransferObject*);
 
 void comandoPause(DWORD);
 
-BOOL comandoLoad(DataTransferObject*, TCHAR*);
+int comandoLoad(DataTransferObject*, TCHAR*);
 
 BOOL comandoClose(DataTransferObject*);
 
