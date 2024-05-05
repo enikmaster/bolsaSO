@@ -17,7 +17,6 @@ O BOARD vai ter de receber comando do utiliazdor para terminar a execução
 #include "../Servidor/constantes.h"
 #include "board.h"
 
-
 typedef struct {
     volatile BOOL running;  // Marca como volátil para garantir visibilidade entre threads
     HANDLE hMap;
