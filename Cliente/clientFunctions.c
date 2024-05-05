@@ -33,38 +33,51 @@ DWORD verificaComando(TCHAR* comando) {
 }
 
 // comandos do cliente
-BOOL comandoLogin(HANDLE hPipe, TCHAR* username, TCHAR* password) {
+BOOL comandoLogin(HANDLE* hPipe, TCHAR* username, TCHAR* password) {
 	Mensagem mensagem = { 0 };
 	mensagem.TipoM = TMensagem_LOGIN;
-	memcpy(mensagem.nome, username, _tcslen(username) * sizeof(TCHAR));
-	memcpy(mensagem.password, password, _tcslen(password) * sizeof(TCHAR));
+	memcpy(mensagem.nome, username, (_tcslen(username) + 1) * sizeof(TCHAR));
+	memcpy(mensagem.password, password, (_tcslen(password) + 1) * sizeof(TCHAR));
 	
-	return enviarMensagem(hPipe, mensagem);
+	enviarMensagem(hPipe, mensagem);
 }
 
-void comandoListc() {
-	// TODO: fazer a lógica
-	//	envia uma mensagem para o servidor a pedir a lista de empresas
+void comandoListc(HANDLE* hPipe) {
+	Mensagem mensagem = { 0 };
+	mensagem.TipoM = TMensagem_LISTC;
+	enviarMensagem(hPipe, mensagem);
 }
 
-void comandoBuy(TCHAR* empresa, DWORD numAcoes) {
-	// TODO: fazer a lógica
-	//	envia uma mensagem para o servidor a pedir a compra de ações
+void comandoBuy(HANDLE* hPipe, TCHAR* nome, TCHAR* empresa, DWORD numAcoes) {
+	Mensagem mensagem = { 0 };
+	mensagem.TipoM = TMensagem_BUY;
+	memcpy(mensagem.nome, nome, (_tcslen(nome) + 1) * sizeof(TCHAR));
+	memcpy(mensagem.empresa, empresa, (_tcslen(empresa) + 1) * sizeof(TCHAR));
+	mensagem.quantidade = numAcoes;
+	enviarMensagem(hPipe, mensagem);
 }
 
-void comandoSell(TCHAR* empresa, DWORD numAcoes) {
-	// TODO: fazer a lógica
-	//	envia uma mensagem para o servidor a pedir a venda de ações
+void comandoSell(HANDLE* hPipe, TCHAR* nome, TCHAR* empresa, DWORD numAcoes) {
+	Mensagem mensagem = { 0 };
+	mensagem.TipoM = TMensagem_SELL;
+	memcpy(mensagem.nome, nome, (_tcslen(nome) + 1) * sizeof(TCHAR));
+	memcpy(mensagem.empresa, empresa, (_tcslen(empresa) + 1) * sizeof(TCHAR));
+	mensagem.quantidade = numAcoes;
+	enviarMensagem(hPipe, mensagem);
 }
 
-void comandoBalance() {
-	// TODO: fazer a lógica
-	//	envia uma mensagem para o servidor a pedir o saldo
+void comandoBalance(HANDLE* hPipe, TCHAR* username) {
+	Mensagem mensagem = { 0 };
+	mensagem.TipoM = TMensagem_BALANCE;
+	memcpy(mensagem.nome, username, (_tcslen(username) + 1) * sizeof(TCHAR));
+	enviarMensagem(hPipe, mensagem);
 }
 
-void comandoWallet() {
-	// TODO: fazer a lógica
-	//	envia uma mensagem para o servidor a pedir a carteira de ações
+void comandoWallet(HANDLE* hPipe, TCHAR* username) {
+	Mensagem mensagem = { 0 };
+	mensagem.TipoM = TMensagem_WALLET;
+	memcpy(mensagem.nome, username, (_tcslen(username) + 1)* sizeof(TCHAR));
+	enviarMensagem(hPipe, mensagem);
 }
 
 void comandoExit() {
@@ -72,7 +85,7 @@ void comandoExit() {
 	//	envia uma mensagem para o servidor a pedir o logout
 }
 
-BOOL enviarMensagem(HANDLE hPipe, Mensagem mensagem) {
+BOOL enviarMensagem(HANDLE* hPipe, Mensagem mensagem) {
 	DWORD bytesEscritos;
 	OVERLAPPED ov = { 0 };
 	ov.hEvent = CreateEvent(NULL, TRUE, FALSE, NULL);
@@ -80,9 +93,8 @@ BOOL enviarMensagem(HANDLE hPipe, Mensagem mensagem) {
 		_tprintf_s(ERRO_CREATE_EVENT);
 		return FALSE;
 	}
-	BOOL fSuccess = WriteFile(hPipe, &mensagem, sizeof(Mensagem), &bytesEscritos, &ov);
-	WaitForSingleObject(hPipe, INFINITE);
-	BOOL ovResult = GetOverlappedResult(hPipe, &ov, &bytesEscritos, FALSE);
+	BOOL fSuccess = WriteFile(*hPipe, &mensagem, sizeof(Mensagem), &bytesEscritos, &ov);
+	BOOL ovResult = GetOverlappedResult(*hPipe, &ov, &bytesEscritos, FALSE);
 	if (!ovResult || bytesEscritos == 0) {
 		_tprintf_s(ERRO_ESCRITA_MSG);
 		return FALSE;

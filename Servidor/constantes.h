@@ -15,8 +15,7 @@
 #define TAM_NOME 50 // tamanho máximo de um nome
 #define TAM_PASSWORD 50 // tamanho máximo de uma password
 #define TAM_REGISTRY 100 // tamanho máximo de uma key do registo
-#define CONNECTING_STATE 0 // estado em ligação
-#define READING_STATE 1 // estado em leitura
+#define COMANDO _T("Comando:  ")
 
 // Nomes
 #define NOME_SHARED_MEMORY _T("Dados_Partilhados")
@@ -64,15 +63,23 @@
 #define ERRO_NO_LOGIN _T("[ERRO] Efetue o login primeiro\n")
 #define ERRO_ALREADY_LOGIN _T("[ERRO] Já efetuou login\n")
 #define ERRO_EMPRESA_NAO_EXISTE _T("[ERRO] A empresa não existe\n")
+#define ERRO_COMPRA _T("[ERRO] Não foi possível efetuar a compra\n")
+#define ERRO_VENDA _T("[ERRO] Não foi possível efetuar a venda\n")
 
 // Mensagens de informação
-#define INFO_ADDC _T("[INFO] Empresa adicionada com sucesso\n")
-#define INFO_LOAD _T("[INFO] Empresas carregadas com sucesso\n")
-#define INFO_STOCK _T("[INFO] Valor alterado com sucesso\n")
+#define INFO_ADDC _T("[INFO] A empresa %s foi adicionada à bolsa\n")
+#define INFO_LOAD _T("[INFO] Foram adicionadas %lu empresas com sucesso\n")
+#define INFO_STOCK _T("[INFO] Valor da empresa %s alterado com sucesso para %.2lf\n")
 #define INFO_LOGIN _T("[INFO] Login efetuado com sucesso\n")
 #define INFO_LISTC _T("Nome: %s \tAções disponíveis: %lu \tPreço atual por ação: %.2lf\n")
+#define INFO_LISTC_VAZIA _T("[INFO] Não existem empresas disponíveis\n")
 #define INFO_USERS _T("Username: %s \tSaldo: %lf \tEstado: %s\n")
 #define INFO_CLIENTE_CONECTADO _T("[INFO] Cliente conectado, thread criada e lançada\n")
+#define INFO_SALDO _T("[INFO] Saldo atual: %.2lf\n")
+#define INFO_COMPRA _T("[INFO] Compra de acões da empresa %s efetuada com sucesso\n")
+#define INFO_VENDA _T("[INFO] Venda de acões da empresa %s efetuada com sucesso\n")
+#define INFO_WALLET_VAZIA _T("[INFO] Carteira de ações vazia\n")
+#define INFO_WALLET _T("Empresa: %s \tQuantidade: %lu\n")
 
 // Mensagens de debug
 #define DEBUGGER _T("\n[DEBUG] Estou aqui\n")
@@ -143,12 +150,12 @@ struct DetalhesTransacao {
     double precoPorAcao;
 };
 
-
 // Estrutura para comunicação entre cliente e servidor
 typedef struct Mensagem Mensagem, * pMensagem;
 struct Mensagem {
     TipoMensagem TipoM;
     TCHAR nome[TAM_NOME];
+    TCHAR empresa[TAM_NOME];
     TCHAR password[TAM_PASSWORD];
     BOOL sucesso;
     DWORD quantidade;
@@ -176,6 +183,7 @@ struct Sync {
     CRITICAL_SECTION csLimClientes;
     CRITICAL_SECTION csEmpresas;
     CRITICAL_SECTION csUtilizadores;
+    CRITICAL_SECTION csWrite;
 };
 
 // Estrutura de dados partilhados entre threads do servidor
@@ -191,10 +199,17 @@ struct DataTransferObject {
     BOOL continuar;
 };
 
-// Estrutura para lidar com threads
+// Estrutura para lidar com threads no servidor
 typedef struct ThreadData ThreadData;
 struct ThreadData {
     DataTransferObject* dto;
     HANDLE hPipeInst;
     BOOL livre; // indica se a thread está livre para ser usada
+};
+
+// Estrutura para lidar com threads no cliente
+typedef struct ClienteData ClienteData;
+struct ClienteData {
+	HANDLE hPipe;
+    BOOL logado;
 };

@@ -9,54 +9,52 @@
 DWORD verificaComando(TCHAR*);
 
 // comandos do cliente
-BOOL comandoLogin(TCHAR*, TCHAR*);
+BOOL comandoLogin(HANDLE*, TCHAR*, TCHAR*);
 
-void comandoListc();
+void comandoListc(HANDLE*);
 
-void comandoBuy(TCHAR*, DWORD);
+void comandoBuy(HANDLE*, TCHAR*, TCHAR*, DWORD);
 
-void comandoSell(TCHAR*, DWORD);
+void comandoSell(HANDLE*, TCHAR*, TCHAR*, DWORD);
 
-void comandoBalance();
+void comandoBalance(HANDLE*, TCHAR*);
 
-void comandoWallet();
+void comandoWallet(HANDLE*, TCHAR*);
 
-void comandoExit();
+void comandoExit(HANDLE*, TCHAR*);
 
-BOOL enviarMensagem(HANDLE, Mensagem);
+BOOL enviarMensagem(HANDLE*, Mensagem);
 
 // funções de threads
 void WINAPI threadComandosClienteHandler(PVOID);
 
-void messageHandlerCliente(Mensagem);
-
 void PrintLastError(TCHAR*, DWORD);
 
 // funções de tratamento de mensagens no cliente
-void mensagemRLogin();
+void mensagemRLogin(Mensagem);
 
-void mensagemRListc();
+void mensagemRListc(Mensagem);
 
-void mensagemRBuy();
+void mensagemRBuy(Mensagem);
 
-void mensagemRSell();
+void mensagemRSell(Mensagem);
 
-void mensagemRBalance();
+void mensagemRBalance(Mensagem);
 
-void mensagemRWallet();
+void mensagemRWallet(Mensagem);
 
-void mensagemAddc();
+void mensagemAddc(Mensagem);
 
-void mensagemStock();
+void mensagemStock(Mensagem);
 
-void mensagemPause();
+void mensagemPause(Mensagem);
 
-void mensagemResume();
+void mensagemResume(Mensagem);
 
-void mensagemLoad();
+void mensagemLoad(Mensagem);
 
-void mensagemCloseC();
+BOOL mensagemCloseC(Mensagem);
 
-void mensagemExit();
+BOOL mensagemExit(Mensagem);
 
 #endif

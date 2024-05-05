@@ -51,6 +51,7 @@ DWORD lerUtilizadores(DataTransferObject* dto, const TCHAR* nomeFicheiro) {
 			uLocal[i].username, (unsigned)_countof(uLocal[i].username),
 			uLocal[i].password, (unsigned)_countof(uLocal[i].password),
 			&(uLocal[i].saldo));
+		uLocal[i].numEmpresasAcoes = 0;
 		uLocal[i++].logado = FALSE;
 	};
 	fclose(file);
@@ -154,6 +155,7 @@ BOOL inicializarDTO(DataTransferObject* dto) {
 	InitializeCriticalSection(&dto->pSync->csLimClientes);
 	InitializeCriticalSection(&dto->pSync->csEmpresas);
 	InitializeCriticalSection(&dto->pSync->csUtilizadores);
+	InitializeCriticalSection(&dto->pSync->csWrite);
 
 	dto->dadosP = (DadosPartilhados*)dto->pView;
 	dto->dadosP->numEmpresas = 0;
@@ -168,11 +170,13 @@ void terminarDTO(DataTransferObject* dto) {
 	LeaveCriticalSection(&dto->pSync->csLimClientes);
 	LeaveCriticalSection(&dto->pSync->csEmpresas);
 	LeaveCriticalSection(&dto->pSync->csUtilizadores);
+	LeaveCriticalSection(&dto->pSync->csWrite);
 	// apagar os CriticalSections
 	DeleteCriticalSection(&dto->pSync->csContinuar);
 	DeleteCriticalSection(&dto->pSync->csLimClientes);
 	DeleteCriticalSection(&dto->pSync->csEmpresas);
 	DeleteCriticalSection(&dto->pSync->csUtilizadores);
+	DeleteCriticalSection(&dto->pSync->csWrite);
 	// libertar o semáforo
 	ReleaseSemaphore(dto->pSync->hSemBolsa, 1, NULL);
 	// desmapear a memória partilhada
@@ -188,8 +192,9 @@ void terminarDTO(DataTransferObject* dto) {
 // comandos do servidor
 BOOL comandoAddc(DataTransferObject* dto, const TCHAR* nomeEmpresa, const DWORD numeroAcoes, const double precoAcao) {
 	system("cls");
+	DWORD numEmpresas = 0;
 	EnterCriticalSection(&dto->pSync->csEmpresas);
-	DWORD numEmpresas = dto->dadosP->numEmpresas;
+	numEmpresas = dto->dadosP->numEmpresas;
 	if (numEmpresas >= TAM_MAX_EMPRESAS) {
 		LeaveCriticalSection(&dto->pSync->csEmpresas);
 		return FALSE;
@@ -259,7 +264,7 @@ void comandoPause(DWORD numeroSegundos) {
 	// TODO: parar o servidor por um determinado tempo
 }
 
-BOOL comandoLoad(DataTransferObject* dto, TCHAR* nomeFicheiro) {
+int comandoLoad(DataTransferObject* dto, TCHAR* nomeFicheiro) {
 	system("cls");
 	DWORD numEmpresasLidas = 0;
 	Empresa eLocal[TAM_MAX_EMPRESAS];
@@ -269,7 +274,7 @@ BOOL comandoLoad(DataTransferObject* dto, TCHAR* nomeFicheiro) {
 		_tprintf_s(ERRO_OPEN_FILE);
 		if (file != NULL)
 			fclose(file);
-		return FALSE;
+		return -1;
 	}
 	TCHAR linha[MAX_PATH];
 	while (_fgetts(linha, sizeof(linha) / sizeof(linha[0]), file) != NULL) {
@@ -285,20 +290,21 @@ BOOL comandoLoad(DataTransferObject* dto, TCHAR* nomeFicheiro) {
 		numEmpresasLidas++;
 	};
 	fclose(file);
-
+	DWORD numEmpresasAteMax = 0;
 	EnterCriticalSection(&dto->pSync->csEmpresas);
-	if(TAM_MAX_EMPRESAS - dto->dadosP->numEmpresas > 0) {
-		if (numEmpresasLidas <= TAM_MAX_EMPRESAS - dto->dadosP->numEmpresas) {
+	numEmpresasAteMax = TAM_MAX_EMPRESAS - dto->dadosP->numEmpresas;
+	if(numEmpresasAteMax > 0) {
+		if (numEmpresasLidas <= numEmpresasAteMax) {
 			CopyMemory(&dto->dadosP->empresas[dto->dadosP->numEmpresas], eLocal, numEmpresasLidas * sizeof(Empresa));
 			dto->dadosP->numEmpresas += numEmpresasLidas;
 			LeaveCriticalSection(&dto->pSync->csEmpresas);
-			return TRUE;
+			return numEmpresasLidas;
 		}
-		if (numEmpresasLidas > TAM_MAX_EMPRESAS - dto->dadosP->numEmpresas) {
+		if (numEmpresasLidas > numEmpresasAteMax) {
 			CopyMemory(&dto->dadosP->empresas[dto->dadosP->numEmpresas], eLocal, (TAM_MAX_EMPRESAS - dto->dadosP->numEmpresas) * sizeof(Empresa));
 			dto->dadosP->numEmpresas = TAM_MAX_EMPRESAS;
 			LeaveCriticalSection(&dto->pSync->csEmpresas);
-			return TRUE;
+			return numEmpresasAteMax;
 		}
 	}
 	LeaveCriticalSection(&dto->pSync->csEmpresas);

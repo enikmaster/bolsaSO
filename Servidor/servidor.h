@@ -27,28 +27,28 @@ void comandoUsers(DataTransferObject*);
 
 void comandoPause(DWORD);
 
-BOOL comandoLoad(DataTransferObject*, TCHAR*);
+int comandoLoad(DataTransferObject*, TCHAR*);
 
 BOOL comandoClose(DataTransferObject*);
 
 // funções de tratamento de mensagens
 void mensagemLogin(ThreadData*, Mensagem);
 
-void mensagemListc(DataTransferObject*);
+void mensagemListc(ThreadData*);
 
-void mensagemBuy(ThreadData*);
+void mensagemBuy(ThreadData*, Mensagem);
 
-void mensagemSell();
+void mensagemSell(ThreadData*, Mensagem);
 
-void mensagemBalance(ThreadData*);
+void mensagemBalance(ThreadData*, Mensagem);
 
-void mensagemWallet();
+void mensagemWallet(ThreadData*, Mensagem);
 
 void mensagemExit();
 
-void mensagemAddc();
+void mensagemAddc(ThreadData*, TCHAR*);
 
-void mensagemStock();
+void mensagemStock(ThreadData*, TCHAR*, double);
 
 void mensagemPause();
 
@@ -58,16 +58,14 @@ void mensagemLoad();
 
 void mensagemClose();
 
+BOOL enviarMensagem(HANDLE, Mensagem, CRITICAL_SECTION);
+
 // funções das threads
 void WINAPI threadComandosAdminHandler(PVOID);
 
 void WINAPI threadClientHandler(PVOID);
 
 void WINAPI threadBoardHandler(PVOID);
-
-void messageHandler(PVOID, Mensagem);
-
-BOOL ConnectToNewClient(HANDLE, LPOVERLAPPED);
 
 void PrintLastError(TCHAR*, DWORD);
 
