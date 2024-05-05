@@ -63,9 +63,12 @@ void WINAPI threadComandosAdminHandler(PVOID p) {
 			}
 			else {
 				double valorAcao = _tstof(argumento2);
-				comandoStock(td->dto, argumento1, valorAcao)
-					? _tprintf_s(INFO_STOCK)
-					: _tprintf_s(ERRO_STOCK);
+				if (comandoStock(td->dto, argumento1, valorAcao)) {
+					_tprintf_s(INFO_STOCK, argumento1, valorAcao);
+					mensagemStock(td, argumento1, valorAcao);
+				}
+				else 
+					_tprintf_s(ERRO_STOCK);
 			}
 			break;
 		case 4: // comando users

@@ -48,7 +48,7 @@ void mensagemExit();
 
 void mensagemAddc(ThreadData*, TCHAR*);
 
-void mensagemStock();
+void mensagemStock(ThreadData*, TCHAR*, double);
 
 void mensagemPause();
 
