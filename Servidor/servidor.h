@@ -42,11 +42,11 @@ void mensagemSell(ThreadData*, Mensagem);
 
 void mensagemBalance(ThreadData*, Mensagem);
 
-void mensagemWallet();
+void mensagemWallet(ThreadData*, Mensagem);
 
 void mensagemExit();
 
-void mensagemAddc();
+void mensagemAddc(ThreadData*, TCHAR*);
 
 void mensagemStock();
 
@@ -58,7 +58,7 @@ void mensagemLoad();
 
 void mensagemClose();
 
-BOOL enviarMensagem(HANDLE, Mensagem);
+BOOL enviarMensagem(HANDLE, Mensagem, CRITICAL_SECTION);
 
 // funções das threads
 void WINAPI threadComandosAdminHandler(PVOID);
