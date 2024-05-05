@@ -43,7 +43,7 @@ int _tmain(int argc, TCHAR** argv) {
 		listaTD[i].dto = &dto;
 	}
 
-	HANDLE hThreads[2];
+	HANDLE hThreads[3];
 	// lançar thread para lidar com os comandos de admin
 	hThreads[0] = CreateThread(NULL, 0, threadComandosAdminHandler, &listaTD, 0, NULL);
 	if (hThreads[0] == NULL) {
@@ -58,6 +58,8 @@ int _tmain(int argc, TCHAR** argv) {
 		terminarDTO(&dto);
 		ExitProcess(-1);
 	}
+
+	hThreads[3] = CreateThread(NULL, 0, threadAtualizarAcoesHandler, &dto, 0, NULL);
 
 	// criar a thread para lidar com as conexões
 	BOOL continuar = TRUE;

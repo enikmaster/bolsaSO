@@ -214,6 +214,21 @@ void WINAPI threadBoardHandler(PVOID p) {
 	// TODO: Marques, faz isto!
 }
 
+void WINAPI threadAtualizarAcoesHandler(PVOID p) {
+	DataTransferObject* dto = (DataTransferObject*)p;
+	// TODO: fazer um ciclo infinito que só é quebrado quando for sinalizado
+	//		que o servidor vai fechar
+	//      correr todas as ações e verificar se o valor da ação mudou
+	//		caso tenha subido, aumentar 10%
+	//      caso tenha descido, diminuir 10%
+	//      caso não tenha mudado, verificar se na ultima alteração foi para cima ou para baixo
+	//		caso tenha sido para cima, aumentar 5%
+	//		caso tenha sido para baixo, diminuir 5%
+	//      fazer isto de 5 em 5 segundos
+	//      tem de ficar à espera de um sinal para terminar mas não pode bloquear
+	//
+}
+
 void PrintLastError(TCHAR* part, DWORD id) {
 	PTSTR buffer;
 	if (part == NULL)

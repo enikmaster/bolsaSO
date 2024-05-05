@@ -67,6 +67,8 @@ void WINAPI threadClientHandler(PVOID);
 
 void WINAPI threadBoardHandler(PVOID);
 
+void WINAPI threadAtualizarAcoesHandler(PVOID);
+
 void PrintLastError(TCHAR*, DWORD);
 
 #endif
