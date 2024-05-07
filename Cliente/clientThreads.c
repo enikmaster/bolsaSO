@@ -95,9 +95,9 @@ void WINAPI threadComandosClienteHandler(PVOID p) {
 			else
 				_tprintf_s(ERRO_NO_LOGIN);
 			break;
-		case 7: // comando exit TODO
-			comandoExit(hPipe, username);
-			repetir = FALSE;
+		case 7: // comando exit
+			repetir = comandoExit(hPipe, username);
+			SetEvent(cd->hExitEvent);
 			break;
 		case 0: // comando inválido
 		default:
