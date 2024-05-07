@@ -212,4 +212,5 @@ typedef struct ClienteData ClienteData;
 struct ClienteData {
 	HANDLE hPipe;
     BOOL logado;
+    HANDLE hExitEvent;
 };
