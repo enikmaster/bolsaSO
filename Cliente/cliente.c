@@ -61,6 +61,16 @@ int _tmain(int argc, TCHAR** argv)
 
 	cd.logado = FALSE;
 
+	cd.hExitEvent = CreateEvent(NULL, TRUE, FALSE, NULL);
+	if (cd.hExitEvent == NULL) {
+		_tprintf_s(ERRO_CREATE_EVENT);
+		CloseHandle(ov.hEvent);
+		CloseHandle(cd.hPipe);
+		ExitProcess(-1);
+	}
+
+	HANDLE hEvents[2] = { ov.hEvent, cd.hExitEvent };
+
 	// thread para lidar com os comandos do cliente
 	HANDLE hThread = CreateThread(NULL, 0, threadComandosClienteHandler, &cd, 0, NULL);
 	if (hThread == NULL) {
@@ -73,6 +83,7 @@ int _tmain(int argc, TCHAR** argv)
 	DWORD bytesLidos;
 	Mensagem mensagemRead = { 0 };
 	BOOL continuar = TRUE;
+	DWORD dwWaitResult;
 
 	while (continuar) {
 		// limpar a mensagem
@@ -84,7 +95,11 @@ int _tmain(int argc, TCHAR** argv)
 		// ler a mensagem
 		fSuccess = ReadFile(cd.hPipe, &mensagemRead, sizeof(Mensagem), &bytesLidos, &ov);
 		// esperar que o evento seja sinalizado
-		WaitForSingleObject(ov.hEvent, INFINITE);
+		dwWaitResult = WaitForMultipleObjects(2, hEvents, FALSE, INFINITE);
+		if (dwWaitResult == WAIT_OBJECT_0 + 1) {
+			continuar = FALSE;
+			break;
+		}
 		// verificar se a leitura foi bem sucedida
 		if(fSuccess || bytesLidos != 0) {
 			if (!GetOverlappedResult(cd.hPipe, &ov, &bytesLidos, FALSE)) {
@@ -131,7 +146,7 @@ int _tmain(int argc, TCHAR** argv)
 		case TMensagem_CLOSE:
 			continuar = mensagemCloseC(mensagemRead);
 			break;
-		case TMensagem_EXIT:
+		case TMensagem_EXIT: // não é necessário
 			continuar = mensagemExit(mensagemRead);
 			break;
 		default:

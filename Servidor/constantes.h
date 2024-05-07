@@ -16,6 +16,7 @@
 #define TAM_PASSWORD 50 // tamanho máximo de uma password
 #define TAM_REGISTRY 100 // tamanho máximo de uma key do registo
 #define COMANDO _T("Comando:  ")
+#define WELCOME _T("Bem-vindo ao sistema de compra e venda de ações\n")
 
 // Nomes
 #define NOME_SHARED_MEMORY _T("Dados_Partilhados")
@@ -23,6 +24,8 @@
 #define NOME_MUTEX_BOARD _T("Mutex_Board")
 #define NOME_REGISTRY_KEY_NCLIENTES _T("SOFTWARE\\SO2\\NCLIENTES")
 #define NOME_NAMED_PIPE _T("\\\\.\\pipe\\Pipe_Servidor_Cliente")
+
+#define NOME_EVENTO_BOARD _T("EventoComunicacaoBolsa")
 
 // Mensagens de erro do sistema
 #define ERRO_INVALID_N_ARGS _T("[ERRO] Número de argumentos inválido\n")
@@ -50,6 +53,7 @@
 #define ERRO_INVALID_MSG _T("[ERRO] Mensagem inválida\n")
 #define ERRO_MEMORIA _T("[ERRO] Erro ao alocar memória\n")
 #define ERRO_REGISTRY _T("[ERRO] Erro ao ler o registo\n")
+#define ERRO_GET_STDIN _T("[ERRO] Erro ao obter handle do stdin\n")
 
 // Mensages de erro do administrador
 #define ERRO_ADDC _T("[ERRO] Erro ao adicionar a empresa\n")
@@ -170,6 +174,7 @@ struct DadosPartilhados {
     Empresa empresas[TAM_MAX_EMPRESAS];
     DWORD numEmpresas;
     DetalhesTransacao ultimaTransacao;
+    HANDLE hEvent; // handle p evento de alteração da board
 };
 
 // Estrutura de mecanismos de sincorização
@@ -210,4 +215,5 @@ typedef struct ClienteData ClienteData;
 struct ClienteData {
 	HANDLE hPipe;
     BOOL logado;
+    HANDLE hExitEvent;
 };

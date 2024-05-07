@@ -80,9 +80,11 @@ void comandoWallet(HANDLE* hPipe, TCHAR* username) {
 	enviarMensagem(hPipe, mensagem);
 }
 
-void comandoExit() {
-	// TODO: fazer a lógica
-	//	envia uma mensagem para o servidor a pedir o logout
+BOOL comandoExit(HANDLE* hPipe, TCHAR* username) {
+	Mensagem mensagem = { 0 };
+	mensagem.TipoM = TMensagem_EXIT;
+	memcpy(mensagem.nome, username, (_tcslen(username) + 1) * sizeof(TCHAR));
+	return !enviarMensagem(hPipe, mensagem);
 }
 
 BOOL enviarMensagem(HANDLE* hPipe, Mensagem mensagem) {
