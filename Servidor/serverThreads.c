@@ -89,7 +89,7 @@ void WINAPI threadComandosAdminHandler(PVOID p) {
 				DWORD numeroSegundos = _tstoi(argumento1);
 				comandoPause(numeroSegundos);
 				// TODO: falta qq coisa mas não sei o que é para já
-				//	fazer SuspendThread e ResumeThread
+				//	fazer SuspendThread e ResumeThread?
 			}
 			break;
 		case 6: // comando load
@@ -216,6 +216,13 @@ void WINAPI threadBoardHandler(PVOID p) {
 
 void WINAPI threadAtualizarAcoesHandler(PVOID p) {
 	DataTransferObject* dto = (DataTransferObject*)p;
+
+	while (TRUE) {
+
+
+
+		WaitForSingleObject(evento_fechar_thread, 10000);
+	}
 	// TODO: fazer um ciclo infinito que só é quebrado quando for sinalizado
 	//		que o servidor vai fechar
 	//      correr todas as ações e verificar se o valor da ação mudou

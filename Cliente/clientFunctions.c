@@ -81,6 +81,7 @@ void comandoWallet(HANDLE* hPipe, TCHAR* username) {
 }
 
 void comandoExit() {
+	
 	// TODO: fazer a lógica
 	//	envia uma mensagem para o servidor a pedir o logout
 }
