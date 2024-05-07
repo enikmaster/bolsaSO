@@ -16,6 +16,7 @@
 #define TAM_PASSWORD 50 // tamanho máximo de uma password
 #define TAM_REGISTRY 100 // tamanho máximo de uma key do registo
 #define COMANDO _T("Comando:  ")
+#define WELCOME _T("Bem-vindo ao sistema de compra e venda de ações\n")
 
 // Nomes
 #define NOME_SHARED_MEMORY _T("Dados_Partilhados")
@@ -52,6 +53,7 @@
 #define ERRO_INVALID_MSG _T("[ERRO] Mensagem inválida\n")
 #define ERRO_MEMORIA _T("[ERRO] Erro ao alocar memória\n")
 #define ERRO_REGISTRY _T("[ERRO] Erro ao ler o registo\n")
+#define ERRO_GET_STDIN _T("[ERRO] Erro ao obter handle do stdin\n")
 
 // Mensages de erro do administrador
 #define ERRO_ADDC _T("[ERRO] Erro ao adicionar a empresa\n")
