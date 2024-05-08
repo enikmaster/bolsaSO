@@ -185,7 +185,7 @@ void WINAPI threadClientHandler(PVOID p) {
 			mensagemWallet(td, mensagemRead);
 			break;
 		case TMensagem_EXIT:
-			mensagemExit();
+			mensagemExit(td, mensagemRead);
 			break;
 		default:
 			_tprintf_s(ERRO_INVALID_MSG);
