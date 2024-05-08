@@ -31,7 +31,7 @@ DWORD WINAPI DisplayDados(LPVOID param) {
     //DadosPartilhados* pDados = (DadosPartilhados*)(estado->hMap);
 
     while (estado->running) {
-        WaitForSingleObject(estado->eventoEscrita, 5000); //espera por um evento
+        WaitForSingleObject(estado->eventoEscrita, 3000); //espera por um evento
        
         OrganizarEExibirEmpresas(estado->pDados, estado->N);
 

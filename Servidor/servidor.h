@@ -56,7 +56,7 @@ void mensagemResume();
 
 void mensagemLoad();
 
-void mensagemClose();
+void mensagemClose(ThreadData*);
 
 BOOL enviarMensagem(HANDLE, Mensagem, CRITICAL_SECTION);
 
@@ -66,6 +66,8 @@ void WINAPI threadComandosAdminHandler(PVOID);
 void WINAPI threadClientHandler(PVOID);
 
 void WINAPI threadBoardHandler(PVOID);
+
+void WINAPI threadVariacaoPrecoHandler(PVOID);
 
 void PrintLastError(TCHAR*, DWORD);
 

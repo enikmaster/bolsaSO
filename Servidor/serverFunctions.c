@@ -311,11 +311,14 @@ int comandoLoad(DataTransferObject* dto, TCHAR* nomeFicheiro) {
 	return FALSE;
 }
 
-BOOL comandoClose(DataTransferObject* dto) {
+BOOL comandoClose(ThreadData* td) {
 	system("cls");
 
 	// TODO: avisar todos os clientes que o servidor vai fechar
 	// TODO: mais qq coisa que seja necessária
+
+	SetEvent(td->hExitEvent);
+
 
 	return FALSE;
 }
