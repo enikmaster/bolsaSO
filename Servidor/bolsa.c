@@ -14,7 +14,21 @@ int _tmain(int argc, TCHAR** argv) {
 		_tprintf_s(ERRO_INVALID_N_ARGS);
 		ExitProcess(-1);
 	}
-	
+
+	// Verificar se o bolsa já foi iniciado
+	HANDLE hSemaphore = OpenSemaphore(SEMAPHORE_ALL_ACCESS, FALSE, NOME_SEMAFORO);
+	if (hSemaphore == NULL) {
+		hSemaphore = CreateSemaphore(NULL, 1, 1, NOME_SEMAFORO);
+		if(hSemaphore == NULL) {
+			_tprintf_s(ERRO_CREATE_SEM);
+			ExitProcess(-1);
+		}
+	}
+	else {
+		_tprintf_s(ERRO_SEM_JA_INICIADO);
+		ExitProcess(-1);
+	}
+
 	// Inicializar os dados do sistema
 	DataTransferObject dto;
 	if(!inicializarDTO(&dto)) {
@@ -119,6 +133,7 @@ int _tmain(int argc, TCHAR** argv) {
 		CloseHandle(hThreads[t]);
 	//CloseHandle(hThread);
 	terminarDTO(&dto);
+	CloseHandle(hSemaphore); //eventualmente para o dto
 
 	ExitProcess(0);
 }
