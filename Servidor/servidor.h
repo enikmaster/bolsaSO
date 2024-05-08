@@ -54,9 +54,9 @@ void mensagemPause();
 
 void mensagemResume();
 
-void mensagemLoad();
+void mensagemLoad(ThreadData*, int);
 
-void mensagemClose();
+void mensagemClose(ThreadData*);
 
 BOOL enviarMensagem(HANDLE, Mensagem, CRITICAL_SECTION);
 

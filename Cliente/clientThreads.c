@@ -12,7 +12,21 @@ void WINAPI threadComandosClienteHandler(PVOID p) {
 	BOOL repetir = TRUE;
 	TCHAR username[TAM_NOME];
 	int numArgumentos;
-	HANDLE hStdin;
+	HANDLE hStdin = {0};
+	hStdin = GetStdHandle(STD_INPUT_HANDLE);
+	if (hStdin == INVALID_HANDLE_VALUE) {
+		_tprintf_s(ERRO_GET_STDIN);
+		return;
+	}
+	/*OVERLAPPED ol = { 0 };
+	ol.hEvent = CreateEvent(NULL, TRUE, FALSE, NULL);
+	if(ol.hEvent == NULL) {
+		_tprintf_s(ERRO_CREATE_EVENT);
+		CloseHandle(hStdin);
+		return;
+	}
+	DWORD bytesLidos;*/
+	HANDLE hEvents[2] = { hStdin, cd->hExitEvent };
 	DWORD stdinResult;
 	_tprintf_s(WELCOME);
 	while (repetir) {
@@ -20,14 +34,37 @@ void WINAPI threadComandosClienteHandler(PVOID p) {
 		memset(argumento1, 0, sizeof(argumento1));
 		memset(argumento2, 0, sizeof(argumento2));
 		memset(failSafe, 0, sizeof(failSafe));
+		fflush(stdin);
 		if(!cd->logado) 
 			_tprintf_s(_T("Efetue login primeiro\nComando:  "));
-		hStdin = GetStdHandle(STD_INPUT_HANDLE);
+
+		// Tentativa #1
+		/*hStdin = GetStdHandle(STD_INPUT_HANDLE);
 		if (hStdin == INVALID_HANDLE_VALUE) {
 			_tprintf_s(ERRO_GET_STDIN);
 			return;
-		}
-		stdinResult = WaitForSingleObject(hStdin, INFINITE);
+		}*/
+
+		// Tentativa que resulta +/-
+		//stdinResult = WaitForSingleObject(hStdin, INFINITE);
+		/*stdinResult = WaitForMultipleObjects(2, hEvents, FALSE, INFINITE);
+		if (stdinResult == WAIT_OBJECT_0 + 1) {
+			repetir = FALSE;
+			break;
+		}*/
+		
+		// Tentativa #2
+		/*ResetEvent(ol.hEvent);
+		BOOL resultResult = ReadFile(hStdin, comando, TAM_COMANDO * sizeof(TCHAR), &bytesLidos, &ol);
+		if (!resultResult);
+		WaitForSingleObject(ol.hEvent, INFINITE);
+		BOOL result = GetOverlappedResult(hStdin, &ol, &bytesLidos, FALSE);
+		if (!result || bytesLidos == 0) {
+			PrintLastError(_T("GetOverlappedResult"), GetLastError());
+			break;
+		}*/
+
+
 		_fgetts(comando, sizeof(comando) / sizeof(comando[0]), stdin);
 		comando[_tcslen(comando) - 1] = _T('\0');
 		controlo = verificaComando(comando);
@@ -106,11 +143,21 @@ void WINAPI threadComandosClienteHandler(PVOID p) {
 			break;
 		case 7: // comando exit
 			repetir = comandoExit(hPipe, username);
-			SetEvent(cd->hExitEvent);
+			if (repetir == FALSE) {
+				// usar mutex para garantir que o exit é feito antes de fechar o pipe
+				WaitForSingleObject(cd->hMutex, INFINITE);
+				SetEvent(cd->hExitEvent);
+				ReleaseMutex(cd->hMutex);
+			}
 			break;
 		case 0: // comando inválido
 		default:
 			_tprintf_s(ERRO_INVALID_CMD);
+			break;
+		}
+		stdinResult = WaitForMultipleObjects(2, hEvents, FALSE, INFINITE);
+		if (stdinResult == WAIT_OBJECT_0 + 1) {
+			repetir = FALSE;
 			break;
 		}
 	};

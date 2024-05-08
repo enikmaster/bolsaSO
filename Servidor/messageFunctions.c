@@ -404,7 +404,7 @@ void mensagemLoad(ThreadData* td, int numEmpresas) {
 	EnterCriticalSection(&td->dto->pSync->csLimClientes);
 	limiteClientes = td->dto->limiteClientes;
 	LeaveCriticalSection(&td->dto->pSync->csLimClientes);
-	mensagem.quantidade = numEmpresas;
+	mensagem.quantidade = (DWORD)numEmpresas;
 	for (DWORD i = 0; i < limiteClientes; ++i) {
 		if (!td[i].livre) {
 			enviarMensagem(td[i].hPipeInst, mensagem, td->dto->pSync->csWrite);

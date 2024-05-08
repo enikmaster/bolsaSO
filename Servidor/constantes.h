@@ -213,7 +213,8 @@ struct ThreadData {
 // Estrutura para lidar com threads no cliente
 typedef struct ClienteData ClienteData;
 struct ClienteData {
-	HANDLE hPipe;
     BOOL logado;
+    HANDLE hPipe;
     HANDLE hExitEvent;
+    HANDLE hMutex;
 };

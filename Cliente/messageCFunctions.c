@@ -72,7 +72,7 @@ void mensagemLoad(Mensagem mensagem){
 
 BOOL mensagemCloseC(Mensagem mensagem) {
 	_tprintf_s(INFO_CLOSEC);
-	// TODO: sinalizar o a thread do input que está parada no fgets
+	//sleep(5000);
 	return FALSE;
 }
 
