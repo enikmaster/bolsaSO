@@ -18,6 +18,27 @@ int _tmain(int argc, TCHAR** argv)
 
 	ClienteData cd = { 0 };
 
+	// criar um timer
+	HANDLE hTimer = CreateWaitableTimer(NULL, TRUE, NULL);
+	if(hTimer==NULL) {
+		_tprintf_s(ERRO_CREATE_TIMER);
+		ExitProcess(-1);
+	}
+
+	LARGE_INTEGER liDueTime;
+	liDueTime.QuadPart = -100000000LL;
+
+	int contadorTentativas = 0;
+	BOOL isConnected = FALSE;
+	while(contadorTentativas < MAX_TENTATIVAS_LIGACAO && !isConnected){
+
+		if (!SetWaitableTimer(hTimer, &liDueTime, 0, NULL, NULL, FALSE)) {
+			_tprintf_s(ERRO_SET_TIMER);
+			ExitProcess(-1);
+		}
+
+		WaitForSingleObject(hTimer, INFINITE);
+
 	// criar named pipe
 	cd.hPipe = CreateFile(
 		NOME_NAMED_PIPE,
@@ -28,17 +49,37 @@ int _tmain(int argc, TCHAR** argv)
 		0 | FILE_FLAG_OVERLAPPED,
 		NULL
 	);
-	// verificar se a criação do named pipe foi bem sucedida
-	if (cd.hPipe == INVALID_HANDLE_VALUE) {
-		_tprintf_s(ERRO_CONNECT_NAMED_PIPE);
-		ExitProcess(-1);
+
+	if(cd.hPipe != INVALID_HANDLE_VALUE) {
+		system("cls");
+		isConnected = TRUE;
+		break;
 	}
+
 	// verificar se a conexão foi bem sucedida
 	if (GetLastError() == ERROR_PIPE_BUSY) {
 		_tprintf_s(ERRO_PIPE_BUSY);
+		contadorTentativas++;
+	}
+	else {
+		system("cls");
+		_tprintf_s(ERRO_LIGAR_BOLSA);
 		CloseHandle(cd.hPipe);
+		contadorTentativas++;
+		//ExitProcess(-1);
+		}	
+	}
+	if(contadorTentativas == MAX_TENTATIVAS_LIGACAO) {
+		_tprintf_s(ERRO_MAX_TENTATIVAS);
 		ExitProcess(-1);
 	}
+
+	if (!isConnected) {
+		_tprintf_s(ERRO_CONNECT_NAMED_PIPE);
+		ExitProcess(-1);
+	}
+
+
 
 	// definir o modo de leitura do named pipe
 	DWORD dwMode = PIPE_READMODE_MESSAGE;

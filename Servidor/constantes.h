@@ -15,6 +15,7 @@
 #define TAM_NOME 50 // tamanho máximo de um nome
 #define TAM_PASSWORD 50 // tamanho máximo de uma password
 #define TAM_REGISTRY 100 // tamanho máximo de uma key do registo
+#define MAX_TENTATIVAS_LIGACAO 20 // número máximo de tentativas de ligação ao named pipe
 #define COMANDO _T("Comando:  ")
 
 // Nomes
@@ -52,6 +53,11 @@
 #define ERRO_INVALID_MSG _T("[ERRO] Mensagem inválida\n")
 #define ERRO_MEMORIA _T("[ERRO] Erro ao alocar memória\n")
 #define ERRO_REGISTRY _T("[ERRO] Erro ao ler o registo\n")
+#define ERRO_CREATE_TIMER _T("[ERRO] Erro ao criar o timer\n")
+#define ERRO_SET_TIMER _T("[ERRO] Erro ao definir o timer\n")
+#define ERRO_MAX_TENTATIVAS _T("[ERRO] Número máximo de tentativas de ligação atingido\n")
+#define ERRO_LIGAR_BOLSA _T("Não existe nenhum servidor Bolsa para ligação\n")
+
 
 // Mensages de erro do administrador
 #define ERRO_ADDC _T("[ERRO] Erro ao adicionar a empresa\n")
