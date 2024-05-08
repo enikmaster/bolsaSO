@@ -57,7 +57,7 @@
 #define ERRO_SET_TIMER _T("[ERRO] Erro ao definir o timer\n")
 #define ERRO_MAX_TENTATIVAS _T("[ERRO] Número máximo de tentativas de ligação atingido\n")
 #define ERRO_LIGAR_BOLSA _T("Não existe nenhum servidor Bolsa para ligação\n")
-
+#define ERRO_MALLOC _T("[ERRO] Erro ao alocar memória\n")
 
 // Mensages de erro do administrador
 #define ERRO_ADDC _T("[ERRO] Erro ao adicionar a empresa\n")
@@ -211,6 +211,7 @@ struct ThreadData {
     DataTransferObject* dto;
     HANDLE hPipeInst;
     BOOL livre; // indica se a thread está livre para ser usada
+    HANDLE hExitEvent;//para sinalizar todas as threads que devem terminar
 };
 
 // Estrutura para lidar com threads no cliente

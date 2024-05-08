@@ -36,14 +36,24 @@ int _tmain(int argc, TCHAR** argv) {
 	// zerar a lista de estruturas
 	memset(listaTD, 0, sizeof(listaTD));
 	
+	HANDLE hExitEvent = CreateEvent(NULL, TRUE, FALSE, NULL);
+	if (hExitEvent == NULL) {
+		_tprintf_s(ERRO_CREATE_EVENT);
+		terminarDTO(&dto);
+		ExitProcess(-1);
+	}
+
 	// indica que todas as estruturas estão livres até ao limite de clientes possiveis
 	DWORD i;
 	for(i = 0; i < TAM_MAX_USERS; i++) {
 		listaTD[i].livre = i < dto.limiteClientes;
 		listaTD[i].dto = &dto;
+		listaTD[i].hExitEvent = hExitEvent;
 	}
 
-	HANDLE hThreads[2];
+	
+
+	HANDLE hThreads[3];
 	// lançar thread para lidar com os comandos de admin
 	hThreads[0] = CreateThread(NULL, 0, threadComandosAdminHandler, &listaTD, 0, NULL);
 	if (hThreads[0] == NULL) {
@@ -52,12 +62,21 @@ int _tmain(int argc, TCHAR** argv) {
 		ExitProcess(-1);
 	}
 	// lançar thread para lidar com o Board
-	hThreads[1] = CreateThread(NULL, 0, threadBoardHandler, &dto, 0, NULL);
+	hThreads[1] = CreateThread(NULL, 0, threadBoardHandler, &listaTD, 0, NULL);
 	if (hThreads[1] == NULL) {
 		_tprintf_s(ERRO_CREATE_THREAD);
 		terminarDTO(&dto);
 		ExitProcess(-1);
 	}
+
+	//lançar thread para lidar com a variação de preço
+	hThreads[2] = CreateThread(NULL, 0, threadVariacaoPrecoHandler, &listaTD, 0, NULL);
+	if (hThreads[2] == NULL) {
+		_tprintf_s(ERRO_CREATE_THREAD);
+		terminarDTO(&dto);
+		ExitProcess(-1);
+	}
+
 
 	// criar a thread para lidar com as conexões
 	BOOL continuar = TRUE;
@@ -113,9 +132,9 @@ int _tmain(int argc, TCHAR** argv) {
 	//		 WaitForSingleObject para cada cliente? não faz sentido...
 
 	// esperar que as threads terminem
-	if (WaitForMultipleObjects(2, hThreads, TRUE, INFINITE) != WAIT_OBJECT_0)
+	if (WaitForMultipleObjects(3, hThreads, TRUE, INFINITE) != WAIT_OBJECT_0)
 		_tprintf_s(ERRO_ESPERAR_THREADS);
-	for(DWORD t = 0; t < 2; t++)
+	for(DWORD t = 0; t < 3; t++)
 		CloseHandle(hThreads[t]);
 	//CloseHandle(hThread);
 	terminarDTO(&dto);
