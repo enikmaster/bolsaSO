@@ -34,11 +34,13 @@
 #define ERRO_CREATE_KEY_NCLIENTES _T("[ERRO] Erro ao criar a key NCLIENTES\n")
 #define ERRO_CREATE_FILE_MAPPING _T("[ERRO] Erro ao criar file mapping\n")
 #define ERRO_CREATE_MAP_VIEW _T("[ERRO] Erro ao criar file mapping view\n")
+#define ERRO_OPEN_FILE_MAPPING _T("[ERRO] Erro ao abrir file mapping\n")
 #define ERRO_CREATE_SEM _T("[ERRO] Erro ao criar semáforo\n")
 #define ERRO_CREATE_MUTEX _T("[ERRO] Erro ao criar mutex\n")
 #define ERRO_CREATE_NAMED_PIPE _T("[ERRO] Erro ao criar named pipe\n")
 #define ERRO_CREATE_THREAD _T("[ERRO] Erro ao criar thread\n")
 #define ERRO_CREATE_EVENT _T("[ERRO] Erro ao criar evento\n")
+#define ERRO_RESET_EVENT _T("[ERRO] Erro ao resetar evento\n")
 #define ERRO_ESPERAR_THREADS _T("[ERRO] Erro ao esperar que as threads terminem\n")
 #define ERRO_MAX_CLIENTES _T("[ERRO] Limite máximo de clientes ativos atingido\n")
 #define ERRO_INICIALIZAR_DTO _T("[ERRO] Erro a incializar o sistema\n")
@@ -80,6 +82,14 @@
 #define INFO_VENDA _T("[INFO] Venda de acões da empresa %s efetuada com sucesso\n")
 #define INFO_WALLET_VAZIA _T("[INFO] Carteira de ações vazia\n")
 #define INFO_WALLET _T("Empresa: %s \tQuantidade: %lu\n")
+#define INFO_ULTIMA_TRANSACAO _T("Ultima Transação: %s - %lu e %.2f\n")
+
+
+#define INFO_TOP_EMPRESAS _T("Top %d Empresas Mais Valiosas:\n")
+#define INFO_EMPRESA_ACOES _T("%d. %s - Ações: %lu, Valor por Ação: $%.2f, Valor de Mercado: $%.2f\n"
+#define INFO_EMPRESAS_VAZIA _T("[ERRO] Não existem empresas cotadas em bolsa\n")
+#define INFO_NUMERO_EMPRESAS _T("[ERRO] Número de empresas inválido (1 - 10)\n")
+#define INFO_ERRO_DPARTILHADOS _T("[ERRO]_ A estrutura DadosPartilhados está vazia\n")
 
 // Mensagens de debug
 #define DEBUGGER _T("\n[DEBUG] Estou aqui\n")
