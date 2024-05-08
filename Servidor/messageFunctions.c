@@ -375,6 +375,7 @@ void mensagemExit(ThreadData* td, Mensagem mensagem) {
 			break;
 		}
 	}
+	td->livre = TRUE;
 	LeaveCriticalSection(&td->dto->pSync->csUtilizadores);
 }
 
