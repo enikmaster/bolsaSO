@@ -1,19 +1,3 @@
-/*
-
-O Board vai apresentar:
-[ ] A  lista das N emrpesas mais valiosas apresentadas por ordem decrescente de valor.
-[ ] E apresenta a ultima transação realizada.
-
-[ ] O valor de N é dado através de um argumento na linha de comandos.
-
-[ ] BOARD comunica com a bolsa através de mem partilhada
-
-
-O BOARD vai ter de receber comando do utiliazdor para terminar a execução
-[ ]comando "close"
-
-*/
-
 #include "../Servidor/constantes.h"
 #include "board.h"
 
@@ -37,7 +21,6 @@ DWORD WINAPI WaitForCloseCommand(LPVOID param) {
             }
         }
     }
-
     return 0;
 }
 
@@ -60,9 +43,12 @@ DWORD WINAPI DisplayDados(LPVOID param) {
 
 int _tmain(int argc, TCHAR** argv) {
 #ifdef UNICODE
-    _setmode(_fileno(stdin), _O_WTEXT);
-    _setmode(_fileno(stdout), _O_WTEXT);
-    _setmode(_fileno(stderr), _O_WTEXT);
+    DWORD x1, x2, x3;
+    x1 = _setmode(_fileno(stdin), _O_WTEXT);
+    x2 = _setmode(_fileno(stdout), _O_WTEXT);
+    x3 = _setmode(_fileno(stderr), _O_WTEXT);
+    if (x1 == -1 || x2 == -1 || x3 == -1)
+        ExitProcess(-1);
 #endif
 
     if (argc != 2) {
@@ -72,7 +58,7 @@ int _tmain(int argc, TCHAR** argv) {
 
     DWORD N = _tstoi(argv[1]);
     if (N <= 0 || N > TAM_MAX_EMPRESAS) {
-        _tprintf_s(_T("[ERRO] Número de empresas inválido (1 - 10)\n"));
+        _tprintf_s(INFO_NUMERO_EMPRESAS);
         return -3;
     }
 
@@ -80,7 +66,7 @@ int _tmain(int argc, TCHAR** argv) {
 
     estado.hMap = OpenFileMapping(FILE_MAP_READ, FALSE, NOME_SHARED_MEMORY);
     if (estado.hMap == NULL) {
-        _tprintf(_T("Erro ao abrir o mapeamento do ficheiro: %d\n"), GetLastError());
+        _tprintf(ERRO_OPEN_FILE_MAPPING, GetLastError());
         return -1;
     }
 
@@ -92,7 +78,7 @@ int _tmain(int argc, TCHAR** argv) {
         sizeof(DadosPartilhados));
 
     if (estado.pDados == NULL) {
-        _tprintf(_T("Erro ao mapear a visualização do ficheiro: %d\n"), GetLastError());
+        _tprintf(ERRO_CREATE_FILE_MAPPING, GetLastError());
         CloseHandle(estado.hMap);
         return -1;
     }
@@ -100,7 +86,7 @@ int _tmain(int argc, TCHAR** argv) {
     //open do evento
     estado.eventoEscrita = OpenEventW(EVENT_MODIFY_STATE | SYNCHRONIZE, FALSE, NOME_EVENTO_BOARD);
     if (estado.eventoEscrita == NULL) {
-        _tprintf(_T("Erro ao abrir o evento: %d\n"), GetLastError());
+        _tprintf(ERRO_CREATE_EVENT), GetLastError();
         UnmapViewOfFile(estado.pDados);
         CloseHandle(estado.hMap);
         return -1;
@@ -108,7 +94,7 @@ int _tmain(int argc, TCHAR** argv) {
 
     // Reset the event
     if (!ResetEvent(estado.eventoEscrita)) {
-        _tprintf(_T("Erro ao redefinir o evento: %d\n"), GetLastError());
+        _tprintf(ERRO_RESET_EVENT), GetLastError();
         UnmapViewOfFile(estado.pDados);
         CloseHandle(estado.hMap);
         CloseHandle(estado.eventoEscrita);
@@ -118,10 +104,10 @@ int _tmain(int argc, TCHAR** argv) {
     HANDLE hThreadCommand = CreateThread(NULL, 0, WaitForCloseCommand, &estado, 0, NULL);
     HANDLE hThreadDisplay = CreateThread(NULL, 0, DisplayDados, &estado, 0, NULL);
     if(hThreadCommand == NULL || hThreadDisplay == NULL) {
-		_tprintf(_T("Erro ao criar a thread: %d\n"), GetLastError());
+		_tprintf(ERRO_CREATE_THREAD, GetLastError());
 		UnmapViewOfFile(estado.pDados);
 		CloseHandle(estado.hMap);
-        CloseHandle(hThreadCommand);
+        CloseHandle(hThreadCommand);    
         CloseHandle(hThreadDisplay);
 		return -1;
 	}
