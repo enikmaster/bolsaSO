@@ -69,6 +69,7 @@ int _tmain(int argc, TCHAR** argv) {
 		// TODO: alterar este bloco de código em baixo
 		if (i == dto.limiteClientes) {
 			_tprintf_s(ERRO_MAX_CLIENTES);
+			// meter aqui um WaitForSingleObject à espera de um evento que diga que já pode continuar
 			continue;
 		}
 		// criar uma instância do named pipe
