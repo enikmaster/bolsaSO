@@ -419,13 +419,11 @@ void mensagemClose(ThreadData* td) {
 	EnterCriticalSection(&td->dto->pSync->csLimClientes);
 	limiteClientes = td->dto->limiteClientes;
 	LeaveCriticalSection(&td->dto->pSync->csLimClientes);
-	for(DWORD i = 0; i < td->dto->limiteClientes; ++i) {
+	for(DWORD i = 0; i < limiteClientes; ++i) {
 		if (!td[i].livre) {
 			enviarMensagem(td[i].hPipeInst, mensagem, td->dto->pSync->csWrite);
 		}
 	}
-	// TODO: mensagemClose
-	//       sinalizar as threads
 }
 
 BOOL enviarMensagem(HANDLE hPipe, Mensagem mensagem, CRITICAL_SECTION csWrite) {

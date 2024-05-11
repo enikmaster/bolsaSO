@@ -35,15 +35,23 @@ int _tmain(int argc, TCHAR** argv) {
 	ThreadData listaTD[TAM_MAX_USERS];
 	// zerar a lista de estruturas
 	memset(listaTD, 0, sizeof(listaTD));
+
+	/*HANDLE hEvent = CreateEvent(NULL, TRUE, FALSE, NULL);
+	if (hEvent == NULL) {
+		_tprintf_s(ERRO_CREATE_EVENT);
+		terminarDTO(&dto);
+		ExitProcess(-1);
+	}*/
 	
 	// indica que todas as estruturas estão livres até ao limite de clientes possiveis
 	DWORD i;
 	for(i = 0; i < TAM_MAX_USERS; i++) {
 		listaTD[i].livre = i < dto.limiteClientes;
 		listaTD[i].dto = &dto;
+		//listaTD[i].hExitEvent = hEvent;
 	}
 
-	HANDLE hThreads[2];
+	HANDLE hThreads[NUM_THREADS_SERVER];
 	// lançar thread para lidar com os comandos de admin
 	hThreads[0] = CreateThread(NULL, 0, threadComandosAdminHandler, &listaTD, 0, NULL);
 	if (hThreads[0] == NULL) {
@@ -114,9 +122,9 @@ int _tmain(int argc, TCHAR** argv) {
 	//		 WaitForSingleObject para cada cliente? não faz sentido...
 
 	// esperar que as threads terminem
-	if (WaitForMultipleObjects(2, hThreads, TRUE, INFINITE) != WAIT_OBJECT_0)
+	if (WaitForMultipleObjects(NUM_THREADS_SERVER, hThreads, TRUE, INFINITE) != WAIT_OBJECT_0)
 		_tprintf_s(ERRO_ESPERAR_THREADS);
-	for(DWORD t = 0; t < 2; t++)
+	for(DWORD t = 0; t < NUM_THREADS_SERVER; t++)
 		CloseHandle(hThreads[t]);
 	//CloseHandle(hThread);
 	terminarDTO(&dto);

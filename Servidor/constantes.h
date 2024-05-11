@@ -15,6 +15,7 @@
 #define TAM_NOME 50 // tamanho máximo de um nome
 #define TAM_PASSWORD 50 // tamanho máximo de uma password
 #define TAM_REGISTRY 100 // tamanho máximo de uma key do registo
+#define NUM_THREADS_SERVER 2
 #define COMANDO _T("Comando:  ")
 #define WELCOME _T("Bem-vindo ao sistema de compra e venda de ações\n")
 
@@ -174,6 +175,7 @@ struct DadosPartilhados {
     Empresa empresas[TAM_MAX_EMPRESAS];
     DWORD numEmpresas;
     DetalhesTransacao ultimaTransacao;
+    HANDLE hExitEvent; // handle para evento de saída
     HANDLE hEvent; // handle p evento de alteração da board
 };
 
@@ -207,6 +209,7 @@ typedef struct ThreadData ThreadData;
 struct ThreadData {
     DataTransferObject* dto;
     HANDLE hPipeInst;
+    //HANDLE hExitEvent;
     BOOL livre; // indica se a thread está livre para ser usada
 };
 

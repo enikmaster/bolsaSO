@@ -29,7 +29,7 @@ void comandoPause(DWORD);
 
 int comandoLoad(DataTransferObject*, TCHAR*);
 
-BOOL comandoClose(DataTransferObject*);
+BOOL comandoClose(ThreadData*);
 
 // funções de tratamento de mensagens
 void mensagemLogin(ThreadData*, Mensagem);

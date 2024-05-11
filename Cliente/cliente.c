@@ -157,7 +157,9 @@ int _tmain(int argc, TCHAR** argv)
 			continuar = FALSE;
 			WaitForSingleObject(cd.hMutex, INFINITE);
 			SetEvent(cd.hExitEvent);
+			
 			ReleaseMutex(cd.hMutex);
+			CancelSynchronousIo(hThread);
 			break;
 		//case TMensagem_EXIT: // não é necessário
 		//	continuar = mensagemExit(mensagemRead);

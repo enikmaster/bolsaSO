@@ -113,7 +113,7 @@ void WINAPI threadComandosAdminHandler(PVOID p) {
 			}
 			break;
 		case 7: // comando close
-			repetir = comandoClose(td->dto);
+			repetir = comandoClose(td);
 			mensagemClose(td);
 			break;
 		case 0:
@@ -141,6 +141,9 @@ void WINAPI threadClientHandler(PVOID p) {
 	HANDLE hPipe = td->hPipeInst;
 	BOOL continuar = TRUE;
 
+	HANDLE hEvents[2] = { ov.hEvent, td->dto->dadosP->hExitEvent };
+	DWORD dwWaitResult;
+
 	while (continuar) {
 		// zerar a mensagem
 		ZeroMemory(&mensagemRead, sizeof(Mensagem));
@@ -157,7 +160,13 @@ void WINAPI threadClientHandler(PVOID p) {
 			&bytesLidos,	// número de bytes lidos
 			&ov);	// estrutura overlapped)
 		// leitura pendente
-		WaitForSingleObject(ov.hEvent, INFINITE);
+		//WaitForSingleObject(ov.hEvent, INFINITE);
+		dwWaitResult = WaitForMultipleObjects(2, hEvents, FALSE, INFINITE);
+		if (dwWaitResult == WAIT_OBJECT_0 + 1) {
+			// evento para sair do programa
+			continuar = FALSE;
+			break;
+		}
 		// verifica se a leitura foi bem sucedida
 		BOOL ovResult = GetOverlappedResult(hPipe, &ov, &bytesLidos, FALSE);
 		if (!ovResult || bytesLidos == 0) {
@@ -191,10 +200,6 @@ void WINAPI threadClientHandler(PVOID p) {
 			_tprintf_s(ERRO_INVALID_MSG);
 			break;
 		}
-
-		//EnterCriticalSection(&dto->pSync->csContinuar);
-		//continuar = mensagemRead.continuar;
-		//LeaveCriticalSection(&dto->pSync->csContinuar);
 	}
 	// limpar os dados do buffer
 	FlushFileBuffers(hPipe);

@@ -116,6 +116,17 @@ BOOL inicializarDTO(DataTransferObject* dto) {
 		CloseHandle(dto->hMap);
 		return FALSE;
 	}
+
+	// criar o evento de saída
+	dto->dadosP->hExitEvent = CreateEvent(NULL, TRUE, FALSE, NULL);
+	if(dto->dadosP->hExitEvent == NULL) {
+		_tprintf_s(ERRO_CREATE_EVENT);
+		UnmapViewOfFile(dto->pView);
+		CloseHandle(dto->hMap);
+		return FALSE;
+	}
+
+	// criar a estrutura de sincronização
 	dto->pSync = (pSync)malloc(sizeof(Sync));
 	if (dto->pSync == NULL) {
 		_tprintf_s(ERRO_MEMORIA);
@@ -183,6 +194,7 @@ void terminarDTO(DataTransferObject* dto) {
 	UnmapViewOfFile(dto->pView);
 	// fechar os handles por ordem inversa da sua criação
 	CloseHandle(dto->hMap);
+	CloseHandle(dto->dadosP->hExitEvent);
 	CloseHandle(dto->pSync->hSemBolsa);
 	CloseHandle(dto->pSync->hMtxBolsa);
 	free(dto->pSync);
@@ -311,11 +323,12 @@ int comandoLoad(DataTransferObject* dto, TCHAR* nomeFicheiro) {
 	return FALSE;
 }
 
-BOOL comandoClose(DataTransferObject* dto) {
+BOOL comandoClose(ThreadData* td) {
 	system("cls");
-	EnterCriticalSection(&dto->pSync->csContinuar);
-	dto->continuar = FALSE;
-	LeaveCriticalSection(&dto->pSync->csContinuar);
+	EnterCriticalSection(&td->dto->pSync->csContinuar);
+	td->dto->continuar = FALSE;
+	SetEvent(td->dto->dadosP->hExitEvent);
+	LeaveCriticalSection(&td->dto->pSync->csContinuar);
 	return FALSE;
 }
 
