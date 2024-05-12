@@ -15,20 +15,27 @@ int CompareEmpresa(const void* a, const void* b) {
 
 
 void ExibirUltimaTransacao(DadosPartilhados* pDados) {
-    _tprintf(_T("Ultima Transação: %s - %lu e %.2f\n"), pDados->ultimaTransacao.nomeEmpresa,
+    _tprintf(INFO_ULTIMA_TRANSACAO, pDados->ultimaTransacao.nomeEmpresa,
         pDados->ultimaTransacao.quantidadeAcoes, pDados->ultimaTransacao.precoPorAcao);
 }
 
 
 void OrganizarEExibirEmpresas(DadosPartilhados* pDados, DWORD N) {
     if (pDados == NULL) {
-        _tprintf(_T("Erro: A estrutura DadosPartilhados está vazia\n"));
+        _tprintf(INFO_ERRO_DPARTILHADOS);
         return;
     }
-
+    
+    if(pDados->numEmpresas == 0) {
+        system("cls");
+		_tprintf(INFO_EMPRESAS_VAZIA);
+		return;
+	}
     
     Empresa empresasOrganizadas[TAM_MAX_EMPRESAS];
 
+    //mutex - TODO
+    // 
     // Copiar os dados para o array local
     CopyMemory(empresasOrganizadas, pDados->empresas, pDados->numEmpresas * sizeof(Empresa));
 
@@ -37,9 +44,9 @@ void OrganizarEExibirEmpresas(DadosPartilhados* pDados, DWORD N) {
 
     // Exibir as N empresas mais valiosas
     system("cls");
-    _tprintf(_T("Top %d Empresas Mais Valiosas:\n"), N);
+    _tprintf(INFO_TOP_EMPRESAS, N);
     for (DWORD i = 0; i < N && i < pDados->numEmpresas; i++) {
-        _tprintf(_T("%d. %s - Ações: %lu, Valor por Ação: $%.2f, Valor de Mercado: $%.2f\n"),
+        _tprintf(INFO_EMPRESA_ACOES),
             i + 1, empresasOrganizadas[i].nome, empresasOrganizadas[i].quantidadeAcoes,
             empresasOrganizadas[i].valorAcao, empresasOrganizadas[i].quantidadeAcoes * empresasOrganizadas[i].valorAcao);
     }

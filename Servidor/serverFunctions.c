@@ -187,8 +187,6 @@ void terminarDTO(DataTransferObject* dto) {
 	UnmapViewOfFile(dto->pView);
 	// fechar os handles por ordem inversa da sua criação
 	CloseHandle(dto->hMap);
-	//CloseHandle(dto->dadosP->hExitEvent);
-	//CloseHandle(dto->dadosP->hUpdateEvent);
 	CloseHandle(dto->pSync->hSemBolsa);
 	CloseHandle(dto->pSync->hMtxBolsa);
 	free(dto->pSync);

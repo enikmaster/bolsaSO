@@ -194,7 +194,7 @@ void WINAPI threadClientHandler(PVOID p) {
 			mensagemWallet(td, mensagemRead);
 			break;
 		case TMensagem_EXIT:
-			mensagemExit();
+			mensagemExit(td, mensagemRead);
 			break;
 		default:
 			_tprintf_s(ERRO_INVALID_MSG);
@@ -215,8 +215,8 @@ void WINAPI threadClientHandler(PVOID p) {
 }
 
 //void WINAPI threadBoardHandler(PVOID p) {
-//	DataTransferObject* dto = (DataTransferObject*)p;
-//	DadosPartilhados* pData = dto->dadosP;
+//	ThreadData* td = (ThreadData*)p;
+//	
 //
 //	//criar o evento de reset manual para o board
 //	HANDLE hEvent = CreateEvent(NULL, TRUE, FALSE, NOME_EVENTO_BOARD);
@@ -225,8 +225,91 @@ void WINAPI threadClientHandler(PVOID p) {
 //		return;
 //	}
 //	
-//	//pData->hEvent = hEvent;
+//	td->dto->dadosP->hEvent = hEvent; //
+//
+//	WaitForSingleObject(td->hExitEvent, INFINITE);
 //}
+
+
+//thread para alterar o preço das ações
+//vai aceder ás empresas, e guardar num array local
+	//passado 10segundos, vai verificar se houve alterações no array das empresas
+
+
+	//se a quantidade de açoes disponiveis for maior que a anterior, quer dizer que clientes venderam á bolsa ( preço das ações desce)
+	//se a quantidade de açoes disponiveis for menor que a anterior, quer dizer que clientes compraram á bolsa ( preço das ações sobe)
+void WINAPI threadVariacaoPrecoHandler (PVOID p) {
+	ThreadData* td = (ThreadData*)p;
+	if(td == NULL) {
+		_tprintf_s(_T("DADOS THREAD ERRADOS"));
+		return;
+	}
+
+
+	Empresa* empresasAntigas = NULL;
+	int numEmpresas = 0;
+	//fazer copida dos dados das empresas
+	/*
+	empresasAntigas = (Empresa*)malloc(numEmpresas * sizeof(Empresa));
+	if (empresasAntigas == NULL) {
+		_tprintf_s(ERRO_MEMORIA);
+		return;
+	}
+	memcpy(empresasAntigas, td->dto->dadosP->empresas, numEmpresas * sizeof(Empresa));
+	*/
+	
+	//criar o timer
+	HANDLE hTimerV = CreateWaitableTimer(NULL, TRUE, NULL);
+	if (hTimerV == NULL) {
+		_tprintf_s(ERRO_CREATE_TIMER);
+		return;
+	}
+
+	LARGE_INTEGER liDueTime;
+	liDueTime.QuadPart = -100000000; // 10 segundos
+
+	HANDLE hThreads[2] = {hTimerV, td->dto->dadosP->hExitEvent };
+
+	while (1) {
+
+	if(!SetWaitableTimer(hTimerV, &liDueTime, 0, NULL, NULL, FALSE)) {
+			_tprintf_s(ERRO_SET_TIMER);
+			break;
+		}
+
+		WaitForMultipleObjects(2,hThreads,FALSE, INFINITE);
+		if(WaitForSingleObject(td->dto->dadosP->hExitEvent, 0) == WAIT_OBJECT_0)
+			break;
+
+		//verificar variação do preço das ações
+		EnterCriticalSection(&td->dto->pSync->csEmpresas);
+
+		numEmpresas = td->dto->dadosP->numEmpresas;
+		empresasAntigas = (Empresa*)malloc(numEmpresas * sizeof(Empresa));
+		if(empresasAntigas == NULL) {
+			_tprintf_s(ERRO_MEMORIA);
+			//LeaveCriticalSection(&dto->pSync->csEmpresas);
+			break;
+		}
+		memcpy(empresasAntigas, td->dto->dadosP->empresas, numEmpresas * sizeof(Empresa));
+		for (int i = 0; i < numEmpresas; i++) {
+			if(td->dto->dadosP->empresas[i].quantidadeAcoes >= empresasAntigas[i].quantidadeAcoes) {
+				double percentagem = 5.0 / 100.0; // 2%
+				td->dto->dadosP->empresas[i].valorAcao -= td->dto->dadosP->empresas[i].valorAcao * percentagem;
+			}
+			else{
+				// Houve compras, então o preço das ações deve subir
+				double percentagem = 5.0 / 100.0; // 2%
+				td->dto->dadosP->empresas[i].valorAcao += (td->dto->dadosP->empresas[i].valorAcao * percentagem);
+			}
+
+		}
+		LeaveCriticalSection(&td->dto->pSync->csEmpresas);
+
+		free(empresasAntigas);
+	}
+	CloseHandle(hTimerV);
+}
 
 void PrintLastError(TCHAR* part, DWORD id) {
 	PTSTR buffer;

@@ -14,7 +14,21 @@ int _tmain(int argc, TCHAR** argv) {
 		_tprintf_s(ERRO_INVALID_N_ARGS);
 		ExitProcess(-1);
 	}
-	
+
+	// Verificar se o bolsa já foi iniciado
+	HANDLE hSemaphore = OpenSemaphore(SEMAPHORE_ALL_ACCESS, FALSE, NOME_SEMAFORO);
+	if (hSemaphore == NULL) {
+		hSemaphore = CreateSemaphore(NULL, 1, 1, NOME_SEMAFORO);
+		if(hSemaphore == NULL) {
+			_tprintf_s(ERRO_CREATE_SEM);
+			ExitProcess(-1);
+		}
+	}
+	else {
+		_tprintf_s(ERRO_SEM_JA_INICIADO);
+		ExitProcess(-1);
+	}
+
 	// Inicializar os dados do sistema
 	DataTransferObject dto;
 	if(!inicializarDTO(&dto)) {
@@ -66,15 +80,16 @@ int _tmain(int argc, TCHAR** argv) {
 		terminarDTO(&dto);
 		ExitProcess(-1);
 	}
-	// lançar thread para lidar com o Board
-	//hThreads[1] = CreateThread(NULL, 0, threadBoardHandler, &dto, 0, NULL);
-	//if (hThreads[1] == NULL) {
-	//	_tprintf_s(ERRO_CREATE_THREAD);
-	//	terminarDTO(&dto);
-	//	ExitProcess(-1);
-	//}
 
-	// criar a thread para lidar com as conexões
+	//lançar thread para lidar com a variação de preço
+	hThreads[1] = CreateThread(NULL, 0, threadVariacaoPrecoHandler, &listaTD, 0, NULL);
+	if (hThreads[1] == NULL) {
+		_tprintf_s(ERRO_CREATE_THREAD);
+		terminarDTO(&dto);
+		ExitProcess(-1);
+	}
+
+	// lançar a thread para lidar com as conexões
 	BOOL continuar = TRUE;
 	while (continuar) {
 		// encontrar a primeira posição livre da lista
@@ -153,6 +168,7 @@ int _tmain(int argc, TCHAR** argv) {
 	CloseHandle(hExitEvent);
 	CloseHandle(hUpdateEvent);
 	terminarDTO(&dto);
+	CloseHandle(hSemaphore); //eventualmente para o dto
 
 	ExitProcess(0);
 }
