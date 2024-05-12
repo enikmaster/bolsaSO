@@ -61,9 +61,15 @@ void mensagemStock(Mensagem mensagem){
 	_tprintf_s(COMANDO);
 }
 
-void mensagemPause(Mensagem mensagem){}
+void mensagemPause(Mensagem mensagem){
+	_tprintf_s(INFO_PAUSE, mensagem.quantidade);
+	_tprintf_s(COMANDO);
+}
 
-void mensagemResume(Mensagem mensagem){}
+void mensagemResume(Mensagem mensagem){
+	_tprintf_s(INFO_RESUME);
+	_tprintf_s(COMANDO);
+}
 
 void mensagemLoad(Mensagem mensagem){
 	_tprintf_s(INFO_LOAD, mensagem.quantidade);
@@ -72,7 +78,6 @@ void mensagemLoad(Mensagem mensagem){
 
 BOOL mensagemCloseC(Mensagem mensagem) {
 	_tprintf_s(INFO_CLOSEC);
-	//sleep(5000);
 	return FALSE;
 }
 

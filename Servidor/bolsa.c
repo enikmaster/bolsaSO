@@ -64,6 +64,13 @@ int _tmain(int argc, TCHAR** argv) {
 		ExitProcess(-1);
 	}
 	dto.dadosP->hUpdateEvent = hUpdateEvent;
+	HANDLE hLimiteClientes = CreateEvent(NULL, TRUE, FALSE, NULL);
+	if (hLimiteClientes == NULL) {
+		_tprintf_s(ERRO_CREATE_EVENT);
+		terminarDTO(&dto);
+		ExitProcess(-1);
+	}
+	dto.hLimiteClientes = hLimiteClientes;
 	
 	// indica que todas as estruturas estão livres até ao limite de clientes possiveis
 	DWORD i;
@@ -89,6 +96,8 @@ int _tmain(int argc, TCHAR** argv) {
 		ExitProcess(-1);
 	}
 
+	HANDLE hEvents[2] = { hLimiteClientes, hExitEvent};
+
 	// lançar a thread para lidar com as conexões
 	BOOL continuar = TRUE;
 	while (continuar) {
@@ -96,11 +105,19 @@ int _tmain(int argc, TCHAR** argv) {
 		for (i = 0; i < dto.limiteClientes; ++i)
 			if (listaTD[i].livre)
 				break;
-		// TODO: alterar este bloco de código em baixo
 		if (i == dto.limiteClientes) {
 			_tprintf_s(ERRO_MAX_CLIENTES);
 			// meter aqui um WaitForSingleObject à espera de um evento que diga que já pode continuar
-			continue;
+			DWORD dwWaitResulLimiteClientes =  WaitForMultipleObjects(2, hEvents, FALSE, INFINITE);
+			if (dwWaitResulLimiteClientes == WAIT_OBJECT_0) {
+				// evento que indica que já há posições livres
+				continue;
+			}
+			if (dwWaitResulLimiteClientes == WAIT_OBJECT_0 + 1) {
+				// evento para sair do programa
+				continuar = FALSE;
+				break;
+			}
 		}
 		// criar uma instância do named pipe
 		listaTD[i].hPipeInst = CreateNamedPipe(
@@ -167,6 +184,7 @@ int _tmain(int argc, TCHAR** argv) {
 		CloseHandle(hThreads[t]);
 	CloseHandle(hExitEvent);
 	CloseHandle(hUpdateEvent);
+	CloseHandle(hLimiteClientes);
 	terminarDTO(&dto);
 	CloseHandle(hSemaphore); //eventualmente para o dto
 
