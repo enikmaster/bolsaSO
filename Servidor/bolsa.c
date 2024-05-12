@@ -32,7 +32,7 @@ int _tmain(int argc, TCHAR** argv) {
 	dto.numUtilizadores = lerUtilizadores(&dto, argv[1]);
 
 	// inicializar a lista de estruturas com o limite máximo de utilizadores
-	ThreadData listaTD[TAM_MAX_USERS] = { 0 };
+	ThreadData listaTD[TAM_MAX_USERS];
 	// zerar a lista de estruturas
 	memset(listaTD, 0, sizeof(listaTD));
 
