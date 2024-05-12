@@ -15,8 +15,10 @@
 #define TAM_NOME 50 // tamanho máximo de um nome
 #define TAM_PASSWORD 50 // tamanho máximo de uma password
 #define TAM_REGISTRY 100 // tamanho máximo de uma key do registo
+#define NUM_THREADS_SERVER 1
 #define MAX_TENTATIVAS_LIGACAO 20 // número máximo de tentativas de ligação ao named pipe
 #define COMANDO _T("Comando:  ")
+#define WELCOME _T("Bem-vindo ao sistema de compra e venda de ações\n")
 
 // Nomes
 #define NOME_SHARED_MEMORY _T("Dados_Partilhados")
@@ -91,6 +93,7 @@
 #define INFO_WALLET_VAZIA _T("[INFO] Carteira de ações vazia\n")
 #define INFO_WALLET _T("Empresa: %s \tQuantidade: %lu\n")
 #define INFO_ULTIMA_TRANSACAO _T("Ultima Transação: %s - %lu e %.2f\n")
+#define INFO_CLOSEC _T("[INFO] O programa bolsa está a terminar e este também\n")
 
 
 #define INFO_TOP_EMPRESAS _T("Top %d Empresas Mais Valiosas:\n")
@@ -189,7 +192,8 @@ struct DadosPartilhados {
     Empresa empresas[TAM_MAX_EMPRESAS];
     DWORD numEmpresas;
     DetalhesTransacao ultimaTransacao;
-    HANDLE hEvent; // handle p evento de alteração da board
+    HANDLE hExitEvent; // handle para evento de saída
+    HANDLE hUpdateEvent; // handle p evento de alteração da board
 };
 
 // Estrutura de mecanismos de sincorização
@@ -223,13 +227,13 @@ struct ThreadData {
     DataTransferObject* dto;
     HANDLE hPipeInst;
     BOOL livre; // indica se a thread está livre para ser usada
-    HANDLE hExitEvent;//para sinalizar todas as threads que devem terminar
 };
 
 // Estrutura para lidar com threads no cliente
 typedef struct ClienteData ClienteData;
 struct ClienteData {
-	HANDLE hPipe;
     BOOL logado;
+    HANDLE hPipe;
     HANDLE hExitEvent;
+    HANDLE hMutex;
 };

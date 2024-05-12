@@ -113,8 +113,8 @@ void WINAPI threadComandosAdminHandler(PVOID p) {
 			}
 			break;
 		case 7: // comando close
-			_tprintf_s(_T("[INFO] Comando close\n")); // para apagar
-			repetir = comandoClose(&td);
+			mensagemClose(td);
+			repetir = comandoClose(td);
 			break;
 		case 0:
 		default: // comando inválido
@@ -141,6 +141,9 @@ void WINAPI threadClientHandler(PVOID p) {
 	HANDLE hPipe = td->hPipeInst;
 	BOOL continuar = TRUE;
 
+	HANDLE hEvents[2] = { ov.hEvent, td->dto->dadosP->hExitEvent };
+	DWORD dwWaitResult;
+
 	while (continuar) {
 		// zerar a mensagem
 		ZeroMemory(&mensagemRead, sizeof(Mensagem));
@@ -157,7 +160,13 @@ void WINAPI threadClientHandler(PVOID p) {
 			&bytesLidos,	// número de bytes lidos
 			&ov);	// estrutura overlapped)
 		// leitura pendente
-		WaitForSingleObject(ov.hEvent, INFINITE);
+		//WaitForSingleObject(ov.hEvent, INFINITE);
+		dwWaitResult = WaitForMultipleObjects(2, hEvents, FALSE, INFINITE);
+		if (dwWaitResult == WAIT_OBJECT_0 + 1) {
+			// evento para sair do programa
+			continuar = FALSE;
+			break;
+		}
 		// verifica se a leitura foi bem sucedida
 		BOOL ovResult = GetOverlappedResult(hPipe, &ov, &bytesLidos, FALSE);
 		if (!ovResult || bytesLidos == 0) {
@@ -191,10 +200,6 @@ void WINAPI threadClientHandler(PVOID p) {
 			_tprintf_s(ERRO_INVALID_MSG);
 			break;
 		}
-
-		//EnterCriticalSection(&dto->pSync->csContinuar);
-		//continuar = mensagemRead.continuar;
-		//LeaveCriticalSection(&dto->pSync->csContinuar);
 	}
 	// limpar os dados do buffer
 	FlushFileBuffers(hPipe);
@@ -209,21 +214,21 @@ void WINAPI threadClientHandler(PVOID p) {
 	ExitThread(0);
 }
 
-void WINAPI threadBoardHandler(PVOID p) {
-	ThreadData* td = (ThreadData*)p;
-	
-
-	//criar o evento de reset manual para o board
-	HANDLE hEvent = CreateEvent(NULL, TRUE, FALSE, NOME_EVENTO_BOARD);
-	if (hEvent == NULL) {
-		_tprintf_s(ERRO_CREATE_EVENT);
-		return;
-	}
-	
-	td->dto->dadosP->hEvent = hEvent; //
-
-	WaitForSingleObject(td->hExitEvent, INFINITE);
-}
+//void WINAPI threadBoardHandler(PVOID p) {
+//	ThreadData* td = (ThreadData*)p;
+//	
+//
+//	//criar o evento de reset manual para o board
+//	HANDLE hEvent = CreateEvent(NULL, TRUE, FALSE, NOME_EVENTO_BOARD);
+//	if (hEvent == NULL) {
+//		_tprintf_s(ERRO_CREATE_EVENT);
+//		return;
+//	}
+//	
+//	td->dto->dadosP->hEvent = hEvent; //
+//
+//	WaitForSingleObject(td->hExitEvent, INFINITE);
+//}
 
 
 //thread para alterar o preço das ações
@@ -263,7 +268,7 @@ void WINAPI threadVariacaoPrecoHandler (PVOID p) {
 	LARGE_INTEGER liDueTime;
 	liDueTime.QuadPart = -100000000; // 10 segundos
 
-	HANDLE hThreads[2] = {hTimerV, td->hExitEvent };
+	HANDLE hThreads[2] = {hTimerV, td->dto->dadosP->hExitEvent };
 
 	while (1) {
 
@@ -273,7 +278,7 @@ void WINAPI threadVariacaoPrecoHandler (PVOID p) {
 		}
 
 		WaitForMultipleObjects(2,hThreads,FALSE, INFINITE);
-		if(WaitForSingleObject(td->hExitEvent, 0) == WAIT_OBJECT_0)
+		if(WaitForSingleObject(td->dto->dadosP->hExitEvent, 0) == WAIT_OBJECT_0)
 			break;
 
 		//verificar variação do preço das ações

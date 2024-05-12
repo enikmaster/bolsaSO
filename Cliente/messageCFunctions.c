@@ -71,6 +71,8 @@ void mensagemLoad(Mensagem mensagem){
 }
 
 BOOL mensagemCloseC(Mensagem mensagem) {
+	_tprintf_s(INFO_CLOSEC);
+	//sleep(5000);
 	return FALSE;
 }
 

@@ -116,6 +116,8 @@ BOOL inicializarDTO(DataTransferObject* dto) {
 		CloseHandle(dto->hMap);
 		return FALSE;
 	}
+
+	// criar a estrutura de sincronização
 	dto->pSync = (pSync)malloc(sizeof(Sync));
 	if (dto->pSync == NULL) {
 		_tprintf_s(ERRO_MEMORIA);
@@ -134,6 +136,7 @@ BOOL inicializarDTO(DataTransferObject* dto) {
 		_tprintf_s(ERRO_CREATE_SEM);
 		UnmapViewOfFile(dto->pView);
 		CloseHandle(dto->hMap);
+		free(dto->pSync);
 		return FALSE;
 	}
 
@@ -147,6 +150,7 @@ BOOL inicializarDTO(DataTransferObject* dto) {
 		UnmapViewOfFile(dto->pView);
 		CloseHandle(dto->hMap);
 		CloseHandle(dto->pSync->hSemBolsa);
+		free(dto->pSync);
 		return FALSE;
 	}
 
@@ -219,13 +223,10 @@ void comandoListc(DataTransferObject* dto) {
 	LeaveCriticalSection(&dto->pSync->csEmpresas);
 
 	_tprintf_s(_T(" -- Lista de empresas --\n"));
+	if (numEmpresasLocal == 0)
+		_tprintf_s(INFO_LISTC_VAZIA);
 	for (DWORD i = 0; i < numEmpresasLocal; ++i) {
 		_tprintf_s(INFO_LISTC, eLocal[i].nome, eLocal[i].quantidadeAcoes, eLocal[i].valorAcao);
-	}
-
-	// Verificação de erro ao assinalar o evento
-	if (!SetEvent(dto->dadosP->hEvent)) {
-		_tprintf_s(_T("Erro ao assinalar o evento: %lu\n"), GetLastError());
 	}
 }
 
@@ -250,7 +251,7 @@ void comandoUsers(DataTransferObject* dto) {
 
 	EnterCriticalSection(&dto->pSync->csUtilizadores);
 	numUtilizadoresLocal = dto->numUtilizadores;
-	CopyMemory(uLocal, dto->utilizadores, numUtilizadoresLocal * sizeof(Utilizador));
+	memcpy(uLocal, dto->utilizadores, numUtilizadoresLocal * sizeof(Utilizador));
 	LeaveCriticalSection(&dto->pSync->csUtilizadores);
 
 	_tprintf_s(_T("-- Lista de utilizadores registados --\n"));
@@ -313,13 +314,10 @@ int comandoLoad(DataTransferObject* dto, TCHAR* nomeFicheiro) {
 
 BOOL comandoClose(ThreadData* td) {
 	system("cls");
-
-	// TODO: avisar todos os clientes que o servidor vai fechar
-	// TODO: mais qq coisa que seja necessária
-
-	SetEvent(td->hExitEvent);
-
-
+	EnterCriticalSection(&td->dto->pSync->csContinuar);
+	td->dto->continuar = FALSE;
+	SetEvent(td->dto->dadosP->hExitEvent);
+	LeaveCriticalSection(&td->dto->pSync->csContinuar);
 	return FALSE;
 }
 

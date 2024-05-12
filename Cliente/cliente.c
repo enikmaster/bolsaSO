@@ -112,6 +112,15 @@ int _tmain(int argc, TCHAR** argv)
 
 	HANDLE hEvents[2] = { ov.hEvent, cd.hExitEvent };
 
+	cd.hMutex = CreateMutex(NULL, FALSE, NULL);
+	if (cd.hMutex == NULL) {
+		_tprintf_s(ERRO_CREATE_MUTEX);
+		CloseHandle(ov.hEvent);
+		CloseHandle(cd.hPipe);
+		CloseHandle(cd.hExitEvent);
+		ExitProcess(-1);
+	}
+
 	// thread para lidar com os comandos do cliente
 	HANDLE hThread = CreateThread(NULL, 0, threadComandosClienteHandler, &cd, 0, NULL);
 	if (hThread == NULL) {
@@ -185,11 +194,17 @@ int _tmain(int argc, TCHAR** argv)
 			mensagemLoad(mensagemRead);
 			break;
 		case TMensagem_CLOSE:
-			continuar = mensagemCloseC(mensagemRead);
+			_tprintf_s(INFO_CLOSEC);
+			continuar = FALSE;
+			WaitForSingleObject(cd.hMutex, INFINITE);
+			SetEvent(cd.hExitEvent);
+			
+			ReleaseMutex(cd.hMutex);
+			CancelSynchronousIo(hThread);
 			break;
-		case TMensagem_EXIT: // não é necessário
-			continuar = mensagemExit(mensagemRead);
-			break;
+		//case TMensagem_EXIT: // não é necessário
+		//	continuar = mensagemExit(mensagemRead);
+		//	break;
 		default:
 			_tprintf_s(ERRO_INVALID_MSG);
 			break;

@@ -12,14 +12,19 @@ void WINAPI threadComandosClienteHandler(PVOID p) {
 	BOOL repetir = TRUE;
 	TCHAR username[TAM_NOME];
 	int numArgumentos;
-	while (repetir) {
+
+	_tprintf_s(WELCOME);
+	while(repetir) {
 		memset(comandoTemp, 0, sizeof(comandoTemp));
 		memset(argumento1, 0, sizeof(argumento1));
 		memset(argumento2, 0, sizeof(argumento2));
 		memset(failSafe, 0, sizeof(failSafe));
+		fflush(stdin);
 		if(!cd->logado) 
 			_tprintf_s(_T("Efetue login primeiro\nComando:  "));
-		_fgetts(comando, sizeof(comando) / sizeof(comando[0]), stdin);
+		if(_fgetts(comando, sizeof(comando) / sizeof(comando[0]), stdin) == NULL)
+			break;
+		
 		comando[_tcslen(comando) - 1] = _T('\0');
 		controlo = verificaComando(comando);
 		numArgumentos = 0;
@@ -97,7 +102,12 @@ void WINAPI threadComandosClienteHandler(PVOID p) {
 			break;
 		case 7: // comando exit
 			repetir = comandoExit(hPipe, username);
-			SetEvent(cd->hExitEvent);
+			if (repetir == FALSE) {
+				// usar mutex para garantir que o exit é feito antes de fechar o pipe
+				WaitForSingleObject(cd->hMutex, INFINITE);
+				SetEvent(cd->hExitEvent);
+				ReleaseMutex(cd->hMutex);
+			}
 			break;
 		case 0: // comando inválido
 		default:
