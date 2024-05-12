@@ -352,28 +352,23 @@ void mensagemWallet(ThreadData* td, Mensagem mensagem) {
 }
 
 void mensagemExit(ThreadData* td, Mensagem mensagem) {
-	// TODO: mensagemExit
-	//identificar o cliente
-	//retirar o cliente do array de utilizadores
+	// identificar o cliente
 	TCHAR* username = mensagem.nome;
 	_tprintf_s(_T("Cliente %s saiu\n"), username);
-	//procurar o cliente no array de utilizadores e retirar
+	// procurar o cliente no array de utilizadores e retirar
 	EnterCriticalSection(&td->dto->pSync->csUtilizadores);
 	for (int i = 0; i < td->dto->numUtilizadores; i++) {
 		if (_tcscmp(td->dto->utilizadores[i].username, username) == 0) {
-			//retirar o cliente
-			for (int j = i; j < td->dto->numUtilizadores - 1; j++) {
-				td->dto->utilizadores[j] = td->dto->utilizadores[j + 1];
-			}
-			td->dto->numUtilizadores--;
-			
-			//definir como nao logado
+			// definir como não logado
 			td->dto->utilizadores[i].logado = FALSE;
 			break;
 		}
 	}
-	td->livre = TRUE;
 	LeaveCriticalSection(&td->dto->pSync->csUtilizadores);
+	// fechar o pipe
+	CloseHandle(td->hPipeInst);
+	// libertar a posição do array de ThreadData
+	td->livre = TRUE;
 }
 
 void mensagemAddc(ThreadData* td, TCHAR* empresa) {

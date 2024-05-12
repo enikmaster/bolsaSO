@@ -44,7 +44,7 @@ void mensagemBalance(ThreadData*, Mensagem);
 
 void mensagemWallet(ThreadData*, Mensagem);
 
-void mensagemExit();
+void mensagemExit(ThreadData*, Mensagem);
 
 void mensagemAddc(ThreadData*, TCHAR*);
 
