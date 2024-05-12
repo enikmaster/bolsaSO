@@ -160,7 +160,6 @@ void WINAPI threadClientHandler(PVOID p) {
 			&bytesLidos,	// número de bytes lidos
 			&ov);	// estrutura overlapped)
 		// leitura pendente
-		//WaitForSingleObject(ov.hEvent, INFINITE);
 		dwWaitResult = WaitForMultipleObjects(2, hEvents, FALSE, INFINITE);
 		if (dwWaitResult == WAIT_OBJECT_0 + 1) {
 			// evento para sair do programa
@@ -245,20 +244,7 @@ void WINAPI threadVariacaoPrecoHandler (PVOID p) {
 		return;
 	}
 
-
-	Empresa* empresasAntigas = NULL;
-	int numEmpresas = 0;
-	//fazer copida dos dados das empresas
-	/*
-	empresasAntigas = (Empresa*)malloc(numEmpresas * sizeof(Empresa));
-	if (empresasAntigas == NULL) {
-		_tprintf_s(ERRO_MEMORIA);
-		return;
-	}
-	memcpy(empresasAntigas, td->dto->dadosP->empresas, numEmpresas * sizeof(Empresa));
-	*/
-	
-	//criar o timer
+	// criar o timer
 	HANDLE hTimerV = CreateWaitableTimer(NULL, TRUE, NULL);
 	if (hTimerV == NULL) {
 		_tprintf_s(ERRO_CREATE_TIMER);
@@ -268,45 +254,42 @@ void WINAPI threadVariacaoPrecoHandler (PVOID p) {
 	LARGE_INTEGER liDueTime;
 	liDueTime.QuadPart = -100000000; // 10 segundos
 
-	HANDLE hThreads[2] = {hTimerV, td->dto->dadosP->hExitEvent };
+	HANDLE hThreads[2] = { hTimerV, td->dto->dadosP->hExitEvent };
 
+	Empresa listaEmpresas[TAM_MAX_EMPRESAS] = { 0 };
+	int numEmpresas = 0;
+	double percentagem = 0.02; // 2%
+	
 	while (1) {
-
-	if(!SetWaitableTimer(hTimerV, &liDueTime, 0, NULL, NULL, FALSE)) {
+		// definir o tempo de espera
+		if(!SetWaitableTimer(hTimerV, &liDueTime, 0, NULL, NULL, FALSE)) {
 			_tprintf_s(ERRO_SET_TIMER);
 			break;
 		}
-
-		WaitForMultipleObjects(2,hThreads,FALSE, INFINITE);
+		DWORD i = 0;
+		// esperar por eventos
+		WaitForMultipleObjects(2, hThreads, FALSE, INFINITE);
 		if(WaitForSingleObject(td->dto->dadosP->hExitEvent, 0) == WAIT_OBJECT_0)
 			break;
 
 		//verificar variação do preço das ações
 		EnterCriticalSection(&td->dto->pSync->csEmpresas);
-
 		numEmpresas = td->dto->dadosP->numEmpresas;
-		empresasAntigas = (Empresa*)malloc(numEmpresas * sizeof(Empresa));
-		if(empresasAntigas == NULL) {
-			_tprintf_s(ERRO_MEMORIA);
-			//LeaveCriticalSection(&dto->pSync->csEmpresas);
-			break;
+		// verificar se a listaEmpresas está vazia (primeira vez que é chamada)
+		if (listaEmpresas->nome[0] == 0) {
+			// copiar as empresas para a listaEmpresas (primeira vez)
+			memcpy(listaEmpresas, td->dto->dadosP->empresas, numEmpresas * sizeof(Empresa));
 		}
-		memcpy(empresasAntigas, td->dto->dadosP->empresas, numEmpresas * sizeof(Empresa));
-		for (int i = 0; i < numEmpresas; i++) {
-			if(td->dto->dadosP->empresas[i].quantidadeAcoes >= empresasAntigas[i].quantidadeAcoes) {
-				double percentagem = 5.0 / 100.0; // 2%
-				td->dto->dadosP->empresas[i].valorAcao -= td->dto->dadosP->empresas[i].valorAcao * percentagem;
-			}
-			else{
-				// Houve compras, então o preço das ações deve subir
-				double percentagem = 5.0 / 100.0; // 2%
-				td->dto->dadosP->empresas[i].valorAcao += (td->dto->dadosP->empresas[i].valorAcao * percentagem);
-			}
-
+		for (i; i < numEmpresas; ++i) {
+			(td->dto->dadosP->empresas[i].quantidadeAcoes >= listaEmpresas[i].quantidadeAcoes) ? 
+				// o preço desce
+				(td->dto->dadosP->empresas[i].valorAcao *= (1 - percentagem)) : 
+				// o preço sobe
+				(td->dto->dadosP->empresas[i].valorAcao *= (1 + percentagem));
 		}
+		// depois de verificar as variações, guardar os novos dados para a próxima verificação
+		memcpy(listaEmpresas, td->dto->dadosP->empresas, numEmpresas * sizeof(Empresa));
 		LeaveCriticalSection(&td->dto->pSync->csEmpresas);
-
-		free(empresasAntigas);
 	}
 	CloseHandle(hTimerV);
 }

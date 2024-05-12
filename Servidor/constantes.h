@@ -15,7 +15,7 @@
 #define TAM_NOME 50 // tamanho máximo de um nome
 #define TAM_PASSWORD 50 // tamanho máximo de uma password
 #define TAM_REGISTRY 100 // tamanho máximo de uma key do registo
-#define NUM_THREADS_SERVER 1
+#define NUM_THREADS_SERVER 2
 #define MAX_TENTATIVAS_LIGACAO 20 // número máximo de tentativas de ligação ao named pipe
 #define COMANDO _T("Comando:  ")
 #define WELCOME _T("Bem-vindo ao sistema de compra e venda de ações\n")
