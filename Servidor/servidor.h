@@ -25,7 +25,7 @@ BOOL comandoStock(DataTransferObject*,const TCHAR*, const double);
 
 void comandoUsers(DataTransferObject*);
 
-void comandoPause(DWORD);
+BOOL comandoPause(ThreadData*, DWORD);
 
 int comandoLoad(DataTransferObject*, TCHAR*);
 
@@ -50,9 +50,9 @@ void mensagemAddc(ThreadData*, TCHAR*);
 
 void mensagemStock(ThreadData*, TCHAR*, double);
 
-void mensagemPause();
+void mensagemPause(ThreadData*, DWORD);
 
-void mensagemResume();
+void mensagemResume(ThreadData*);
 
 void mensagemLoad(ThreadData*, int);
 
@@ -68,6 +68,8 @@ void WINAPI threadClientHandler(PVOID);
 void WINAPI threadBoardHandler(PVOID);
 
 void WINAPI threadVariacaoPrecoHandler(PVOID);
+
+void WINAPI threadPauseHandler(PVOID);
 
 void PrintLastError(TCHAR*, DWORD);
 

@@ -90,6 +90,17 @@ void mensagemBuy(ThreadData* td, Mensagem mensagemRead) {
 	DWORD numEmpresasAcoes = 0;
 	DWORD indexEA = 0;
 	double taxaVariacao = 1.2;
+
+	// 0. Verificar se está em Pausa
+	EnterCriticalSection(&td->dto->pSync->csContinuar);
+	if (td->dto->pausado) {
+		LeaveCriticalSection(&td->dto->pSync->csContinuar);
+		mensagem.sucesso = FALSE;
+		enviarMensagem(td->hPipeInst, mensagem, td->dto->pSync->csWrite);
+		return;
+	}
+	LeaveCriticalSection(&td->dto->pSync->csContinuar);
+
 	// 1. Verificar se a empresa existe
 	EnterCriticalSection(&td->dto->pSync->csEmpresas);
 	numEmpresas = td->dto->dadosP->numEmpresas;
@@ -200,6 +211,17 @@ void mensagemSell(ThreadData* td, Mensagem mensagemRead) {
 	BOOL empresaAcaoAtualizada = FALSE;
 	DWORD numEmpresasAcoes = 0;
 	DWORD indexEA = 0;
+
+	// 0. Verificar se está em Pausa
+	EnterCriticalSection(&td->dto->pSync->csContinuar);
+	if (td->dto->pausado) {
+		LeaveCriticalSection(&td->dto->pSync->csContinuar);
+		resposta.sucesso = FALSE;
+		enviarMensagem(td->hPipeInst, resposta, td->dto->pSync->csWrite);
+		return;
+	}
+	LeaveCriticalSection(&td->dto->pSync->csContinuar);
+
 	// 1. Verificar se a empresa existe
 	EnterCriticalSection(&td->dto->pSync->csEmpresas);
 	numEmpresas = td->dto->dadosP->numEmpresas;
@@ -354,6 +376,7 @@ void mensagemWallet(ThreadData* td, Mensagem mensagem) {
 void mensagemExit(ThreadData* td, Mensagem mensagem) {
 	// identificar o cliente
 	TCHAR* username = mensagem.nome;
+	int j = 0;
 	_tprintf_s(_T("Cliente %s saiu\n"), username);
 	// procurar o cliente no array de utilizadores e retirar
 	EnterCriticalSection(&td->dto->pSync->csUtilizadores);
@@ -363,6 +386,16 @@ void mensagemExit(ThreadData* td, Mensagem mensagem) {
 			td->dto->utilizadores[i].logado = FALSE;
 			break;
 		}
+	}
+	
+	for (j; j < td->dto->limiteClientes; ++j) {
+		if(!td[j].livre) {
+			break;
+		}
+	}
+	if (j == td->dto->limiteClientes) {
+		// todos os clientes ocupados mas saiu um agora
+		SetEvent(td->dto->hLimiteClientes);
 	}
 	LeaveCriticalSection(&td->dto->pSync->csUtilizadores);
 	// fechar o pipe
@@ -412,12 +445,44 @@ void mensagemStock(ThreadData* td, TCHAR* empresa, double valorAcao) {
 	}
 }
 
-void mensagemPause() {
-	// TODO: mensagemPause
+void mensagemPause(ThreadData* td, DWORD tempo) {
+	// Criar a mensagem
+	Mensagem mensagem = { 0 };
+	// Definir os dados da mensagem
+	mensagem.TipoM = TMensagem_PAUSE;
+	mensagem.quantidade = tempo;
+
+	DWORD limiteClientes = 0;
+	EnterCriticalSection(&td->dto->pSync->csLimClientes);
+	limiteClientes = td->dto->limiteClientes;
+	LeaveCriticalSection(&td->dto->pSync->csLimClientes);
+
+	// Enviar a mensagem a todos os clientes
+	for (DWORD i = 0; i < limiteClientes; ++i) {
+		if (!td[i].livre) {
+			enviarMensagem(td[i].hPipeInst, mensagem, td->dto->pSync->csWrite);
+		}
+	}
 }
 
-void mensagemResume() {
-	// TODO: mensagemResume
+void mensagemResume(ThreadData* td) {
+	// Criar a mensagem
+	Mensagem mensagem = { 0 };
+	// Definir os dados da mensagem
+	mensagem.TipoM = TMensagem_RESUME;
+	
+	DWORD limiteClientes = 0;
+	EnterCriticalSection(&td->dto->pSync->csLimClientes);
+	limiteClientes = td->dto->limiteClientes;
+	LeaveCriticalSection(&td->dto->pSync->csLimClientes);
+
+	// Enviar a mensagem a todos os clientes
+	for (DWORD i = 0; i < limiteClientes; ++i) {
+		if (!td[i].livre) {
+			enviarMensagem(td[i].hPipeInst, mensagem, td->dto->pSync->csWrite);
+		}
+	}
+
 }
 
 void mensagemLoad(ThreadData* td, int numEmpresas) {

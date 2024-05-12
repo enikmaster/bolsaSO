@@ -87,9 +87,10 @@ void WINAPI threadComandosAdminHandler(PVOID p) {
 			}
 			else {
 				DWORD numeroSegundos = _tstoi(argumento1);
-				comandoPause(numeroSegundos);
-				// TODO: falta qq coisa mas não sei o que é para já
-				//	fazer SuspendThread e ResumeThread
+				if(comandoPause(td, numeroSegundos)) {
+					_tprintf_s(INFO_PAUSE, numeroSegundos);
+					mensagemPause(td, numeroSegundos);
+				}
 			}
 			break;
 		case 6: // comando load
@@ -210,6 +211,42 @@ void WINAPI threadClientHandler(PVOID p) {
 	CloseHandle(ov.hEvent);
 
 	// sair da thread
+	ExitThread(0);
+}
+
+void WINAPI threadPauseHandler(PVOID p) {
+	ThreadData* td = (ThreadData*)p;
+
+	// criar o timer
+	HANDLE hTimerP = CreateWaitableTimer(NULL, TRUE, NULL);
+	if (hTimerP == NULL) {
+		_tprintf_s(ERRO_CREATE_TIMER);
+		return;
+	}
+
+	LARGE_INTEGER liDueTime;
+	liDueTime.QuadPart = -10000000 * (td->dto->numSegundos); // numSegundos indicado pelo admin
+
+	HANDLE hThreads[2] = { hTimerP, td->dto->dadosP->hExitEvent };
+
+	// definir o tempo de espera
+	if (!SetWaitableTimer(hTimerP, &liDueTime, 0, NULL, NULL, FALSE)) {
+		_tprintf_s(ERRO_SET_TIMER);
+		ExitThread(0);
+	}
+
+	DWORD dwWaitResult;
+	dwWaitResult = WaitForMultipleObjects(2, hThreads, FALSE, INFINITE);
+	if (dwWaitResult == WAIT_OBJECT_0+1) {
+		// evento para sair do programa
+		_tprintf_s(INFO_PAUSE_END);
+	}
+	if(dwWaitResult == WAIT_OBJECT_0) {
+		// terminou o tempo de pausa
+		_tprintf_s(INFO_RESUME);
+		td->dto->pausado = FALSE;
+		mensagemResume(td);
+	}
 	ExitThread(0);
 }
 

@@ -164,6 +164,7 @@ BOOL inicializarDTO(DataTransferObject* dto) {
 	dto->dadosP = (DadosPartilhados*)dto->pView;
 	dto->dadosP->numEmpresas = 0;
 	dto->continuar = TRUE;
+	dto->pausado = FALSE;
 
 	return TRUE;
 }
@@ -260,9 +261,26 @@ void comandoUsers(DataTransferObject* dto) {
 	}
 }
 
-void comandoPause(DWORD numeroSegundos) {
+BOOL comandoPause(ThreadData* td, DWORD numeroSegundos) {
 	system("cls");
-	// TODO: parar o servidor por um determinado tempo
+	if(td->dto->pausado) {
+		_tprintf_s(INFO_JA_PAUSADO);
+		return FALSE;
+	}
+
+	td->dto->numSegundos = numeroSegundos;
+	
+	HANDLE hThread = CreateThread(NULL, 0, threadPauseHandler, td, 0, NULL);
+	if (hThread == NULL) {
+		_tprintf_s(ERRO_CREATE_THREAD);
+		return FALSE;
+	}
+
+	EnterCriticalSection(&td->dto->pSync->csContinuar);
+	td->dto->pausado = TRUE;
+	LeaveCriticalSection(&td->dto->pSync->csContinuar);
+
+	CloseHandle(hThread);
 }
 
 int comandoLoad(DataTransferObject* dto, TCHAR* nomeFicheiro) {

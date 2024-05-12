@@ -94,6 +94,10 @@
 #define INFO_WALLET _T("Empresa: %s \tQuantidade: %lu\n")
 #define INFO_ULTIMA_TRANSACAO _T("Ultima Transação: %s - %lu e %.2f\n")
 #define INFO_CLOSEC _T("[INFO] O programa bolsa está a terminar e este também\n")
+#define INFO_PAUSE _T("[INFO] As transações estão suspensas por %lu segundos\n")
+#define INFO_JA_PAUSADO _T("[INFO] As transações já estão suspensas\n")
+#define INFO_PAUSE_END _T("[INFO] A interrupção foi suspensa porque o programa bolsa vair terminar\n")
+#define INFO_RESUME _T("[INFO] As transações foram retomadas\n")
 
 
 #define INFO_TOP_EMPRESAS _T("Top %d Empresas Mais Valiosas:\n")
@@ -219,6 +223,9 @@ struct DataTransferObject {
     Utilizador utilizadores[TAM_MAX_USERS];
     DWORD limiteClientes;
     BOOL continuar;
+    BOOL pausado;
+    DWORD numSegundos;
+    HANDLE hLimiteClientes;
 };
 
 // Estrutura para lidar com threads no servidor
