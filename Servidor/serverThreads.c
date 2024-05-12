@@ -113,8 +113,8 @@ void WINAPI threadComandosAdminHandler(PVOID p) {
 			}
 			break;
 		case 7: // comando close
-			repetir = comandoClose(td);
 			mensagemClose(td);
+			repetir = comandoClose(td);
 			break;
 		case 0:
 		default: // comando inválido
@@ -214,19 +214,19 @@ void WINAPI threadClientHandler(PVOID p) {
 	ExitThread(0);
 }
 
-void WINAPI threadBoardHandler(PVOID p) {
-	DataTransferObject* dto = (DataTransferObject*)p;
-	DadosPartilhados* pData = dto->dadosP;
-
-	//criar o evento de reset manual para o board
-	HANDLE hEvent = CreateEvent(NULL, TRUE, FALSE, NOME_EVENTO_BOARD);
-	if (hEvent == NULL) {
-		_tprintf_s(ERRO_CREATE_EVENT);
-		return;
-	}
-	
-	pData->hEvent = hEvent;
-}
+//void WINAPI threadBoardHandler(PVOID p) {
+//	DataTransferObject* dto = (DataTransferObject*)p;
+//	DadosPartilhados* pData = dto->dadosP;
+//
+//	//criar o evento de reset manual para o board
+//	HANDLE hEvent = CreateEvent(NULL, TRUE, FALSE, NOME_EVENTO_BOARD);
+//	if (hEvent == NULL) {
+//		_tprintf_s(ERRO_CREATE_EVENT);
+//		return;
+//	}
+//	
+//	//pData->hEvent = hEvent;
+//}
 
 void PrintLastError(TCHAR* part, DWORD id) {
 	PTSTR buffer;

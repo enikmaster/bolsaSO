@@ -15,7 +15,7 @@
 #define TAM_NOME 50 // tamanho máximo de um nome
 #define TAM_PASSWORD 50 // tamanho máximo de uma password
 #define TAM_REGISTRY 100 // tamanho máximo de uma key do registo
-#define NUM_THREADS_SERVER 2
+#define NUM_THREADS_SERVER 1
 #define COMANDO _T("Comando:  ")
 #define WELCOME _T("Bem-vindo ao sistema de compra e venda de ações\n")
 
@@ -176,7 +176,7 @@ struct DadosPartilhados {
     DWORD numEmpresas;
     DetalhesTransacao ultimaTransacao;
     HANDLE hExitEvent; // handle para evento de saída
-    HANDLE hEvent; // handle p evento de alteração da board
+    HANDLE hUpdateEvent; // handle p evento de alteração da board
 };
 
 // Estrutura de mecanismos de sincorização
