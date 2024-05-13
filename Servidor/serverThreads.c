@@ -208,7 +208,7 @@ void WINAPI threadClientHandler(PVOID p) {
 	// fechar o handle do named pipe na lista do servidor
 	CloseHandle(hPipe);
 	// fechar o handle do evento
-	CloseHandle(ov.hEvent);
+	//CloseHandle(ov.hEvent);
 
 	// sair da thread
 	ExitThread(0);
@@ -224,10 +224,11 @@ void WINAPI threadPauseHandler(PVOID p) {
 		return;
 	}
 
-	LARGE_INTEGER liDueTime;
-	liDueTime.QuadPart = -10000000 * (td->dto->numSegundos); // numSegundos indicado pelo admin
 
-	HANDLE hThreads[2] = { hTimerP, td->dto->dadosP->hExitEvent };
+	LARGE_INTEGER liDueTime;
+	liDueTime.QuadPart = (LONGLONG)td->dto->numSegundos * -10000000LL; // numSegundos indicado pelo admin
+
+	HANDLE hEvents[2] = { hTimerP, td->dto->dadosP->hExitEvent };
 
 	// definir o tempo de espera
 	if (!SetWaitableTimer(hTimerP, &liDueTime, 0, NULL, NULL, FALSE)) {
@@ -236,7 +237,7 @@ void WINAPI threadPauseHandler(PVOID p) {
 	}
 
 	DWORD dwWaitResult;
-	dwWaitResult = WaitForMultipleObjects(2, hThreads, FALSE, INFINITE);
+	dwWaitResult = WaitForMultipleObjects(2, hEvents, FALSE, INFINITE);
 	if (dwWaitResult == WAIT_OBJECT_0+1) {
 		// evento para sair do programa
 		_tprintf_s(INFO_PAUSE_END);
@@ -249,23 +250,6 @@ void WINAPI threadPauseHandler(PVOID p) {
 	}
 	ExitThread(0);
 }
-
-//void WINAPI threadBoardHandler(PVOID p) {
-//	ThreadData* td = (ThreadData*)p;
-//	
-//
-//	//criar o evento de reset manual para o board
-//	HANDLE hEvent = CreateEvent(NULL, TRUE, FALSE, NOME_EVENTO_BOARD);
-//	if (hEvent == NULL) {
-//		_tprintf_s(ERRO_CREATE_EVENT);
-//		return;
-//	}
-//	
-//	td->dto->dadosP->hEvent = hEvent; //
-//
-//	WaitForSingleObject(td->hExitEvent, INFINITE);
-//}
-
 
 //thread para alterar o preço das ações
 //vai aceder ás empresas, e guardar num array local
@@ -291,7 +275,7 @@ void WINAPI threadVariacaoPrecoHandler (PVOID p) {
 	LARGE_INTEGER liDueTime;
 	liDueTime.QuadPart = -100000000; // 10 segundos
 
-	HANDLE hThreads[2] = { hTimerV, td->dto->dadosP->hExitEvent };
+	HANDLE hEvents[2] = { hTimerV, td->dto->dadosP->hExitEvent };
 
 	Empresa listaEmpresas[TAM_MAX_EMPRESAS] = { 0 };
 	int numEmpresas = 0;
@@ -305,7 +289,7 @@ void WINAPI threadVariacaoPrecoHandler (PVOID p) {
 		}
 		DWORD i = 0;
 		// esperar por eventos
-		WaitForMultipleObjects(2, hThreads, FALSE, INFINITE);
+		WaitForMultipleObjects(2, hEvents, FALSE, INFINITE);
 		if(WaitForSingleObject(td->dto->dadosP->hExitEvent, 0) == WAIT_OBJECT_0)
 			break;
 

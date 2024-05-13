@@ -15,20 +15,20 @@ int CompareEmpresa(const void* a, const void* b) {
 
 
 void ExibirUltimaTransacao(DadosPartilhados* pDados) {
-    _tprintf(INFO_ULTIMA_TRANSACAO, pDados->ultimaTransacao.nomeEmpresa,
+    _tprintf_s(INFO_ULTIMA_TRANSACAO, pDados->ultimaTransacao.nomeEmpresa,
         pDados->ultimaTransacao.quantidadeAcoes, pDados->ultimaTransacao.precoPorAcao);
 }
 
 
 void OrganizarEExibirEmpresas(DadosPartilhados* pDados, DWORD N) {
     if (pDados == NULL) {
-        _tprintf(INFO_ERRO_DPARTILHADOS);
+        _tprintf_s(INFO_ERRO_DPARTILHADOS);
         return;
     }
     
     if(pDados->numEmpresas == 0) {
         system("cls");
-		_tprintf(INFO_EMPRESAS_VAZIA);
+		_tprintf_s(INFO_EMPRESAS_VAZIA);
 		return;
 	}
     
@@ -44,9 +44,9 @@ void OrganizarEExibirEmpresas(DadosPartilhados* pDados, DWORD N) {
 
     // Exibir as N empresas mais valiosas
     system("cls");
-    _tprintf(INFO_TOP_EMPRESAS, N);
+    _tprintf_s(INFO_TOP_EMPRESAS, N);
     for (DWORD i = 0; i < N && i < pDados->numEmpresas; i++) {
-        _tprintf(INFO_EMPRESA_ACOES),
+        _tprintf_s(INFO_EMPRESA_ACOES),
             i + 1, empresasOrganizadas[i].nome, empresasOrganizadas[i].quantidadeAcoes,
             empresasOrganizadas[i].valorAcao, empresasOrganizadas[i].quantidadeAcoes * empresasOrganizadas[i].valorAcao);
     }

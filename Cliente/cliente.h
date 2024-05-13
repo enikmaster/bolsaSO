@@ -21,7 +21,7 @@ void comandoBalance(HANDLE*, TCHAR*);
 
 void comandoWallet(HANDLE*, TCHAR*);
 
-BOOL comandoExit(HANDLE*, TCHAR*);
+BOOL comandoExit(HANDLE*, TCHAR*, BOOL);
 
 BOOL enviarMensagem(HANDLE*, Mensagem);
 

@@ -87,6 +87,7 @@
 #define INFO_LISTC_VAZIA _T("[INFO] Não existem empresas disponíveis\n")
 #define INFO_USERS _T("Username: %s \tSaldo: %lf \tEstado: %s\n")
 #define INFO_CLIENTE_CONECTADO _T("[INFO] Cliente conectado, thread criada e lançada\n")
+#define INFO_CLIENTE_DESCONECTADO _T("[INFO] Cliente %s saiu\n")
 #define INFO_SALDO _T("[INFO] Saldo atual: %.2lf\n")
 #define INFO_COMPRA _T("[INFO] Compra de acões da empresa %s efetuada com sucesso\n")
 #define INFO_VENDA _T("[INFO] Venda de acões da empresa %s efetuada com sucesso\n")

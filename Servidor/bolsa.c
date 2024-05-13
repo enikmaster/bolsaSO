@@ -186,7 +186,7 @@ int _tmain(int argc, TCHAR** argv) {
 	CloseHandle(hUpdateEvent);
 	CloseHandle(hLimiteClientes);
 	terminarDTO(&dto);
-	CloseHandle(hSemaphore); //eventualmente para o dto
+	CloseHandle(hSemaphore);
 
 	ExitProcess(0);
 }

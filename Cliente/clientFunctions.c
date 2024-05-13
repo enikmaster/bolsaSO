@@ -80,10 +80,13 @@ void comandoWallet(HANDLE* hPipe, TCHAR* username) {
 	enviarMensagem(hPipe, mensagem);
 }
 
-BOOL comandoExit(HANDLE* hPipe, TCHAR* username) {
+BOOL comandoExit(HANDLE* hPipe, TCHAR* username, BOOL logado) {
 	Mensagem mensagem = { 0 };
 	mensagem.TipoM = TMensagem_EXIT;
-	memcpy(mensagem.nome, username, (_tcslen(username) + 1) * sizeof(TCHAR));
+	if (logado) 
+		memcpy(mensagem.nome, username, (_tcslen(username) + 1) * sizeof(TCHAR)); 
+	else 
+		mensagem.nome[0] = '\0';
 	return !enviarMensagem(hPipe, mensagem);
 }
 
