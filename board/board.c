@@ -66,7 +66,7 @@ int _tmain(int argc, TCHAR** argv) {
 
     estado.hMap = OpenFileMapping(FILE_MAP_READ, FALSE, NOME_SHARED_MEMORY);
     if (estado.hMap == NULL) {
-        _tprintf(ERRO_OPEN_FILE_MAPPING, GetLastError());
+        _tprintf_s(ERRO_OPEN_FILE_MAPPING, GetLastError());
         return -1;
     }
 
@@ -78,7 +78,7 @@ int _tmain(int argc, TCHAR** argv) {
         sizeof(DadosPartilhados));
 
     if (estado.pDados == NULL) {
-        _tprintf(ERRO_CREATE_FILE_MAPPING, GetLastError());
+        _tprintf_s(ERRO_CREATE_FILE_MAPPING, GetLastError());
         CloseHandle(estado.hMap);
         return -1;
     }
@@ -86,7 +86,7 @@ int _tmain(int argc, TCHAR** argv) {
     //open do evento
     estado.eventoEscrita = OpenEventW(EVENT_MODIFY_STATE | SYNCHRONIZE, FALSE, NOME_EVENTO_BOARD);
     if (estado.eventoEscrita == NULL) {
-        _tprintf(ERRO_CREATE_EVENT), GetLastError();
+        _tprintf_s(ERRO_CREATE_EVENT);
         UnmapViewOfFile(estado.pDados);
         CloseHandle(estado.hMap);
         return -1;
@@ -94,7 +94,7 @@ int _tmain(int argc, TCHAR** argv) {
 
     // Reset the event
     if (!ResetEvent(estado.eventoEscrita)) {
-        _tprintf(ERRO_RESET_EVENT), GetLastError();
+        _tprintf_s(ERRO_RESET_EVENT);
         UnmapViewOfFile(estado.pDados);
         CloseHandle(estado.hMap);
         CloseHandle(estado.eventoEscrita);
@@ -102,16 +102,22 @@ int _tmain(int argc, TCHAR** argv) {
     }
 
     HANDLE hThreadCommand = CreateThread(NULL, 0, WaitForCloseCommand, &estado, 0, NULL);
+    if(hThreadCommand == NULL) {
+        _tprintf_s(ERRO_CREATE_THREAD);
+        UnmapViewOfFile(estado.pDados);
+        CloseHandle(estado.hMap);
+        CloseHandle(estado.eventoEscrita);
+        return -1;
+    }
     HANDLE hThreadDisplay = CreateThread(NULL, 0, DisplayDados, &estado, 0, NULL);
-    if(hThreadCommand == NULL || hThreadDisplay == NULL) {
-		_tprintf(ERRO_CREATE_THREAD, GetLastError());
+    if(hThreadDisplay == NULL) {
+		_tprintf_s(ERRO_CREATE_THREAD);
 		UnmapViewOfFile(estado.pDados);
 		CloseHandle(estado.hMap);
+        CloseHandle(estado.eventoEscrita);
         CloseHandle(hThreadCommand);    
-        CloseHandle(hThreadDisplay);
 		return -1;
 	}
-
    
     WaitForSingleObject(hThreadCommand, INFINITE);
     estado.running = FALSE;
@@ -121,6 +127,7 @@ int _tmain(int argc, TCHAR** argv) {
     // Limpeza e fecho de recursos
     UnmapViewOfFile(estado.pDados);
     CloseHandle(estado.hMap);
+    CloseHandle(estado.eventoEscrita);
     CloseHandle(hThreadCommand);
 	CloseHandle(hThreadDisplay);
 

@@ -101,7 +101,7 @@ void WINAPI threadComandosClienteHandler(PVOID p) {
 				_tprintf_s(ERRO_NO_LOGIN);
 			break;
 		case 7: // comando exit
-			repetir = comandoExit(hPipe, username);
+			repetir = comandoExit(hPipe, username, cd->logado);
 			if (repetir == FALSE) {
 				// usar mutex para garantir que o exit é feito antes de fechar o pipe
 				WaitForSingleObject(cd->hMutex, INFINITE);

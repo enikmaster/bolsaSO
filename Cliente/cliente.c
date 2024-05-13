@@ -3,14 +3,14 @@
 
 int _tmain(int argc, TCHAR** argv)
 {
-	#ifdef UNICODE 
-		DWORD x1, x2, x3;
-		x1 = _setmode(_fileno(stdin), _O_WTEXT);
-		x2 = _setmode(_fileno(stdout), _O_WTEXT);
-		x3 = _setmode(_fileno(stderr), _O_WTEXT);
-		if (x1 == -1 || x2 == -1 || x3 == -1)
-			ExitProcess(-1);
-	#endif
+#ifdef UNICODE 
+	DWORD x1, x2, x3;
+	x1 = _setmode(_fileno(stdin), _O_WTEXT);
+	x2 = _setmode(_fileno(stdout), _O_WTEXT);
+	x3 = _setmode(_fileno(stderr), _O_WTEXT);
+	if (x1 == -1 || x2 == -1 || x3 == -1)
+		ExitProcess(-1);
+#endif
 	if (argc != 1) {
 		_tprintf_s(ERRO_INVALID_N_ARGS);
 		ExitProcess(-1);
@@ -20,7 +20,7 @@ int _tmain(int argc, TCHAR** argv)
 
 	// criar um timer
 	HANDLE hTimer = CreateWaitableTimer(NULL, TRUE, NULL);
-	if(hTimer==NULL) {
+	if (hTimer == NULL) {
 		_tprintf_s(ERRO_CREATE_TIMER);
 		ExitProcess(-1);
 	}
@@ -30,7 +30,37 @@ int _tmain(int argc, TCHAR** argv)
 
 	int contadorTentativas = 0;
 	BOOL isConnected = FALSE;
-	while(contadorTentativas < MAX_TENTATIVAS_LIGACAO && !isConnected){
+	while (contadorTentativas < MAX_TENTATIVAS_LIGACAO && !isConnected) {
+
+		// criar named pipe
+		cd.hPipe = CreateFile(
+			NOME_NAMED_PIPE,
+			GENERIC_READ | GENERIC_WRITE,
+			0,
+			NULL,
+			OPEN_EXISTING,
+			0 | FILE_FLAG_OVERLAPPED,
+			NULL
+		);
+
+		if (cd.hPipe != INVALID_HANDLE_VALUE) {
+			system("cls");
+			isConnected = TRUE;
+			break;
+		}
+
+		// verificar se a conexão foi bem sucedida
+		if (GetLastError() == ERROR_PIPE_BUSY) {
+			_tprintf_s(ERRO_PIPE_BUSY);
+			contadorTentativas++;
+		}
+		else {
+			system("cls");
+			_tprintf_s(ERRO_LIGAR_BOLSA);
+			CloseHandle(cd.hPipe);
+			contadorTentativas++;
+			//ExitProcess(-1);
+		}
 
 		if (!SetWaitableTimer(hTimer, &liDueTime, 0, NULL, NULL, FALSE)) {
 			_tprintf_s(ERRO_SET_TIMER);
@@ -38,38 +68,9 @@ int _tmain(int argc, TCHAR** argv)
 		}
 
 		WaitForSingleObject(hTimer, INFINITE);
-
-	// criar named pipe
-	cd.hPipe = CreateFile(
-		NOME_NAMED_PIPE,
-		GENERIC_READ | GENERIC_WRITE,
-		0,
-		NULL,
-		OPEN_EXISTING,
-		0 | FILE_FLAG_OVERLAPPED,
-		NULL
-	);
-
-	if(cd.hPipe != INVALID_HANDLE_VALUE) {
-		system("cls");
-		isConnected = TRUE;
-		break;
 	}
 
-	// verificar se a conexão foi bem sucedida
-	if (GetLastError() == ERROR_PIPE_BUSY) {
-		_tprintf_s(ERRO_PIPE_BUSY);
-		contadorTentativas++;
-	}
-	else {
-		system("cls");
-		_tprintf_s(ERRO_LIGAR_BOLSA);
-		CloseHandle(cd.hPipe);
-		contadorTentativas++;
-		//ExitProcess(-1);
-		}	
-	}
-	if(contadorTentativas == MAX_TENTATIVAS_LIGACAO) {
+	if (contadorTentativas == MAX_TENTATIVAS_LIGACAO) {
 		_tprintf_s(ERRO_MAX_TENTATIVAS);
 		ExitProcess(-1);
 	}
@@ -78,8 +79,6 @@ int _tmain(int argc, TCHAR** argv)
 		_tprintf_s(ERRO_CONNECT_NAMED_PIPE);
 		ExitProcess(-1);
 	}
-
-
 
 	// definir o modo de leitura do named pipe
 	DWORD dwMode = PIPE_READMODE_MESSAGE;
@@ -151,7 +150,7 @@ int _tmain(int argc, TCHAR** argv)
 			break;
 		}
 		// verificar se a leitura foi bem sucedida
-		if(fSuccess || bytesLidos != 0) {
+		if (fSuccess || bytesLidos != 0) {
 			if (!GetOverlappedResult(cd.hPipe, &ov, &bytesLidos, FALSE)) {
 				_tprintf_s(ERRO_READ_PIPE);
 				break;
@@ -198,13 +197,13 @@ int _tmain(int argc, TCHAR** argv)
 			continuar = FALSE;
 			WaitForSingleObject(cd.hMutex, INFINITE);
 			SetEvent(cd.hExitEvent);
-			
+
 			ReleaseMutex(cd.hMutex);
 			CancelSynchronousIo(hThread);
 			break;
-		//case TMensagem_EXIT: // não é necessário
-		//	continuar = mensagemExit(mensagemRead);
-		//	break;
+			//case TMensagem_EXIT: // não é necessário
+			//	continuar = mensagemExit(mensagemRead);
+			//	break;
 		default:
 			_tprintf_s(ERRO_INVALID_MSG);
 			break;
@@ -212,10 +211,10 @@ int _tmain(int argc, TCHAR** argv)
 	}
 	// esperar que a thread termine
 	WaitForSingleObject(hThread, INFINITE);
-	
+
 	FlushFileBuffers(cd.hPipe);
 	DisconnectNamedPipe(cd.hPipe);
-	
+
 	CloseHandle(cd.hPipe);
 	CloseHandle(hThread);
 

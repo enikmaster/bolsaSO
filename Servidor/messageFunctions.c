@@ -377,13 +377,14 @@ void mensagemExit(ThreadData* td, Mensagem mensagem) {
 	// identificar o cliente
 	TCHAR* username = mensagem.nome;
 	int j = 0;
-	_tprintf_s(_T("Cliente %s saiu\n"), username);
+	
 	// procurar o cliente no array de utilizadores e retirar
 	EnterCriticalSection(&td->dto->pSync->csUtilizadores);
 	for (int i = 0; i < td->dto->numUtilizadores; i++) {
 		if (_tcscmp(td->dto->utilizadores[i].username, username) == 0) {
 			// definir como não logado
 			td->dto->utilizadores[i].logado = FALSE;
+			_tprintf_s(INFO_CLIENTE_DESCONECTADO, username);
 			break;
 		}
 	}
