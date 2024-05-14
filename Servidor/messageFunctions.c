@@ -83,7 +83,6 @@ void mensagemBuy(ThreadData* td, Mensagem mensagemRead) {
 	DWORD numUtilizadores;
 	Mensagem mensagem = { 0 };
 	mensagem.TipoM = TMensagem_R_BUY;
-	DWORD bytesEscritos;
 	DWORD indexEmpresa = 0;
 	double totalCompra = 0;
 	BOOL empresaAcaoAtualizada = FALSE;

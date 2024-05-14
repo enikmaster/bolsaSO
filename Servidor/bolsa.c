@@ -50,20 +50,23 @@ int _tmain(int argc, TCHAR** argv) {
 	// zerar a lista de estruturas
 	memset(listaTD, 0, sizeof(listaTD));
 
-	HANDLE hExitEvent = CreateEvent(NULL, TRUE, FALSE, NULL);
+	// criar evento que sinaliza a saída do programa
+	HANDLE hExitEvent = CreateEvent(NULL, TRUE, FALSE, NOME_EVENTO_EXIT);
 	if (hExitEvent == NULL) {
 		_tprintf_s(ERRO_CREATE_EVENT);
 		terminarDTO(&dto);
 		ExitProcess(-1);
 	}
-	dto.dadosP->hExitEvent = hExitEvent;
+	dto.hExitEvent = hExitEvent;
+	// criar evento que sinaliza a atualização do board
 	HANDLE hUpdateEvent = CreateEvent(NULL, TRUE, FALSE, NOME_EVENTO_BOARD);
 	if (hUpdateEvent == NULL) {
 		_tprintf_s(ERRO_CREATE_EVENT);
 		terminarDTO(&dto);
 		ExitProcess(-1);
 	}
-	dto.dadosP->hUpdateEvent = hUpdateEvent;
+	dto.hUpdateEvent = hUpdateEvent;
+	// criar evento que sinaliza que já há posições livres na lista de ThreadData
 	HANDLE hLimiteClientes = CreateEvent(NULL, TRUE, FALSE, NULL);
 	if (hLimiteClientes == NULL) {
 		_tprintf_s(ERRO_CREATE_EVENT);
@@ -143,7 +146,7 @@ int _tmain(int argc, TCHAR** argv) {
 		}
 		ResetEvent(ov.hEvent);
 
-		HANDLE hEvents[2] = { ov.hEvent, dto.dadosP->hExitEvent };
+		HANDLE hEvents[2] = { ov.hEvent, dto.hExitEvent };
 		DWORD dwWaitResult;
 
 		// conectar o named pipe
@@ -186,6 +189,7 @@ int _tmain(int argc, TCHAR** argv) {
 	CloseHandle(hUpdateEvent);
 	CloseHandle(hLimiteClientes);
 	terminarDTO(&dto);
+	ReleaseSemaphore(hSemaphore, 1, NULL);
 	CloseHandle(hSemaphore);
 
 	ExitProcess(0);

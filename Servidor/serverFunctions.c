@@ -126,20 +126,6 @@ BOOL inicializarDTO(DataTransferObject* dto) {
 		return FALSE;
 	};
 
-	// criar o semáforo da bolsa
-	dto->pSync->hSemBolsa = CreateSemaphore(
-		NULL,
-		0,
-		1,
-		NOME_SEMAFORO);
-	if (dto->pSync->hSemBolsa == NULL) {
-		_tprintf_s(ERRO_CREATE_SEM);
-		UnmapViewOfFile(dto->pView);
-		CloseHandle(dto->hMap);
-		free(dto->pSync);
-		return FALSE;
-	}
-
 	// criar o mutex da bolsa
 	dto->pSync->hMtxBolsa = CreateMutex(
 		NULL,
@@ -149,7 +135,6 @@ BOOL inicializarDTO(DataTransferObject* dto) {
 		_tprintf_s(ERRO_CREATE_MUTEX);
 		UnmapViewOfFile(dto->pView);
 		CloseHandle(dto->hMap);
-		CloseHandle(dto->pSync->hSemBolsa);
 		free(dto->pSync);
 		return FALSE;
 	}
@@ -182,16 +167,12 @@ void terminarDTO(DataTransferObject* dto) {
 	DeleteCriticalSection(&dto->pSync->csEmpresas);
 	DeleteCriticalSection(&dto->pSync->csUtilizadores);
 	DeleteCriticalSection(&dto->pSync->csWrite);
-	// libertar o semáforo
-	ReleaseSemaphore(dto->pSync->hSemBolsa, 1, NULL);
 	// desmapear a memória partilhada
 	UnmapViewOfFile(dto->pView);
 	// fechar os handles por ordem inversa da sua criação
 	CloseHandle(dto->hMap);
-	CloseHandle(dto->pSync->hSemBolsa);
 	CloseHandle(dto->pSync->hMtxBolsa);
 	free(dto->pSync);
-	
 }
 
 // comandos do servidor
@@ -281,6 +262,7 @@ BOOL comandoPause(ThreadData* td, DWORD numeroSegundos) {
 	LeaveCriticalSection(&td->dto->pSync->csContinuar);
 
 	CloseHandle(hThread);
+	return TRUE;
 }
 
 int comandoLoad(DataTransferObject* dto, TCHAR* nomeFicheiro) {
@@ -334,7 +316,7 @@ BOOL comandoClose(ThreadData* td) {
 	system("cls");
 	EnterCriticalSection(&td->dto->pSync->csContinuar);
 	td->dto->continuar = FALSE;
-	SetEvent(td->dto->dadosP->hExitEvent);
+	SetEvent(td->dto->hExitEvent);
 	LeaveCriticalSection(&td->dto->pSync->csContinuar);
 	return FALSE;
 }

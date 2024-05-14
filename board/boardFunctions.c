@@ -47,8 +47,11 @@ void OrganizarEExibirEmpresas(DadosPartilhados* pDados, DWORD N) {
     _tprintf_s(INFO_TOP_EMPRESAS, N);
     for (DWORD i = 0; i < N && i < pDados->numEmpresas; i++) {
         _tprintf_s(INFO_EMPRESA_ACOES),
-            i + 1, empresasOrganizadas[i].nome, empresasOrganizadas[i].quantidadeAcoes,
-            empresasOrganizadas[i].valorAcao, empresasOrganizadas[i].quantidadeAcoes * empresasOrganizadas[i].valorAcao);
+            i + 1, 
+            empresasOrganizadas[i].nome, 
+            empresasOrganizadas[i].quantidadeAcoes,
+            empresasOrganizadas[i].valorAcao, 
+            empresasOrganizadas[i].quantidadeAcoes * empresasOrganizadas[i].valorAcao);
     }
     ExibirUltimaTransacao(pDados);
 }
