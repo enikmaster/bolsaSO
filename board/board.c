@@ -35,7 +35,7 @@ int _tmain(int argc, TCHAR** argv) {
 
     DWORD N = _tstoi(argv[1]);
     if (N <= 0 || N > TAM_MAX_EMPRESAS) {
-        _tprintf_s(INFO_NUMERO_EMPRESAS);
+        _tprintf_s(ERRO_NUMERO_EMPRESAS);
         ExitProcess(-1);
     }
 

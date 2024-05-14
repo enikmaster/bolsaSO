@@ -64,7 +64,8 @@
 #define ERRO_LIGAR_BOLSA _T("[ERRO] Não existe nenhum servidor Bolsa para ligação\n")
 #define ERRO_MALLOC _T("[ERRO] Erro ao alocar memória\n")
 #define ERRO_SEM_JA_INICIADO _T("[ERRO] O semáforo já foi iniciado (OUTRO BOLSA LIGADO)\n")
-
+#define ERRO_NUMERO_EMPRESAS _T("[ERRO] Número de empresas inválido (1 - 10)\n")
+#define ERRO_DPARTILHADOS _T("[ERRO] A estrutura DadosPartilhados está vazia\n")
 
 // Mensages de erro do administrador
 #define ERRO_ADDC _T("[ERRO] Erro ao adicionar a empresa\n")
@@ -104,9 +105,7 @@
 
 #define INFO_TOP_EMPRESAS _T("Top %d Empresas Mais Valiosas:\n")
 #define INFO_EMPRESA_ACOES _T("%d. %s - Ações: %lu, Valor por Ação: %.2f, Valor de Mercado: %.2f\n"
-#define INFO_EMPRESAS_VAZIA _T("[ERRO] Não existem empresas cotadas em bolsa\n")
-#define INFO_NUMERO_EMPRESAS _T("[ERRO] Número de empresas inválido (1 - 10)\n")
-#define INFO_ERRO_DPARTILHADOS _T("[ERRO]_ A estrutura DadosPartilhados está vazia\n")
+#define INFO_EMPRESAS_VAZIA _T("[INFO] Ainda não existem empresas cotadas em bolsa\n")
 
 // Mensagens de debug
 #define DEBUGGER _T("\n[DEBUG] Estou aqui\n")

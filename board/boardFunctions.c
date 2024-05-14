@@ -22,7 +22,7 @@ void ExibirUltimaTransacao(DadosPartilhados* pDados) {
 
 void OrganizarEExibirEmpresas(DadosPartilhados* pDados, DWORD N) {
     if (pDados == NULL) {
-        _tprintf_s(INFO_ERRO_DPARTILHADOS);
+        _tprintf_s(ERRO_DPARTILHADOS);
         return;
     }
     
