@@ -13,13 +13,14 @@ void WINAPI threadComandosAdminHandler(PVOID p) {
 	TCHAR failSafe[TAM_COMANDO];
 	BOOL repetir = TRUE;
 	int numArgumentos;
+	_tprintf_s(WELCOME);
 	while (repetir) {
 		memset(comandoTemp, 0, sizeof(comando));
 		memset(argumento1, 0, sizeof(argumento1));
 		memset(argumento2, 0, sizeof(argumento2));
 		memset(argumento3, 0, sizeof(argumento3));
 		memset(failSafe, 0, sizeof(failSafe));
-		_tprintf_s(_T("Comando: "));
+		_tprintf_s(COMANDO);
 		_fgetts(comando, sizeof(comando) / sizeof(comando[0]), stdin);
 		comando[_tcslen(comando) - 1] = _T('\0');
 		controlo = verificaComando(comando);
@@ -142,7 +143,7 @@ void WINAPI threadClientHandler(PVOID p) {
 	HANDLE hPipe = td->hPipeInst;
 	BOOL continuar = TRUE;
 
-	HANDLE hEvents[2] = { ov.hEvent, td->dto->dadosP->hExitEvent };
+	HANDLE hEvents[2] = { ov.hEvent, td->dto->hExitEvent };
 	DWORD dwWaitResult;
 
 	while (continuar) {
@@ -228,7 +229,7 @@ void WINAPI threadPauseHandler(PVOID p) {
 	LARGE_INTEGER liDueTime;
 	liDueTime.QuadPart = (LONGLONG)td->dto->numSegundos * -10000000LL; // numSegundos indicado pelo admin
 
-	HANDLE hEvents[2] = { hTimerP, td->dto->dadosP->hExitEvent };
+	HANDLE hEvents[2] = { hTimerP, td->dto->hExitEvent };
 
 	// definir o tempo de espera
 	if (!SetWaitableTimer(hTimerP, &liDueTime, 0, NULL, NULL, FALSE)) {
@@ -275,7 +276,7 @@ void WINAPI threadVariacaoPrecoHandler (PVOID p) {
 	LARGE_INTEGER liDueTime;
 	liDueTime.QuadPart = -100000000; // 10 segundos
 
-	HANDLE hEvents[2] = { hTimerV, td->dto->dadosP->hExitEvent };
+	HANDLE hEvents[2] = { hTimerV, td->dto->hExitEvent };
 
 	Empresa listaEmpresas[TAM_MAX_EMPRESAS] = { 0 };
 	int numEmpresas = 0;
@@ -290,7 +291,7 @@ void WINAPI threadVariacaoPrecoHandler (PVOID p) {
 		DWORD i = 0;
 		// esperar por eventos
 		WaitForMultipleObjects(2, hEvents, FALSE, INFINITE);
-		if(WaitForSingleObject(td->dto->dadosP->hExitEvent, 0) == WAIT_OBJECT_0)
+		if(WaitForSingleObject(td->dto->hExitEvent, 0) == WAIT_OBJECT_0)
 			break;
 
 		//verificar variação do preço das ações
@@ -310,6 +311,10 @@ void WINAPI threadVariacaoPrecoHandler (PVOID p) {
 		}
 		// depois de verificar as variações, guardar os novos dados para a próxima verificação
 		memcpy(listaEmpresas, td->dto->dadosP->empresas, numEmpresas * sizeof(Empresa));
+		// assinalar o evento para atualizar o board
+		WaitForSingleObject(td->dto->pSync->hMtxBolsa, INFINITE);
+		SetEvent(td->dto->hUpdateEvent);
+		ReleaseMutex(td->dto->pSync->hMtxBolsa);
 		LeaveCriticalSection(&td->dto->pSync->csEmpresas);
 	}
 	CloseHandle(hTimerV);

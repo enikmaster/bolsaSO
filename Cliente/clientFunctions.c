@@ -33,7 +33,7 @@ DWORD verificaComando(TCHAR* comando) {
 }
 
 // comandos do cliente
-BOOL comandoLogin(HANDLE* hPipe, TCHAR* username, TCHAR* password) {
+void comandoLogin(HANDLE* hPipe, TCHAR* username, TCHAR* password) {
 	Mensagem mensagem = { 0 };
 	mensagem.TipoM = TMensagem_LOGIN;
 	memcpy(mensagem.nome, username, (_tcslen(username) + 1) * sizeof(TCHAR));

@@ -9,7 +9,7 @@
 DWORD verificaComando(TCHAR*);
 
 // comandos do cliente
-BOOL comandoLogin(HANDLE*, TCHAR*, TCHAR*);
+void comandoLogin(HANDLE*, TCHAR*, TCHAR*);
 
 void comandoListc(HANDLE*);
 

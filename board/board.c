@@ -1,45 +1,22 @@
 #include "../Servidor/constantes.h"
 #include "board.h"
 
-typedef struct {
-    volatile BOOL running;  // Marca como volátil para garantir visibilidade entre threads
-    HANDLE hMap;
-    DWORD N;
-    DadosPartilhados* pDados;
-    HANDLE eventoEscrita;
-} EstadoBoard;
 
-DWORD WINAPI WaitForCloseCommand(LPVOID param) {
+void WINAPI WaitForCloseCommand(PVOID param) {
     EstadoBoard* estado = (EstadoBoard*)param;
-    TCHAR command[10];
+    TCHAR comando[TAM_COMANDO];
 
-    while (estado->running) {
-        if (_tscanf_s(_T("%9s"), command, (unsigned)_countof(command)) > 0) {
-            if (_tcsicmp(command, _T("close")) == 0) {
-                estado->running = FALSE; //crit section
-                SetEvent(estado->eventoEscrita);
-            }
+    while (1) {
+        fflush(stdin);
+        if (_fgetts(comando, sizeof(comando) / sizeof(comando[0]), stdin) == NULL)
+            break;
+        comando[TAM_COMANDO - 1] = _T('\0');
+        if (_tcsicmp(comando, _T("close")) == 0) {
+            SetEvent(estado->eventoLocalExit);
+            break;
         }
     }
-    return 0;
 }
-
-//arranjar lógica para só mostrar as N empresas e a ultima transação quando receber um evento do servidor
-//para mostrar só quando houver alterações
-DWORD WINAPI DisplayDados(LPVOID param) {
-    EstadoBoard* estado = (EstadoBoard*)param;
-    //DadosPartilhados* pDados = (DadosPartilhados*)(estado->hMap);
-
-    while (estado->running) {
-        WaitForSingleObject(estado->eventoEscrita, 3000); //espera por um evento
-       
-        OrganizarEExibirEmpresas(estado->pDados, estado->N);
-
-        ResetEvent(estado->eventoEscrita);
-    }
-    return 0;
-}
-
 
 int _tmain(int argc, TCHAR** argv) {
 #ifdef UNICODE
@@ -53,21 +30,21 @@ int _tmain(int argc, TCHAR** argv) {
 
     if (argc != 2) {
         _tprintf_s(ERRO_INVALID_N_ARGS);
-        return -2;
+        ExitProcess(-1);
     }
 
     DWORD N = _tstoi(argv[1]);
     if (N <= 0 || N > TAM_MAX_EMPRESAS) {
         _tprintf_s(INFO_NUMERO_EMPRESAS);
-        return -3;
+        ExitProcess(-1);
     }
 
-    EstadoBoard estado = { .running = TRUE, .hMap = NULL, .N = N, NULL};  // Inicializa a estrutura de estado
+    EstadoBoard estado = { .hMap = NULL, .N = N, NULL};  // Inicializa a estrutura de estado
 
     estado.hMap = OpenFileMapping(FILE_MAP_READ, FALSE, NOME_SHARED_MEMORY);
     if (estado.hMap == NULL) {
-        _tprintf_s(ERRO_OPEN_FILE_MAPPING, GetLastError());
-        return -1;
+        _tprintf_s(ERRO_OPEN_FILE_MAPPING);
+        ExitProcess(-1);
     }
 
     estado.pDados = (DadosPartilhados*)MapViewOfFile(
@@ -78,18 +55,18 @@ int _tmain(int argc, TCHAR** argv) {
         sizeof(DadosPartilhados));
 
     if (estado.pDados == NULL) {
-        _tprintf_s(ERRO_CREATE_FILE_MAPPING, GetLastError());
+        _tprintf_s(ERRO_CREATE_FILE_MAPPING);
         CloseHandle(estado.hMap);
-        return -1;
+        ExitProcess(-1);
     }
 
-    //open do evento
-    estado.eventoEscrita = OpenEventW(EVENT_MODIFY_STATE | SYNCHRONIZE, FALSE, NOME_EVENTO_BOARD);
+    //open do evento de atualização dos dados
+    estado.eventoEscrita = OpenEvent(EVENT_MODIFY_STATE | SYNCHRONIZE, FALSE, NOME_EVENTO_BOARD);
     if (estado.eventoEscrita == NULL) {
         _tprintf_s(ERRO_CREATE_EVENT);
         UnmapViewOfFile(estado.pDados);
         CloseHandle(estado.hMap);
-        return -1;
+        ExitProcess(-1);
     }
 
     // Reset the event
@@ -98,8 +75,30 @@ int _tmain(int argc, TCHAR** argv) {
         UnmapViewOfFile(estado.pDados);
         CloseHandle(estado.hMap);
         CloseHandle(estado.eventoEscrita);
-        return -1;
+        ExitProcess(-1);
     }
+
+    // open do evento exit do servidor
+    estado.eventoExit = OpenEvent(EVENT_MODIFY_STATE | SYNCHRONIZE, FALSE, NOME_EVENTO_EXIT);
+    if (estado.eventoExit == NULL) {
+		_tprintf_s(ERRO_CREATE_EVENT);
+		UnmapViewOfFile(estado.pDados);
+		CloseHandle(estado.hMap);
+		CloseHandle(estado.eventoEscrita);
+        ExitProcess(-1);
+	}
+
+    estado.eventoLocalExit = CreateEvent(NULL, TRUE, FALSE, NULL);
+    if (estado.eventoLocalExit == NULL) {
+		_tprintf_s(ERRO_CREATE_EVENT);
+		UnmapViewOfFile(estado.pDados);
+		CloseHandle(estado.hMap);
+		CloseHandle(estado.eventoEscrita);
+		CloseHandle(estado.eventoExit);
+        ExitProcess(-1);
+	}
+
+    HANDLE hEvents[3] = { estado.eventoEscrita, estado.eventoExit, estado.eventoLocalExit };
 
     HANDLE hThreadCommand = CreateThread(NULL, 0, WaitForCloseCommand, &estado, 0, NULL);
     if(hThreadCommand == NULL) {
@@ -107,29 +106,39 @@ int _tmain(int argc, TCHAR** argv) {
         UnmapViewOfFile(estado.pDados);
         CloseHandle(estado.hMap);
         CloseHandle(estado.eventoEscrita);
-        return -1;
+        CloseHandle(estado.eventoExit);
+        CloseHandle(estado.eventoLocalExit);
+        ExitProcess(-1);
     }
-    HANDLE hThreadDisplay = CreateThread(NULL, 0, DisplayDados, &estado, 0, NULL);
-    if(hThreadDisplay == NULL) {
-		_tprintf_s(ERRO_CREATE_THREAD);
-		UnmapViewOfFile(estado.pDados);
-		CloseHandle(estado.hMap);
-        CloseHandle(estado.eventoEscrita);
-        CloseHandle(hThreadCommand);    
-		return -1;
-	}
-   
+  
+    DWORD dwWaitResult = 0;
+    _tprintf_s(_T("Escreva 'close' para terminar o programa:\n"));
+    while (1) {
+        
+        dwWaitResult = WaitForMultipleObjects(3, hEvents, FALSE, 10000); //espera por um evento
+        if(dwWaitResult == WAIT_OBJECT_0 + 1 || dwWaitResult == WAIT_OBJECT_0 + 2) {
+            _tprintf_s(INFO_CLOSEC);
+			break;
+		}
+
+        OrganizarEExibirEmpresas(estado.pDados, estado.N);
+        _tprintf_s(_T("Escreva 'close' para terminar o programa:\n"));
+        ResetEvent(estado.eventoEscrita);
+    }
+    // Cancelamento da thread de comando
+    CancelSynchronousIo(hThreadCommand);
+    
     WaitForSingleObject(hThreadCommand, INFINITE);
-    estado.running = FALSE;
-   
-    WaitForSingleObject(hThreadDisplay, INFINITE);
+
+    CloseHandle(hThreadCommand);
 
     // Limpeza e fecho de recursos
     UnmapViewOfFile(estado.pDados);
     CloseHandle(estado.hMap);
     CloseHandle(estado.eventoEscrita);
-    CloseHandle(hThreadCommand);
-	CloseHandle(hThreadDisplay);
+    CloseHandle(estado.eventoExit);
+    CloseHandle(estado.eventoLocalExit);
+    //CloseHandle(hThreadCommand);
 
-    return 0;
+    ExitProcess(0);
 }
