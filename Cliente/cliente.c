@@ -25,6 +25,7 @@ int _tmain(int argc, TCHAR** argv)
 		ExitProcess(-1);
 	}
 
+
 	LARGE_INTEGER liDueTime;
 	liDueTime.QuadPart = -100000000LL;
 
