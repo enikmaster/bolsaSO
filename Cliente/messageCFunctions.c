@@ -1,6 +1,6 @@
 #include "cliente.h"
 
-// funções de tratamento de mensagens no cliente
+// funÃ§Ãµes de tratamento de mensagens no cliente
 void mensagemRLogin(Mensagem mensagem){
 	_tprintf_s(mensagem.sucesso ? INFO_LOGIN : ERRO_LOGIN);
 	_tprintf_s(COMANDO);
@@ -8,7 +8,7 @@ void mensagemRLogin(Mensagem mensagem){
 
 void mensagemRListc(Mensagem mensagem){
 	if(mensagem.quantidade != 0) {
-		_tprintf_s(_T("Empresas disponíveis:\n"));
+		_tprintf_s(_T("-- Empresas disponÃ­veis:\n"));
 		for (DWORD i = 0; i < mensagem.quantidade; ++i) {
 			_tprintf_s(INFO_LISTC, mensagem.empresas[i].nome, mensagem.empresas[i].quantidadeAcoes, mensagem.empresas[i].valorAcao);
 		}
@@ -41,7 +41,7 @@ void mensagemRBalance(Mensagem mensagem){
 
 void mensagemRWallet(Mensagem mensagem){
 	if(mensagem.quantidade != 0) {
-		_tprintf_s(_T("-- Carteira de Ações:\n"));
+		_tprintf_s(_T("-- Carteira de AÃ§Ãµes:\n"));
 		for (DWORD i = 0; i < mensagem.quantidade; ++i) {
 			_tprintf_s(INFO_WALLET, mensagem.carteiraAcoes[i].nomeEmpresa, mensagem.carteiraAcoes[i].quantidadeAcoes);
 		}

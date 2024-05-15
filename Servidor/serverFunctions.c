@@ -2,16 +2,17 @@
 
 // funções da plataforma
 DWORD verificaComando(const TCHAR* comando) {
-	const TCHAR listaComandos[][TAM_COMANDO] = { _T("addc"), _T("listc"), _T("stock"), _T("users"), _T("pause"), _T("load"), _T("close")};
+	const TCHAR listaComandos[][TAM_COMANDO] = { _T("addc"), _T("listc"), _T("stock"), _T("users"), _T("pause"), _T("load"), _T("close") };
 
 	// comando sem argumentos
 	if (_tcschr(comando, _T(' ')) == NULL) {
-		for(DWORD i = 0; i < sizeof(listaComandos) / sizeof(listaComandos[0]); ++i) {
+		for (DWORD i = 0; i < sizeof(listaComandos) / sizeof(listaComandos[0]); ++i) {
 			if (_tcscmp(comando, listaComandos[i]) == 0) {
 				return i + 1;
 			}
 		}
-	} else {
+	}
+	else {
 		TCHAR comandoTemp[TAM_COMANDO];
 		TCHAR argumentos[TAM_COMANDO];
 		memset(comandoTemp, 0, sizeof(comandoTemp));
@@ -21,7 +22,7 @@ DWORD verificaComando(const TCHAR* comando) {
 		// garantir que a string é terminada com zero
 		comandoTemp[TAM_COMANDO - 1] = _T('\0');
 
-		for(DWORD i = 0; i <sizeof(listaComandos) / sizeof(listaComandos[0]); ++i) {
+		for (DWORD i = 0; i < sizeof(listaComandos) / sizeof(listaComandos[0]); ++i) {
 			if (_tcscmp(comandoTemp, listaComandos[i]) == 0) {
 				return ++i;
 			}
@@ -76,13 +77,15 @@ DWORD lerCriarRegistryKey() {
 	if (res == ERROR_SUCCESS) {
 		RegQueryValueEx(hKey, NULL, NULL, NULL, (LPBYTE)&limiteClientes, &tamanho);
 		_tprintf_s(_T("[INFO] O valor lido no registry para NCLIENTES foi: %lu\n"), limiteClientes);
-	} else {
+	}
+	else {
 		res = RegCreateKeyEx(HKEY_CURRENT_USER, nomeKey, 0, NULL, REG_OPTION_NON_VOLATILE, KEY_WRITE, NULL, &hKey, &res);
 		if (res == ERROR_SUCCESS) {
 			RegSetValueEx(hKey, NULL, 0, REG_DWORD, (const BYTE*)&nClientes, sizeof(DWORD));
 			_tprintf_s(_T("O valor NCLIENTES escrito no registry foi: %lu\n"), nClientes);
 			limiteClientes = nClientes;
-		} else 
+		}
+		else
 			_tprintf_s(ERRO_CREATE_KEY_NCLIENTES);
 	}
 
@@ -244,13 +247,13 @@ void comandoUsers(DataTransferObject* dto) {
 
 BOOL comandoPause(ThreadData* td, DWORD numeroSegundos) {
 	system("cls");
-	if(td->dto->pausado) {
+	if (td->dto->pausado) {
 		_tprintf_s(INFO_JA_PAUSADO);
 		return FALSE;
 	}
 
 	td->dto->numSegundos = numeroSegundos;
-	
+
 	HANDLE hThread = CreateThread(NULL, 0, threadPauseHandler, td, 0, NULL);
 	if (hThread == NULL) {
 		_tprintf_s(ERRO_CREATE_THREAD);
@@ -294,7 +297,7 @@ int comandoLoad(DataTransferObject* dto, TCHAR* nomeFicheiro) {
 	DWORD numEmpresasAteMax = 0;
 	EnterCriticalSection(&dto->pSync->csEmpresas);
 	numEmpresasAteMax = TAM_MAX_EMPRESAS - dto->dadosP->numEmpresas;
-	if(numEmpresasAteMax > 0) {
+	if (numEmpresasAteMax > 0) {
 		if (numEmpresasLidas <= numEmpresasAteMax) {
 			CopyMemory(&dto->dadosP->empresas[dto->dadosP->numEmpresas], eLocal, numEmpresasLidas * sizeof(Empresa));
 			dto->dadosP->numEmpresas += numEmpresasLidas;

@@ -1,3 +1,7 @@
 spaceX 1000 50
 metroMondego 100 75
-ações 123 100
+microsoft 123 100
+galp 1500 23
+apple 600 50
+xiaomi 956 42.56
+edp 654 86.54

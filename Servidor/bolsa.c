@@ -2,14 +2,14 @@
 #include "constantes.h"
 
 int _tmain(int argc, TCHAR** argv) {
-	#ifdef UNICODE
+#ifdef UNICODE
 	DWORD x1, x2, x3;
-		x1 = _setmode(_fileno(stdin), _O_WTEXT);
-		x2 = _setmode(_fileno(stdout), _O_WTEXT);
-		x3 = _setmode(_fileno(stderr), _O_WTEXT);
-		if (x1 == -1 || x2 == -1 || x3 == -1)
-			ExitProcess(-1);
-	#endif
+	x1 = _setmode(_fileno(stdin), _O_WTEXT);
+	x2 = _setmode(_fileno(stdout), _O_WTEXT);
+	x3 = _setmode(_fileno(stderr), _O_WTEXT);
+	if (x1 == -1 || x2 == -1 || x3 == -1)
+		ExitProcess(-1);
+#endif
 	if (argc != 2) {
 		_tprintf_s(ERRO_INVALID_N_ARGS);
 		ExitProcess(-1);
@@ -19,7 +19,7 @@ int _tmain(int argc, TCHAR** argv) {
 	HANDLE hSemaphore = OpenSemaphore(SEMAPHORE_ALL_ACCESS, FALSE, NOME_SEMAFORO);
 	if (hSemaphore == NULL) {
 		hSemaphore = CreateSemaphore(NULL, 1, 1, NOME_SEMAFORO);
-		if(hSemaphore == NULL) {
+		if (hSemaphore == NULL) {
 			_tprintf_s(ERRO_CREATE_SEM);
 			ExitProcess(-1);
 		}
@@ -31,17 +31,17 @@ int _tmain(int argc, TCHAR** argv) {
 
 	// Inicializar os dados do sistema
 	DataTransferObject dto;
-	if(!inicializarDTO(&dto)) {
+	if (!inicializarDTO(&dto)) {
 		_tprintf_s(ERRO_INICIALIZAR_DTO);
 		ExitProcess(-1);
 	}
 	dto.limiteClientes = lerCriarRegistryKey();
-	if(dto.limiteClientes == 0) {
+	if (dto.limiteClientes == 0) {
 		_tprintf_s(ERRO_REGISTRY);
 		terminarDTO(&dto);
 		ExitProcess(-1);
 	}
-	if(dto.limiteClientes > TAM_MAX_USERS)
+	if (dto.limiteClientes > TAM_MAX_USERS)
 		dto.limiteClientes = TAM_MAX_USERS;
 	dto.numUtilizadores = lerUtilizadores(&dto, argv[1]);
 
@@ -74,10 +74,10 @@ int _tmain(int argc, TCHAR** argv) {
 		ExitProcess(-1);
 	}
 	dto.hLimiteClientes = hLimiteClientes;
-	
+
 	// indica que todas as estruturas estão livres até ao limite de clientes possiveis
 	DWORD i;
-	for(i = 0; i < TAM_MAX_USERS; i++) {
+	for (i = 0; i < TAM_MAX_USERS; i++) {
 		listaTD[i].livre = i < dto.limiteClientes;
 		listaTD[i].dto = &dto;
 	}
@@ -99,7 +99,7 @@ int _tmain(int argc, TCHAR** argv) {
 		ExitProcess(-1);
 	}
 
-	HANDLE hEvents[2] = { hLimiteClientes, hExitEvent};
+	HANDLE hEvents[2] = { hLimiteClientes, hExitEvent };
 
 	// lançar a thread para lidar com as conexões
 	BOOL continuar = TRUE;
@@ -111,7 +111,7 @@ int _tmain(int argc, TCHAR** argv) {
 		if (i == dto.limiteClientes) {
 			_tprintf_s(ERRO_MAX_CLIENTES);
 			// meter aqui um WaitForSingleObject à espera de um evento que diga que já pode continuar
-			DWORD dwWaitResulLimiteClientes =  WaitForMultipleObjects(2, hEvents, FALSE, INFINITE);
+			DWORD dwWaitResulLimiteClientes = WaitForMultipleObjects(2, hEvents, FALSE, INFINITE);
 			if (dwWaitResulLimiteClientes == WAIT_OBJECT_0) {
 				// evento que indica que já há posições livres
 				continue;
@@ -132,7 +132,7 @@ int _tmain(int argc, TCHAR** argv) {
 			sizeof(Mensagem) * 2,
 			0,
 			NULL);
-		if(listaTD[i].hPipeInst == INVALID_HANDLE_VALUE) {
+		if (listaTD[i].hPipeInst == INVALID_HANDLE_VALUE) {
 			_tprintf_s(ERRO_CREATE_NAMED_PIPE);
 			continue;
 		}
@@ -169,7 +169,8 @@ int _tmain(int argc, TCHAR** argv) {
 			// indicar que a posição da lista de ThreadData está ocupada
 			listaTD[i].livre = FALSE;
 			_tprintf_s(INFO_CLIENTE_CONECTADO);
-		} else {
+		}
+		else {
 			_tprintf_s(ERRO_CONNECT_NAMED_PIPE);
 			CloseHandle(listaTD[i].hPipeInst);
 		}
@@ -183,7 +184,7 @@ int _tmain(int argc, TCHAR** argv) {
 	// esperar que as threads terminem
 	if (WaitForMultipleObjects(NUM_THREADS_SERVER, hThreads, TRUE, INFINITE) != WAIT_OBJECT_0)
 		_tprintf_s(ERRO_ESPERAR_THREADS);
-	for(DWORD t = 0; t < NUM_THREADS_SERVER; t++)
+	for (DWORD t = 0; t < NUM_THREADS_SERVER; t++)
 		CloseHandle(hThreads[t]);
 	CloseHandle(hExitEvent);
 	CloseHandle(hUpdateEvent);
