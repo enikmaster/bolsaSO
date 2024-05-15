@@ -8,17 +8,17 @@
 #include <string.h>
 
 // Constantes
-#define TAM_MAX_EMPRESA_ACAO 5  // carteira de a√ß√µes
-#define TAM_MAX_EMPRESAS 30 // tamanho m√°ximo de empresas
-#define TAM_MAX_USERS 20 // tamanho m√°ximo de utilizadores
-#define TAM_COMANDO 100 // tamanho m√°ximo de um comando
-#define TAM_NOME 50 // tamanho m√°ximo de um nome
-#define TAM_PASSWORD 50 // tamanho m√°ximo de uma password
-#define TAM_REGISTRY 100 // tamanho m√°ximo de uma key do registo
+#define TAM_MAX_EMPRESA_ACAO 5  // carteira de aÁıes
+#define TAM_MAX_EMPRESAS 30 // tamanho m·ximo de empresas
+#define TAM_MAX_USERS 20 // tamanho m·ximo de utilizadores
+#define TAM_COMANDO 100 // tamanho m·ximo de um comando
+#define TAM_NOME 50 // tamanho m·ximo de um nome
+#define TAM_PASSWORD 50 // tamanho m·ximo de uma password
+#define TAM_REGISTRY 100 // tamanho m·ximo de uma key do registo
 #define NUM_THREADS_SERVER 2
-#define MAX_TENTATIVAS_LIGACAO 20 // n√∫mero m√°ximo de tentativas de liga√ß√£o ao named pipe
+#define MAX_TENTATIVAS_LIGACAO 20 // n˙mero m·ximo de tentativas de ligaÁ„o ao named pipe
 #define COMANDO _T("Comando:  ")
-#define WELCOME _T("Bem-vindo ao sistema de compra e venda de a√ß√µes\n")
+#define WELCOME _T("Bem-vindo ao sistema de compra e venda de aÁıes\n")
 #define COMANDO_CLOSE _T("Escreva 'close' para terminar o programa:\n")
 
 // Nomes
@@ -32,86 +32,84 @@
 #define NOME_EVENTO_EXIT _T("EventoSairBolsa")
 
 // Mensagens de erro do sistema
-#define ERRO_INVALID_N_ARGS _T("[ERRO] N√∫mero de argumentos inv√°lido\n")
-#define ERRO_INVALID_CMD _T("[ERRO] Comando inv√°lido\n")
-#define ERRO_OPEN_FILE _T("[ERRO] N√£o foi poss√≠vel abrir o ficheiro\n")
-#define ERRO_MEM_ALLOC _T("[ERRO] Erro ao alocar mem√≥ria para o utilizador\n")
+#define ERRO_INVALID_N_ARGS _T("[ERRO] N˙mero de argumentos inv·lido\n")
+#define ERRO_INVALID_CMD _T("[ERRO] Comando inv·lido\n")
+#define ERRO_OPEN_FILE _T("[ERRO] N„o foi possÌvel abrir o ficheiro\n")
 #define ERRO_CREATE_KEY_NCLIENTES _T("[ERRO] Erro ao criar a key NCLIENTES\n")
 #define ERRO_CREATE_FILE_MAPPING _T("[ERRO] Erro ao criar file mapping\n")
 #define ERRO_CREATE_MAP_VIEW _T("[ERRO] Erro ao criar file mapping view\n")
 #define ERRO_OPEN_FILE_MAPPING _T("[ERRO] Erro ao abrir file mapping\n")
-#define ERRO_CREATE_SEM _T("[ERRO] Erro ao criar sem√°foro\n")
+#define ERRO_CREATE_SEM _T("[ERRO] Erro ao criar sem·foro\n")
 #define ERRO_CREATE_MUTEX _T("[ERRO] Erro ao criar mutex\n")
 #define ERRO_CREATE_NAMED_PIPE _T("[ERRO] Erro ao criar named pipe\n")
 #define ERRO_CREATE_THREAD _T("[ERRO] Erro ao criar thread\n")
 #define ERRO_CREATE_EVENT _T("[ERRO] Erro ao criar evento\n")
 #define ERRO_RESET_EVENT _T("[ERRO] Erro ao resetar evento\n")
 #define ERRO_ESPERAR_THREADS _T("[ERRO] Erro ao esperar que as threads terminem\n")
-#define ERRO_MAX_CLIENTES _T("[ERRO] Limite m√°ximo de clientes ativos atingido\n")
+#define ERRO_MAX_CLIENTES _T("[ERRO] Limite m·ximo de clientes ativos atingido\n")
 #define ERRO_INICIALIZAR_DTO _T("[ERRO] Erro a incializar o sistema\n")
 #define ERRO_READ_PIPE _T("[ERRO] Erro ao ler do named pipe\n")
 #define ERRO_CONNECT_NAMED_PIPE _T("[ERRO] Erro ao conectar ao named pipe\n")
-#define ERRO_PIPE_BUSY _T("[ERRO] O named pipe est√° ocupado\n")
-#define ERRO_BROKEN_PIPE _T("[ERRO] A conex√£o foi interrompida\n")
+#define ERRO_PIPE_BUSY _T("[ERRO] O named pipe est· ocupado\n")
+#define ERRO_BROKEN_PIPE _T("[ERRO] A conex„o foi interrompida\n")
 #define ERRO_SET_PIPE_STATE _T("[ERRO] Erro ao definir o estado do named pipe\n")
 #define ERRO_LEITURA_MSG _T("[ERRO] Erro ao ler a mensagem\n")
 #define ERRO_ESCRITA_MSG _T("[ERRO] Erro ao escrever a mensagem\n")
-#define ERRO_INVALID_MSG _T("[ERRO] Mensagem inv√°lida\n")
-#define ERRO_MEMORIA _T("[ERRO] Erro ao alocar mem√≥ria\n")
+#define ERRO_INVALID_MSG _T("[ERRO] Mensagem inv·lida\n")
+#define ERRO_MEMORIA _T("[ERRO] Erro ao alocar memÛria\n")
 #define ERRO_REGISTRY _T("[ERRO] Erro ao ler o registo\n")
 #define ERRO_CREATE_TIMER _T("[ERRO] Erro ao criar o timer\n")
 #define ERRO_SET_TIMER _T("[ERRO] Erro ao definir o timer\n")
-#define ERRO_MAX_TENTATIVAS _T("[ERRO] N√∫mero m√°ximo de tentativas de liga√ß√£o atingido\n")
-#define ERRO_LIGAR_BOLSA _T("[ERRO] N√£o existe nenhum servidor Bolsa para liga√ß√£o\n")
-#define ERRO_MALLOC _T("[ERRO] Erro ao alocar mem√≥ria\n")
-#define ERRO_SEM_JA_INICIADO _T("[ERRO] O sem√°foro j√° foi iniciado (OUTRO BOLSA LIGADO)\n")
-#define ERRO_NUMERO_EMPRESAS _T("[ERRO] N√∫mero de empresas inv√°lido (1 - 10)\n")
-#define ERRO_DPARTILHADOS _T("[ERRO] A estrutura DadosPartilhados est√° vazia\n")
+#define ERRO_MAX_TENTATIVAS _T("[ERRO] N˙mero m·ximo de tentativas de ligaÁıes atingido\n")
+#define ERRO_LIGAR_BOLSA _T("[ERRO] N„o existe nenhum servidor Bolsa para ligaÁ„o\n")
+#define ERRO_SEM_JA_INICIADO _T("[ERRO] O sem·foro j· foi iniciado (OUTRO BOLSA LIGADO)\n")
+#define ERRO_NUMERO_EMPRESAS _T("[ERRO] N√É¬∫mero de empresas inv·lido (1 - 10)\n")
+#define ERRO_DPARTILHADOS _T("[ERRO] A estrutura DadosPartilhados est· vazia\n")
 
 // Mensages de erro do administrador
 #define ERRO_ADDC _T("[ERRO] Erro ao adicionar a empresa\n")
 #define ERRO_LOAD _T("[ERRO] Erro ao carregar as empresas\n")
-#define ERRO_STOCK _T("[ERRO] Erro a altera o valor da a√ß√£o\n")
+#define ERRO_STOCK _T("[ERRO] Erro a altera o valor da aÁ„o\n")
 
 // Mensagens de erro do utilizador
 #define ERRO_LOGIN _T("[ERRO] Erro ao efetuar login\n")
 #define ERRO_NO_LOGIN _T("[ERRO] Efetue o login primeiro\n")
-#define ERRO_ALREADY_LOGIN _T("[ERRO] J√° efetuou login\n")
-#define ERRO_EMPRESA_NAO_EXISTE _T("[ERRO] A empresa n√£o existe\n")
-#define ERRO_COMPRA _T("[ERRO] N√£o foi poss√≠vel efetuar a compra\n")
-#define ERRO_VENDA _T("[ERRO] N√£o foi poss√≠vel efetuar a venda\n")
+#define ERRO_ALREADY_LOGIN _T("[ERRO] J· efetuou login\n")
+#define ERRO_EMPRESA_NAO_EXISTE _T("[ERRO] A empresa n„o existe\n")
+#define ERRO_COMPRA _T("[ERRO] N„o foi possÌvel efetuar a compra\n")
+#define ERRO_VENDA _T("[ERRO] N„o foi possÌvel efetuar a venda\n")
 
-// Mensagens de informa√ß√£o
-#define INFO_ADDC _T("[INFO] A empresa %s foi adicionada √† bolsa\n")
+// Mensagens de informaÁ„o
+#define INFO_ADDC _T("[INFO] A empresa %s foi adicionada ‡ bolsa\n")
 #define INFO_LOAD _T("[INFO] Foram adicionadas %lu empresas com sucesso\n")
 #define INFO_STOCK _T("[INFO] Valor da empresa %s alterado com sucesso para %.2lf\n")
 #define INFO_LOGIN _T("[INFO] Login efetuado com sucesso\n")
-#define INFO_LISTC _T("Nome: %s \tA√ß√µes dispon√≠veis: %lu \tPre√ßo atual por a√ß√£o: %.2lf\n")
-#define INFO_LISTC_VAZIA _T("[INFO] N√£o existem empresas dispon√≠veis\n")
+#define INFO_LISTC _T("Nome: %s \tAÁıes disponÌveis: %lu \tPreÁo atual por aÁ„o: %.2lf\n")
+#define INFO_LISTC_VAZIA _T("[INFO] N„o existem empresas disponÌveis\n")
 #define INFO_USERS _T("Username: %s \tSaldo: %lf \tEstado: %s\n")
-#define INFO_CLIENTE_CONECTADO _T("[INFO] Cliente conectado, thread criada e lan√ßada\n")
+#define INFO_CLIENTE_CONECTADO _T("[INFO] Cliente conectado, thread criada e lanÁada\n")
 #define INFO_CLIENTE_DESCONECTADO _T("[INFO] Cliente %s saiu\n")
 #define INFO_SALDO _T("[INFO] Saldo atual: %.2lf\n")
-#define INFO_COMPRA _T("[INFO] Compra de ac√µes da empresa %s efetuada com sucesso\n")
-#define INFO_VENDA _T("[INFO] Venda de ac√µes da empresa %s efetuada com sucesso\n")
-#define INFO_WALLET_VAZIA _T("[INFO] Carteira de a√ß√µes vazia\n")
+#define INFO_COMPRA _T("[INFO] Compra de aÁıes da empresa %s efetuada com sucesso\n")
+#define INFO_VENDA _T("[INFO] Venda de aÁıes da empresa %s efetuada com sucesso\n")
+#define INFO_WALLET_VAZIA _T("[INFO] Carteira de aÁıes vazia\n")
 #define INFO_WALLET _T("Empresa: %s \tQuantidade: %lu\n")
-#define INFO_ULTIMA_TRANSACAO _T("Ultima Transa√ß√£o: %s - %lu e %.2f\n")
-#define INFO_CLOSEC _T("[INFO] O programa bolsa est√° a terminar e este tamb√©m\n")
-#define INFO_PAUSE _T("[INFO] As transa√ß√µes est√£o suspensas por %lu segundos\n")
-#define INFO_JA_PAUSADO _T("[INFO] As transa√ß√µes j√° est√£o suspensas\n")
-#define INFO_PAUSE_END _T("[INFO] A interrup√ß√£o foi suspensa porque o programa bolsa vair terminar\n")
-#define INFO_RESUME _T("[INFO] As transa√ß√µes foram retomadas\n")
+#define INFO_ULTIMA_TRANSACAO _T("Ultima TransaÁ„o: %s - %lu e %.2f\n")
+#define INFO_CLOSEC _T("[INFO] O programa bolsa est· a terminar e este tambÈm\n")
+#define INFO_PAUSE _T("[INFO] As transaÁıes est„o suspensas por %lu segundos\n")
+#define INFO_JA_PAUSADO _T("[INFO] As transaÁıes j· est„o suspensas\n")
+#define INFO_PAUSE_END _T("[INFO] A interrupÁ„o foi suspensa porque o programa bolsa vair terminar\n")
+#define INFO_RESUME _T("[INFO] As transaÁıes foram retomadas\n")
 
 
 #define INFO_TOP_EMPRESAS _T("Top %d Empresas Mais Valiosas:\n")
-#define INFO_EMPRESA_ACOES _T("%d. %s - A√ß√µes: %lu, Valor por A√ß√£o: %.2f, Valor de Mercado: %.2f\n")
-#define INFO_EMPRESAS_VAZIA _T("[INFO] Ainda n√£o existem empresas cotadas em bolsa\n")
+#define INFO_EMPRESA_ACOES _T("%d. %s - AÁıes: %lu, Valor por AÁ„o: %.2f, Valor de Mercado: %.2f\n")
+#define INFO_EMPRESAS_VAZIA _T("[INFO] Ainda n„o existem empresas cotadas em bolsa\n")
 
 // Mensagens de debug
 #define DEBUGGER _T("\n[DEBUG] Estou aqui\n")
 
-// Tipos de transa√ß√£o
+// Tipos de trnsaÁ„o
 typedef enum {
     TTransacao_COMPRA,
     TTransacao_VENDA
@@ -155,14 +153,14 @@ typedef struct ThreadData ThreadData;
 typedef struct ClienteData ClienteData;
 typedef struct EstadoBoard EstadoBoard;
 
-// Estrutura que representa informa√ß√µes gerais de uma empresa
+// Estrutura que representa informaÁıes gerais de uma empresa
 struct Empresa {
     TCHAR nome[TAM_NOME];
     DWORD quantidadeAcoes;
     double valorAcao;
 };
 
-// Estrutura que representa a rela√ß√£o entre uma empresa e as a√ß√µes que um utilizador tem dessa empresa
+// Estrutura que representa a relaÁ„o entre uma empresa e as aÁıes que um utilizador tem dessa empresa
 struct EmpresaAcao {
     TCHAR nomeEmpresa[50];
     DWORD quantidadeAcoes;
@@ -178,7 +176,7 @@ struct Utilizador {
     DWORD numEmpresasAcoes;
 };
 
-// Estrutura que detalha transa√ß√£o de compra ou venda
+// Estrutura que detalha transaÁıes de compra ou venda
 struct DetalhesTransacao {
     TipoTransacao TipoT;
     TCHAR nomeEmpresa[TAM_NOME];
@@ -186,7 +184,7 @@ struct DetalhesTransacao {
     double precoPorAcao;
 };
 
-// Estrutura para comunicac√£o entre cliente e servidor
+// Estrutura para comunicaÁ„o entre cliente e servidor
 struct Mensagem {
     TipoMensagem TipoM;
     TCHAR nome[TAM_NOME];
@@ -200,14 +198,14 @@ struct Mensagem {
     BOOL continuar;
 };
 
-// Estrutura de Mem√≥ria partilhada
+// Estrutura de memÛria partilhada
 struct DadosPartilhados {
     Empresa empresas[TAM_MAX_EMPRESAS];
     DWORD numEmpresas;
     DetalhesTransacao ultimaTransacao;
 };
 
-// Estrutura de mecanismos de sincoriza√ß√£o
+// Estrutura de mecanismos de sincronizaÁ„o
 struct Sync {
     HANDLE hMtxBolsa;
     CRITICAL_SECTION csContinuar;
@@ -230,15 +228,15 @@ struct DataTransferObject {
     BOOL pausado;
     DWORD numSegundos;
     HANDLE hLimiteClientes;
-    HANDLE hExitEvent; // handle para evento de sa√≠da
-    HANDLE hUpdateEvent; // handle p evento de altera√ß√£o da board
+    HANDLE hExitEvent; // handle para evento de saÌda
+    HANDLE hUpdateEvent; // handle p evento de alteraÁ„o da board
 };
 
 // Estrutura para lidar com threads no servidor
 struct ThreadData {
     DataTransferObject* dto;
     HANDLE hPipeInst;
-    BOOL livre; // indica se a thread est√° livre para ser usada
+    BOOL livre; // indica se a thread est· livre para ser usada
 };
 
 // Estrutura para lidar com threads no cliente
@@ -251,7 +249,6 @@ struct ClienteData {
 
 // Estrutura para lidar com threads no board
 struct EstadoBoard {
-    //volatile BOOL running;  // Marca como vol√°til para garantir visibilidade entre threads
     HANDLE hMap;
     DWORD N;
     DadosPartilhados* pDados;
