@@ -2,7 +2,7 @@
 #include "..\Servidor\constantes.h"
 #include "cliente.h"
 
-// funções da plataforma
+// funÃ§Ãµes da plataforma
 DWORD verificaComando(TCHAR* comando) {
 	const TCHAR listaComandos[][TAM_COMANDO] = { _T("login"), _T("listc"), _T("buy"), _T("sell"), _T("balance"), _T("wallet"), _T("exit") };
 
@@ -21,7 +21,7 @@ DWORD verificaComando(TCHAR* comando) {
 		memset(argumentos, 0, sizeof(argumentos));
 		_stscanf_s(comando, _T("%s %s"), comandoTemp, TAM_COMANDO, argumentos, TAM_COMANDO);
 
-		// garantir que a string é terminada com zero
+		// garantir que a string Ã© terminada com zero
 		comandoTemp[TAM_COMANDO - 1] = _T('\0');
 
 		for (DWORD i = 0; i < sizeof(listaComandos) / sizeof(listaComandos[0]); ++i) {

@@ -60,7 +60,7 @@ int _tmain(int argc, TCHAR** argv) {
         ExitProcess(-1);
     }
 
-    //open do evento de atualização dos dados
+    //open do evento de atualizaÃ§Ã£o dos dados
     estado.eventoEscrita = OpenEvent(EVENT_MODIFY_STATE | SYNCHRONIZE, FALSE, NOME_EVENTO_BOARD);
     if (estado.eventoEscrita == NULL) {
         _tprintf_s(ERRO_CREATE_EVENT);
@@ -69,7 +69,7 @@ int _tmain(int argc, TCHAR** argv) {
         ExitProcess(-1);
     }
 
-    // Reset the event
+    // Reset do evento
     if (!ResetEvent(estado.eventoEscrita)) {
         _tprintf_s(ERRO_RESET_EVENT);
         UnmapViewOfFile(estado.pDados);
@@ -112,7 +112,7 @@ int _tmain(int argc, TCHAR** argv) {
     }
 
     DWORD dwWaitResult = 0;
-    _tprintf_s(_T("Escreva 'close' para terminar o programa:\n"));
+    _tprintf_s(COMANDO_CLOSE);
     while (1) {
 
         dwWaitResult = WaitForMultipleObjects(3, hEvents, FALSE, 10000); //espera por um evento
@@ -122,7 +122,7 @@ int _tmain(int argc, TCHAR** argv) {
         }
 
         OrganizarEExibirEmpresas(estado.pDados, estado.N);
-        _tprintf_s(_T("Escreva 'close' para terminar o programa:\n"));
+        _tprintf_s(COMANDO_CLOSE);
         ResetEvent(estado.eventoEscrita);
     }
     // Cancelamento da thread de comando

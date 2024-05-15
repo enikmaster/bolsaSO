@@ -1,6 +1,6 @@
 #include "servidor.h"
 
-// funções das threads
+// funÃ§Ãµes das threads
 void WINAPI threadComandosAdminHandler(PVOID p) {
 	ThreadData* td = (ThreadData*)p;
 
@@ -30,11 +30,11 @@ void WINAPI threadComandosAdminHandler(PVOID p) {
 			numArgumentos = _stscanf_s(
 				comando,									  // buffer de onde ler
 				_T("%s %s %s %s %s"),                         // formato para "partir" a string
-				comandoTemp, (unsigned)_countof(comandoTemp), // variável onde guardar o comando + tamanho do buffer
-				argumento1, (unsigned)_countof(argumento1),   // variável onde guardar o 1º argumento + tamanho do buffer
-				argumento2, (unsigned)_countof(argumento2),   // variável onde guardar o 2º argumento + tamanho do buffer
-				argumento3, (unsigned)_countof(argumento3),   // variável onde guardar o 3º argumento + tamanho do buffer
-				failSafe, (unsigned)_countof(failSafe));      // variável de segurança + tamanho do buffer (se preenchida o num de argumentos estará a mais)
+				comandoTemp, (unsigned)_countof(comandoTemp), // variÃ¡vel onde guardar o comando + tamanho do buffer
+				argumento1, (unsigned)_countof(argumento1),   // variÃ¡vel onde guardar o 1Âº argumento + tamanho do buffer
+				argumento2, (unsigned)_countof(argumento2),   // variÃ¡vel onde guardar o 2Âº argumento + tamanho do buffer
+				argumento3, (unsigned)_countof(argumento3),   // variÃ¡vel onde guardar o 3Âº argumento + tamanho do buffer
+				failSafe, (unsigned)_countof(failSafe));      // variÃ¡vel de seguranÃ§a + tamanho do buffer (se preenchida o num de argumentos estarÃ¡ a mais)
 			if (numArgumentos != 4) {
 				_tprintf_s(ERRO_INVALID_N_ARGS);
 			}
@@ -77,7 +77,6 @@ void WINAPI threadComandosAdminHandler(PVOID p) {
 			comandoUsers(td->dto);
 			break;
 		case 5: // comando pause
-			_tprintf_s(_T("[INFO] Comando pause\n")); // para apagar
 			numArgumentos = _stscanf_s(
 				comando,
 				_T("%s %s %s"),
@@ -120,7 +119,7 @@ void WINAPI threadComandosAdminHandler(PVOID p) {
 			repetir = comandoClose(td);
 			break;
 		case 0:
-		default: // comando inválido
+		default: // comando invÃ¡lido
 			_tprintf_s(ERRO_INVALID_CMD);
 			break;
 		}
@@ -159,8 +158,8 @@ void WINAPI threadClientHandler(PVOID p) {
 		BOOL fSuccess = ReadFile(
 			td->hPipeInst, // handle do named pipe
 			&mensagemRead,	// buffer de leitura
-			sizeof(Mensagem),	// número de bytes a ler
-			&bytesLidos,	// número de bytes lidos
+			sizeof(Mensagem),	// numero de bytes a ler
+			&bytesLidos,	// numero de bytes lidos
 			&ov);	// estrutura overlapped)
 		// leitura pendente
 		dwWaitResult = WaitForMultipleObjects(2, hEvents, FALSE, INFINITE);
@@ -253,13 +252,10 @@ void WINAPI threadPauseHandler(PVOID p) {
 	ExitThread(0);
 }
 
-//thread para alterar o preço das ações
-//vai aceder ás empresas, e guardar num array local
-	//passado 10segundos, vai verificar se houve alterações no array das empresas
+//thread para alterar o valor das aÃ§Ãµes
 
-
-	//se a quantidade de açoes disponiveis for maior que a anterior, quer dizer que clientes venderam á bolsa ( preço das ações desce)
-	//se a quantidade de açoes disponiveis for menor que a anterior, quer dizer que clientes compraram á bolsa ( preço das ações sobe)
+	//se a quantidade de acoes disponiveis for MAIOR que a anterior, quer dizer que clientes venderam  ( valor DESCE )
+	//se a quantidade de acoes disponiveis for MENOR que a anterior, quer dizer que clientes compraram  ( valor SOBE )
 void WINAPI threadVariacaoPrecoHandler(PVOID p) {
 	ThreadData* td = (ThreadData*)p;
 	if (td == NULL) {
@@ -295,22 +291,22 @@ void WINAPI threadVariacaoPrecoHandler(PVOID p) {
 		if (WaitForSingleObject(td->dto->hExitEvent, 0) == WAIT_OBJECT_0)
 			break;
 
-		//verificar variação do preço das ações
+		//verificar variacao do valor das acoes
 		EnterCriticalSection(&td->dto->pSync->csEmpresas);
 		numEmpresas = td->dto->dadosP->numEmpresas;
-		// verificar se a listaEmpresas está vazia (primeira vez que é chamada)
+		// verificar se a listaEmpresas estÃ¡ vazia (primeira vez que Ã© chamada)
 		if (listaEmpresas->nome[0] == 0) {
 			// copiar as empresas para a listaEmpresas (primeira vez)
 			memcpy(listaEmpresas, td->dto->dadosP->empresas, numEmpresas * sizeof(Empresa));
 		}
 		for (i; i < numEmpresas; ++i) {
 			(td->dto->dadosP->empresas[i].quantidadeAcoes >= listaEmpresas[i].quantidadeAcoes) ?
-				// o preço desce
+				// o valor desce
 				(td->dto->dadosP->empresas[i].valorAcao *= (1 - percentagem)) :
-				// o preço sobe
+				// o valor sobe
 				(td->dto->dadosP->empresas[i].valorAcao *= (1 + percentagem));
 		}
-		// depois de verificar as variações, guardar os novos dados para a próxima verificação
+		// depois de verificar as variaÃ§Ãµes, guardar os novos dados para a prÃ³xima verificaÃ§Ã£o
 		memcpy(listaEmpresas, td->dto->dadosP->empresas, numEmpresas * sizeof(Empresa));
 		// assinalar o evento para atualizar o board
 		WaitForSingleObject(td->dto->pSync->hMtxBolsa, INFINITE);

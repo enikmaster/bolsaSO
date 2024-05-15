@@ -19,6 +19,7 @@
 #define MAX_TENTATIVAS_LIGACAO 20 // número máximo de tentativas de ligação ao named pipe
 #define COMANDO _T("Comando:  ")
 #define WELCOME _T("Bem-vindo ao sistema de compra e venda de ações\n")
+#define COMANDO_CLOSE _T("Escreva 'close' para terminar o programa:\n")
 
 // Nomes
 #define NOME_SHARED_MEMORY _T("Dados_Partilhados")
@@ -104,7 +105,7 @@
 
 
 #define INFO_TOP_EMPRESAS _T("Top %d Empresas Mais Valiosas:\n")
-#define INFO_EMPRESA_ACOES _T("%d. %s - Ações: %lu, Valor por Ação: %.2f, Valor de Mercado: %.2f\n"
+#define INFO_EMPRESA_ACOES _T("%d. %s - Ações: %lu, Valor por Ação: %.2f, Valor de Mercado: %.2f\n")
 #define INFO_EMPRESAS_VAZIA _T("[INFO] Ainda não existem empresas cotadas em bolsa\n")
 
 // Mensagens de debug
@@ -185,7 +186,7 @@ struct DetalhesTransacao {
     double precoPorAcao;
 };
 
-// Estrutura para comunicação entre cliente e servidor
+// Estrutura para comunicacão entre cliente e servidor
 struct Mensagem {
     TipoMensagem TipoM;
     TCHAR nome[TAM_NOME];

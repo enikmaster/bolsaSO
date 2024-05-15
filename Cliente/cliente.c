@@ -49,7 +49,7 @@ int _tmain(int argc, TCHAR** argv)
 			break;
 		}
 
-		// verificar se a conex„o foi bem sucedida
+		// verificar se a conex√£o foi bem sucedida
 		if (GetLastError() == ERROR_PIPE_BUSY) {
 			_tprintf_s(ERRO_PIPE_BUSY);
 			contadorTentativas++;
@@ -89,9 +89,9 @@ int _tmain(int argc, TCHAR** argv)
 		ExitProcess(-1);
 	}
 
-	// criar uma inst‚ncia de OVERLAPPED
+	// criar uma instancia de OVERLAPPED
 	OVERLAPPED ov = { 0 };
-	// criar um evento para a inst‚ncia de OVERLAPPED
+	// criar um evento para a instancia de OVERLAPPED
 	ov.hEvent = CreateEvent(NULL, TRUE, FALSE, NULL);
 	if (ov.hEvent == NULL) {
 		_tprintf_s(ERRO_CREATE_EVENT);

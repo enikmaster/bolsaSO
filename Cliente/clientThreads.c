@@ -103,13 +103,13 @@ void WINAPI threadComandosClienteHandler(PVOID p) {
 		case 7: // comando exit
 			repetir = comandoExit(hPipe, username, cd->logado);
 			if (repetir == FALSE) {
-				// usar mutex para garantir que o exit È feito antes de fechar o pipe
+				// usar mutex para garantir que o exit √© feito antes de fechar o pipe
 				WaitForSingleObject(cd->hMutex, INFINITE);
 				SetEvent(cd->hExitEvent);
 				ReleaseMutex(cd->hMutex);
 			}
 			break;
-		case 0: // comando inv·lido
+		case 0: // comando inv√°lido
 		default:
 			_tprintf_s(ERRO_INVALID_CMD);
 			break;

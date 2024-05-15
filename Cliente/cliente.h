@@ -5,7 +5,7 @@
 
 #include "..\Servidor\constantes.h"
 
-// funções da plataforma
+// funÃ§Ãµes da plataforma
 DWORD verificaComando(TCHAR*);
 
 // comandos do cliente
@@ -25,12 +25,12 @@ BOOL comandoExit(HANDLE*, TCHAR*, BOOL);
 
 BOOL enviarMensagem(HANDLE*, Mensagem);
 
-// funções de threads
+// funÃ§Ãµes de threads
 void WINAPI threadComandosClienteHandler(PVOID);
 
 void PrintLastError(TCHAR*, DWORD);
 
-// funções de tratamento de mensagens no cliente
+// funÃ§Ãµes de tratamento de mensagens no cliente
 void mensagemRLogin(Mensagem);
 
 void mensagemRListc(Mensagem);

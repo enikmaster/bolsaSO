@@ -1,6 +1,6 @@
 #include "servidor.h"
 
-// funções auxilares
+// funï¿½ï¿½es auxilares
 BOOL verificaEmpresa(ThreadData* td, Mensagem mensagemRead, DWORD numEmpresas, DWORD* indexEmpresa) {
 	for (*indexEmpresa = 0; *indexEmpresa < numEmpresas; ++(*indexEmpresa))
 		if (_tcscmp(mensagemRead.empresa, td->dto->dadosP->empresas[*indexEmpresa].nome) == 0)
@@ -26,7 +26,7 @@ BOOL verificaEmpresaCarteira(ThreadData* td, DWORD indexUtilizador, Mensagem men
 	return FALSE;
 }
 
-// funções de tratamento de mensagens
+// funï¿½ï¿½es de tratamento de mensagens
 void mensagemLogin(ThreadData* td, Mensagem mensagem) {
 	pUtilizador uLocais = (pUtilizador)malloc(TAM_MAX_USERS * sizeof(Utilizador));
 	if (uLocais == NULL) {
@@ -75,7 +75,7 @@ void mensagemListc(ThreadData* td) {
 	memcpy(resposta.empresas, td->dto->dadosP->empresas, sizeof(Empresa) * td->dto->dadosP->numEmpresas);
 	LeaveCriticalSection(&td->dto->pSync->csEmpresas);
 
-	enviarMensagem(hPipe, resposta, td->dto->pSync->csWrite); //enviarMensagem( para_onde, o_quê);
+	enviarMensagem(hPipe, resposta, td->dto->pSync->csWrite); //enviarMensagem( para_onde, o_quï¿½);
 }
 
 void mensagemBuy(ThreadData* td, Mensagem mensagemRead) {
@@ -90,7 +90,7 @@ void mensagemBuy(ThreadData* td, Mensagem mensagemRead) {
 	DWORD indexEA = 0;
 	double taxaVariacao = 1.2;
 
-	// 0. Verificar se está em Pausa
+	// 0. Verificar se estÃ¡ em Pausa
 	EnterCriticalSection(&td->dto->pSync->csContinuar);
 	if (td->dto->pausado) {
 		LeaveCriticalSection(&td->dto->pSync->csContinuar);
@@ -122,9 +122,9 @@ void mensagemBuy(ThreadData* td, Mensagem mensagemRead) {
 		return;
 	}
 	// o utilizador existe
-	// 3. Verificar se a quantidade de ações é válida (oferta inicial)
+	// 3. Verificar se a quantidade de aÃ§Ãµes Ã© vÃ¡lida (oferta inicial)
 	if (mensagemRead.quantidade > &td->dto->dadosP->empresas[indexEmpresa].quantidadeAcoes) {
-		// quantidade superior ao disponível na empresa
+		// quantidade superior ao disponÃ­vel na empresa
 		LeaveCriticalSection(&td->dto->pSync->csUtilizadores);
 		LeaveCriticalSection(&td->dto->pSync->csEmpresas);
 		mensagem.sucesso = FALSE;
@@ -132,7 +132,7 @@ void mensagemBuy(ThreadData* td, Mensagem mensagemRead) {
 		enviarMensagem(td->hPipeInst, mensagem, td->dto->pSync->csWrite);
 		return;
 	}
-	// quantidade válida
+	// quantidade vÃ¡lida
 	totalCompra = mensagemRead.quantidade * td->dto->dadosP->empresas[indexEmpresa].valorAcao;
 	if (totalCompra > td->dto->utilizadores[indexUtilizador].saldo) {
 		// saldo insuficiente
@@ -144,16 +144,16 @@ void mensagemBuy(ThreadData* td, Mensagem mensagemRead) {
 		return;
 	}
 	// saldo suficiente
-	// 4. Atualizar a carteira de ações do utilizador
+	// 4. Atualizar a carteira de aÃ§Ãµes do utilizador
 	numEmpresasAcoes = td->dto->utilizadores[indexUtilizador].numEmpresasAcoes;
 	for (indexEA = 0; indexEA < numEmpresasAcoes; ++indexEA) {
 		if (_tcscmp(td->dto->utilizadores[indexUtilizador].carteiraAcoes[indexEA].nomeEmpresa, mensagemRead.empresa) == 0) {
-			// empresa já existe na carteira de ações do utilizador
-			// aumenta a quantidade de ações
+			// empresa jÃ¡ existe na carteira de aÃ§Ãµes do utilizador
+			// aumenta a quantidade de aÃ§Ãµes
 			td->dto->utilizadores[indexUtilizador].carteiraAcoes[indexEA].quantidadeAcoes += mensagemRead.quantidade;
-			// alterar o valor das ações
+			// alterar o valor das aÃ§Ãµes
 			td->dto->dadosP->empresas[indexEmpresa].valorAcao *= taxaVariacao;
-			// diminui a quantidade de ações na empresa
+			// diminui a quantidade de aÃ§Ãµes na empresa
 			td->dto->dadosP->empresas[indexEmpresa].quantidadeAcoes -= mensagemRead.quantidade;
 			// atualiza o saldo do utilizador
 			td->dto->utilizadores[indexUtilizador].saldo -= totalCompra;
@@ -161,9 +161,9 @@ void mensagemBuy(ThreadData* td, Mensagem mensagemRead) {
 			break;
 		}
 	}
-	// a empresa não existe na carteira de ações do utilizador
+	// a empresa nÃ£o existe na carteira de aÃ§Ãµes do utilizador
 	if (numEmpresasAcoes == TAM_MAX_EMPRESA_ACAO && !empresaAcaoAtualizada) {
-		// carteira de ações cheia
+		// carteira de aÃ§Ãµes cheia
 		LeaveCriticalSection(&td->dto->pSync->csUtilizadores);
 		LeaveCriticalSection(&td->dto->pSync->csEmpresas);
 		mensagem.sucesso = FALSE;
@@ -171,18 +171,18 @@ void mensagemBuy(ThreadData* td, Mensagem mensagemRead) {
 		enviarMensagem(td->hPipeInst, mensagem, td->dto->pSync->csWrite);
 		return;
 	}
-	// 5. acrescentar uma EmpresaAcao à carteira de ações do utilizador
+	// 5. acrescentar uma EmpresaAcao na carteira de aÃ§Ãµes do utilizador
 	if (!empresaAcaoAtualizada) {
-		// empresa não existe na carteira de ações do utilizador
-		// acrescentar uma EmpresaAcao à carteira de ações do utilizador
+		// empresa nÃ£o existe na carteira de aÃ§Ãµes do utilizador
+		// acrescentar uma EmpresaAcao na carteira de aÃ§Ãµes do utilizador
 		td->dto->utilizadores[indexUtilizador].carteiraAcoes[indexEA].quantidadeAcoes = mensagemRead.quantidade;
 		memcpy(td->dto->utilizadores[indexUtilizador].carteiraAcoes[indexEA].nomeEmpresa, mensagemRead.empresa, (_tcslen(mensagemRead.empresa) + 1) * sizeof(TCHAR));
 	}
-	// alterar o valor das ações
+	// alterar o valor das aÃ§Ãµes
 	td->dto->dadosP->empresas[indexEmpresa].valorAcao *= taxaVariacao;
-	// diminui a quantidade de ações na empresa
+	// diminui a quantidade de aÃ§Ãµes na empresa
 	td->dto->dadosP->empresas[indexEmpresa].quantidadeAcoes -= mensagemRead.quantidade;
-	// atualiza o numero de ações na carteira de ações do utilizador
+	// atualiza o numero de aÃ§Ãµes na carteira de aÃ§Ãµes do utilizador
 	td->dto->utilizadores[indexUtilizador].numEmpresasAcoes++;
 	// atualiza o saldo do utilizador
 	td->dto->utilizadores[indexUtilizador].saldo -= totalCompra;
@@ -195,8 +195,6 @@ void mensagemBuy(ThreadData* td, Mensagem mensagemRead) {
 
 	enviarMensagem(td->hPipeInst, mensagem, td->dto->pSync->csWrite);
 }
-
-
 
 void mensagemSell(ThreadData* td, Mensagem mensagemRead) {
 	Mensagem resposta = { 0 };
@@ -211,7 +209,7 @@ void mensagemSell(ThreadData* td, Mensagem mensagemRead) {
 	DWORD numEmpresasAcoes = 0;
 	DWORD indexEA = 0;
 
-	// 0. Verificar se está em Pausa
+	// 0. Verificar se estÃ¡ em Pausa
 	EnterCriticalSection(&td->dto->pSync->csContinuar);
 	if (td->dto->pausado) {
 		LeaveCriticalSection(&td->dto->pSync->csContinuar);
@@ -244,7 +242,7 @@ void mensagemSell(ThreadData* td, Mensagem mensagemRead) {
 	}
 
 	// o utilizador existe
-	// 3. Verificar se a empresa existe na carteira de ações do utilizador
+	// 3. Verificar se a empresa existe na carteira de aÃ§Ãµes do utilizador
 	numEmpresasAcoes = td->dto->utilizadores[indexUtilizador].numEmpresasAcoes;
 	if (!verificaEmpresaCarteira(td, indexUtilizador, mensagemRead, numEmpresasAcoes, &indexEA)) {
 		LeaveCriticalSection(&td->dto->pSync->csUtilizadores);
@@ -253,7 +251,7 @@ void mensagemSell(ThreadData* td, Mensagem mensagemRead) {
 		enviarMensagem(td->hPipeInst, resposta, td->dto->pSync->csWrite);
 		return;
 	}
-	// a empresa não existe na carteira de ações do utilizador
+	// a empresa nÃ£o existe na carteira de aÃ§Ãµes do utilizador
 	if (indexEA == numEmpresasAcoes) {
 		LeaveCriticalSection(&td->dto->pSync->csUtilizadores);
 		LeaveCriticalSection(&td->dto->pSync->csEmpresas);
@@ -262,10 +260,10 @@ void mensagemSell(ThreadData* td, Mensagem mensagemRead) {
 		enviarMensagem(td->hPipeInst, resposta, td->dto->pSync->csWrite);
 		return;
 	}
-	// a empresa existe na carteira de ações do utilizador
-	// 4. Verificar se a quantidade de ações é válida
+	// a empresa existe na carteira de aÃ§Ãµes do utilizador
+	// 4. Verificar se a quantidade de aÃ§Ãµes Ã© vÃ¡lida
 	if (mensagemRead.quantidade > td->dto->utilizadores[indexUtilizador].carteiraAcoes[indexEA].quantidadeAcoes) {
-		// quantidade superior ao disponível na carteira de ações do utilizador
+		// quantidade superior ao disponÃ­vel na carteira de aÃ§Ãµes do utilizador
 		LeaveCriticalSection(&td->dto->pSync->csUtilizadores);
 		LeaveCriticalSection(&td->dto->pSync->csEmpresas);
 		resposta.sucesso = FALSE;
@@ -273,20 +271,20 @@ void mensagemSell(ThreadData* td, Mensagem mensagemRead) {
 		enviarMensagem(td->hPipeInst, resposta, td->dto->pSync->csWrite);
 		return;
 	}
-	// quantidade válida
+	// quantidade vÃ¡lida
 	totalVenda = mensagemRead.quantidade * td->dto->dadosP->empresas[indexEmpresa].valorAcao;
 
-	// 5. Atualizar a carteira de ações do utilizador
+	// 5. Atualizar a carteira de aÃ§Ãµes do utilizador
 	td->dto->utilizadores[indexUtilizador].carteiraAcoes[indexEA].quantidadeAcoes -= mensagemRead.quantidade;
 	if (td->dto->utilizadores[indexUtilizador].carteiraAcoes[indexEA].quantidadeAcoes == 0) {
-		// remover a empresa da carteira de ações do utilizador
+		// remover a empresa da carteira de aÃ§Ãµes do utilizador
 		for (DWORD i = indexEA; i < numEmpresasAcoes - 1; ++i) {
 			td->dto->utilizadores[indexUtilizador].carteiraAcoes[i] = td->dto->utilizadores[indexUtilizador].carteiraAcoes[i + 1];
 		}
 		td->dto->utilizadores[indexUtilizador].numEmpresasAcoes--;
 	}
 	td->dto->utilizadores[indexUtilizador].saldo += totalVenda;
-	// 6. Atualizar o valor das ações da empresa
+	// 6. Atualizar o valor das aÃ§Ãµes da empresa
 	td->dto->dadosP->empresas[indexEmpresa].valorAcao *= taxaVariacao;
 	td->dto->dadosP->empresas[indexEmpresa].quantidadeAcoes += mensagemRead.quantidade;
 	// 7. Enviar resposta sucesso ao cliente
@@ -324,7 +322,7 @@ void mensagemBalance(ThreadData* td, Mensagem mensagem) {
 	}
 
 	if (i == numUtilizadores) {
-		// utilizador não existe
+		// utilizador nÃ£o existe
 		resposta.sucesso = FALSE;
 		enviarMensagem(hPipe, resposta, td->dto->pSync->csWrite);
 		free(uLocais);
@@ -352,7 +350,7 @@ void mensagemWallet(ThreadData* td, Mensagem mensagem) {
 			break;
 		}
 	}
-	// o utilizador não existe
+	// o utilizador nÃ£o existe
 	if (indexUtilizador == numUtilizadores) {
 		LeaveCriticalSection(&td->dto->pSync->csUtilizadores);
 		resposta.sucesso = FALSE;
@@ -381,7 +379,7 @@ void mensagemExit(ThreadData* td, Mensagem mensagem) {
 	EnterCriticalSection(&td->dto->pSync->csUtilizadores);
 	for (int i = 0; i < td->dto->numUtilizadores; i++) {
 		if (_tcscmp(td->dto->utilizadores[i].username, username) == 0) {
-			// definir como não logado
+			// definir como nÃ£o logado
 			td->dto->utilizadores[i].logado = FALSE;
 			_tprintf_s(INFO_CLIENTE_DESCONECTADO, username);
 			break;
@@ -400,7 +398,7 @@ void mensagemExit(ThreadData* td, Mensagem mensagem) {
 	LeaveCriticalSection(&td->dto->pSync->csUtilizadores);
 	// fechar o pipe
 	CloseHandle(td->hPipeInst);
-	// libertar a posição do array de ThreadData
+	// libertar a posiÃ§Ã£o do array de ThreadData
 	td->livre = TRUE;
 }
 
