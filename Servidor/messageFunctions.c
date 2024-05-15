@@ -1,6 +1,6 @@
 #include "servidor.h"
 
-// fun��es auxilares
+// funções auxilares
 BOOL verificaEmpresa(ThreadData* td, Mensagem mensagemRead, DWORD numEmpresas, DWORD* indexEmpresa) {
 	for (*indexEmpresa = 0; *indexEmpresa < numEmpresas; ++(*indexEmpresa))
 		if (_tcscmp(mensagemRead.empresa, td->dto->dadosP->empresas[*indexEmpresa].nome) == 0)
@@ -26,7 +26,7 @@ BOOL verificaEmpresaCarteira(ThreadData* td, DWORD indexUtilizador, Mensagem men
 	return FALSE;
 }
 
-// fun��es de tratamento de mensagens
+// funções de tratamento de mensagens
 void mensagemLogin(ThreadData* td, Mensagem mensagem) {
 	pUtilizador uLocais = (pUtilizador)malloc(TAM_MAX_USERS * sizeof(Utilizador));
 	if (uLocais == NULL) {
@@ -75,7 +75,7 @@ void mensagemListc(ThreadData* td) {
 	memcpy(resposta.empresas, td->dto->dadosP->empresas, sizeof(Empresa) * td->dto->dadosP->numEmpresas);
 	LeaveCriticalSection(&td->dto->pSync->csEmpresas);
 
-	enviarMensagem(hPipe, resposta, td->dto->pSync->csWrite); //enviarMensagem( para_onde, o_qu�);
+	enviarMensagem(hPipe, resposta, td->dto->pSync->csWrite); //enviarMensagem( para_onde, o_quê);
 }
 
 void mensagemBuy(ThreadData* td, Mensagem mensagemRead) {
