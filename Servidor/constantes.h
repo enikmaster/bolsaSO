@@ -63,7 +63,7 @@
 #define ERRO_MAX_TENTATIVAS _T("[ERRO] Número máximo de tentativas de ligações atingido\n")
 #define ERRO_LIGAR_BOLSA _T("[ERRO] Não existe nenhum servidor Bolsa para ligação\n")
 #define ERRO_SEM_JA_INICIADO _T("[ERRO] O semáforo já foi iniciado (OUTRO BOLSA LIGADO)\n")
-#define ERRO_NUMERO_EMPRESAS _T("[ERRO] NÃƒÂºmero de empresas inválido (1 - 10)\n")
+#define ERRO_NUMERO_EMPRESAS _T("[ERRO] Número de empresas inválido (1 - 10)\n")
 #define ERRO_DPARTILHADOS _T("[ERRO] A estrutura DadosPartilhados está vazia\n")
 
 // Mensages de erro do administrador

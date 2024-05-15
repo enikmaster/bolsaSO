@@ -1,4 +1,3 @@
-#include "../Servidor/constantes.h"
 #include "board.h"
 
 int CompareEmpresa(const void* a, const void* b) {
@@ -13,12 +12,10 @@ int CompareEmpresa(const void* a, const void* b) {
     return 0;
 }
 
-
 void ExibirUltimaTransacao(DadosPartilhados* pDados) {
     _tprintf_s(INFO_ULTIMA_TRANSACAO, pDados->ultimaTransacao.nomeEmpresa,
         pDados->ultimaTransacao.quantidadeAcoes, pDados->ultimaTransacao.precoPorAcao);
 }
-
 
 void OrganizarEExibirEmpresas(DadosPartilhados* pDados, DWORD N) {
     if (pDados == NULL) {

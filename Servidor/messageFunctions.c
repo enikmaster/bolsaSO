@@ -183,7 +183,8 @@ void mensagemBuy(ThreadData* td, Mensagem mensagemRead) {
 	// diminui a quantidade de ações na empresa
 	td->dto->dadosP->empresas[indexEmpresa].quantidadeAcoes -= mensagemRead.quantidade;
 	// atualiza o numero de ações na carteira de ações do utilizador
-	td->dto->utilizadores[indexUtilizador].numEmpresasAcoes++;
+	if(!empresaAcaoAtualizada)
+		td->dto->utilizadores[indexUtilizador].numEmpresasAcoes++;
 	// atualiza o saldo do utilizador
 	td->dto->utilizadores[indexUtilizador].saldo -= totalCompra;
 	empresaAcaoAtualizada = TRUE;

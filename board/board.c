@@ -1,6 +1,4 @@
-#include "../Servidor/constantes.h"
 #include "board.h"
-
 
 void WINAPI WaitForCloseCommand(PVOID param) {
     EstadoBoard* estado = (EstadoBoard*)param;
@@ -138,7 +136,6 @@ int _tmain(int argc, TCHAR** argv) {
     CloseHandle(estado.eventoEscrita);
     CloseHandle(estado.eventoExit);
     CloseHandle(estado.eventoLocalExit);
-    //CloseHandle(hThreadCommand);
 
     ExitProcess(0);
 }

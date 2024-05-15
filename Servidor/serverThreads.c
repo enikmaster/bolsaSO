@@ -156,11 +156,11 @@ void WINAPI threadClientHandler(PVOID p) {
 		ResetEvent(ov.hEvent);
 		// ler a mensagem do named pipe
 		BOOL fSuccess = ReadFile(
-			td->hPipeInst, // handle do named pipe
-			&mensagemRead,	// buffer de leitura
+			td->hPipeInst,		// handle do named pipe
+			&mensagemRead,		// buffer de leitura
 			sizeof(Mensagem),	// numero de bytes a ler
-			&bytesLidos,	// numero de bytes lidos
-			&ov);	// estrutura overlapped)
+			&bytesLidos,		// numero de bytes lidos
+			&ov);				// estrutura overlapped
 		// leitura pendente
 		dwWaitResult = WaitForMultipleObjects(2, hEvents, FALSE, INFINITE);
 		if (dwWaitResult == WAIT_OBJECT_0 + 1) {
@@ -208,9 +208,6 @@ void WINAPI threadClientHandler(PVOID p) {
 	DisconnectNamedPipe(hPipe);
 	// fechar o handle do named pipe na lista do servidor
 	CloseHandle(hPipe);
-	// fechar o handle do evento
-	//CloseHandle(ov.hEvent);
-
 	// sair da thread
 	ExitThread(0);
 }
@@ -253,9 +250,8 @@ void WINAPI threadPauseHandler(PVOID p) {
 }
 
 //thread para alterar o valor das ações
-
-	//se a quantidade de acoes disponiveis for MAIOR que a anterior, quer dizer que clientes venderam  ( valor DESCE )
-	//se a quantidade de acoes disponiveis for MENOR que a anterior, quer dizer que clientes compraram  ( valor SOBE )
+//se a quantidade de acoes disponiveis for MAIOR que a anterior, quer dizer que clientes venderam  ( valor DESCE )
+//se a quantidade de acoes disponiveis for MENOR que a anterior, quer dizer que clientes compraram  ( valor SOBE )
 void WINAPI threadVariacaoPrecoHandler(PVOID p) {
 	ThreadData* td = (ThreadData*)p;
 	if (td == NULL) {
