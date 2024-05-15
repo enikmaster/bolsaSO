@@ -13,7 +13,8 @@ DWORD verificaComando(TCHAR* comando) {
 				return ++i;
 			}
 		}
-	} else {
+	}
+	else {
 		TCHAR comandoTemp[TAM_COMANDO];
 		TCHAR argumentos[TAM_COMANDO];
 		memset(comandoTemp, 0, sizeof(comandoTemp));
@@ -23,7 +24,7 @@ DWORD verificaComando(TCHAR* comando) {
 		// garantir que a string é terminada com zero
 		comandoTemp[TAM_COMANDO - 1] = _T('\0');
 
-		for(DWORD i = 0; i < sizeof(listaComandos) / sizeof(listaComandos[0]); ++i) {
+		for (DWORD i = 0; i < sizeof(listaComandos) / sizeof(listaComandos[0]); ++i) {
 			if (_tcscmp(comandoTemp, listaComandos[i]) == 0) {
 				return ++i;
 			}
@@ -38,7 +39,7 @@ void comandoLogin(HANDLE* hPipe, TCHAR* username, TCHAR* password) {
 	mensagem.TipoM = TMensagem_LOGIN;
 	memcpy(mensagem.nome, username, (_tcslen(username) + 1) * sizeof(TCHAR));
 	memcpy(mensagem.password, password, (_tcslen(password) + 1) * sizeof(TCHAR));
-	
+
 	enviarMensagem(hPipe, mensagem);
 }
 
@@ -76,16 +77,16 @@ void comandoBalance(HANDLE* hPipe, TCHAR* username) {
 void comandoWallet(HANDLE* hPipe, TCHAR* username) {
 	Mensagem mensagem = { 0 };
 	mensagem.TipoM = TMensagem_WALLET;
-	memcpy(mensagem.nome, username, (_tcslen(username) + 1)* sizeof(TCHAR));
+	memcpy(mensagem.nome, username, (_tcslen(username) + 1) * sizeof(TCHAR));
 	enviarMensagem(hPipe, mensagem);
 }
 
 BOOL comandoExit(HANDLE* hPipe, TCHAR* username, BOOL logado) {
 	Mensagem mensagem = { 0 };
 	mensagem.TipoM = TMensagem_EXIT;
-	if (logado) 
-		memcpy(mensagem.nome, username, (_tcslen(username) + 1) * sizeof(TCHAR)); 
-	else 
+	if (logado)
+		memcpy(mensagem.nome, username, (_tcslen(username) + 1) * sizeof(TCHAR));
+	else
 		mensagem.nome[0] = '\0';
 	return !enviarMensagem(hPipe, mensagem);
 }

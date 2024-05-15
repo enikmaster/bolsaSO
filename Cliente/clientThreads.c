@@ -14,17 +14,17 @@ void WINAPI threadComandosClienteHandler(PVOID p) {
 	int numArgumentos;
 
 	_tprintf_s(WELCOME);
-	while(repetir) {
+	while (repetir) {
 		memset(comandoTemp, 0, sizeof(comandoTemp));
 		memset(argumento1, 0, sizeof(argumento1));
 		memset(argumento2, 0, sizeof(argumento2));
 		memset(failSafe, 0, sizeof(failSafe));
 		fflush(stdin);
-		if(!cd->logado) 
+		if (!cd->logado)
 			_tprintf_s(_T("Efetue login primeiro\nComando:  "));
-		if(_fgetts(comando, sizeof(comando) / sizeof(comando[0]), stdin) == NULL)
+		if (_fgetts(comando, sizeof(comando) / sizeof(comando[0]), stdin) == NULL)
 			break;
-		
+
 		comando[_tcslen(comando) - 1] = _T('\0');
 		controlo = verificaComando(comando);
 		numArgumentos = 0;

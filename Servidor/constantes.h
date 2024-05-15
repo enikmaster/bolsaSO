@@ -221,7 +221,7 @@ struct DataTransferObject {
     HANDLE hMap;
     PVOID pView;
     pSync pSync;
-	DadosPartilhados* dadosP;
+    DadosPartilhados* dadosP;
     DWORD numUtilizadores;
     Utilizador utilizadores[TAM_MAX_USERS];
     DWORD limiteClientes;

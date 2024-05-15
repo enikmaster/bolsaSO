@@ -41,10 +41,11 @@ void WINAPI threadComandosAdminHandler(PVOID p) {
 			else {
 				DWORD numeroAcoes = _tstoi(argumento2);
 				double precoAcao = _tstof(argumento3);
-				if (comandoAddc(td->dto, argumento1, numeroAcoes, precoAcao)){
+				if (comandoAddc(td->dto, argumento1, numeroAcoes, precoAcao)) {
 					_tprintf_s(INFO_ADDC, argumento1);
 					mensagemAddc(td, argumento1);
-				} else
+				}
+				else
 					_tprintf_s(ERRO_ADDC);
 			}
 			break;
@@ -68,7 +69,7 @@ void WINAPI threadComandosAdminHandler(PVOID p) {
 					_tprintf_s(INFO_STOCK, argumento1, valorAcao);
 					mensagemStock(td, argumento1, valorAcao);
 				}
-				else 
+				else
 					_tprintf_s(ERRO_STOCK);
 			}
 			break;
@@ -88,7 +89,7 @@ void WINAPI threadComandosAdminHandler(PVOID p) {
 			}
 			else {
 				DWORD numeroSegundos = _tstoi(argumento1);
-				if(comandoPause(td, numeroSegundos)) {
+				if (comandoPause(td, numeroSegundos)) {
 					_tprintf_s(INFO_PAUSE, numeroSegundos);
 					mensagemPause(td, numeroSegundos);
 				}
@@ -239,11 +240,11 @@ void WINAPI threadPauseHandler(PVOID p) {
 
 	DWORD dwWaitResult;
 	dwWaitResult = WaitForMultipleObjects(2, hEvents, FALSE, INFINITE);
-	if (dwWaitResult == WAIT_OBJECT_0+1) {
+	if (dwWaitResult == WAIT_OBJECT_0 + 1) {
 		// evento para sair do programa
 		_tprintf_s(INFO_PAUSE_END);
 	}
-	if(dwWaitResult == WAIT_OBJECT_0) {
+	if (dwWaitResult == WAIT_OBJECT_0) {
 		// terminou o tempo de pausa
 		_tprintf_s(INFO_RESUME);
 		td->dto->pausado = FALSE;
@@ -259,9 +260,9 @@ void WINAPI threadPauseHandler(PVOID p) {
 
 	//se a quantidade de açoes disponiveis for maior que a anterior, quer dizer que clientes venderam á bolsa ( preço das ações desce)
 	//se a quantidade de açoes disponiveis for menor que a anterior, quer dizer que clientes compraram á bolsa ( preço das ações sobe)
-void WINAPI threadVariacaoPrecoHandler (PVOID p) {
+void WINAPI threadVariacaoPrecoHandler(PVOID p) {
 	ThreadData* td = (ThreadData*)p;
-	if(td == NULL) {
+	if (td == NULL) {
 		_tprintf_s(_T("DADOS THREAD ERRADOS"));
 		return;
 	}
@@ -281,17 +282,17 @@ void WINAPI threadVariacaoPrecoHandler (PVOID p) {
 	Empresa listaEmpresas[TAM_MAX_EMPRESAS] = { 0 };
 	int numEmpresas = 0;
 	double percentagem = 0.02; // 2%
-	
+
 	while (1) {
 		// definir o tempo de espera
-		if(!SetWaitableTimer(hTimerV, &liDueTime, 0, NULL, NULL, FALSE)) {
+		if (!SetWaitableTimer(hTimerV, &liDueTime, 0, NULL, NULL, FALSE)) {
 			_tprintf_s(ERRO_SET_TIMER);
 			break;
 		}
 		DWORD i = 0;
 		// esperar por eventos
 		WaitForMultipleObjects(2, hEvents, FALSE, INFINITE);
-		if(WaitForSingleObject(td->dto->hExitEvent, 0) == WAIT_OBJECT_0)
+		if (WaitForSingleObject(td->dto->hExitEvent, 0) == WAIT_OBJECT_0)
 			break;
 
 		//verificar variação do preço das ações
@@ -303,9 +304,9 @@ void WINAPI threadVariacaoPrecoHandler (PVOID p) {
 			memcpy(listaEmpresas, td->dto->dadosP->empresas, numEmpresas * sizeof(Empresa));
 		}
 		for (i; i < numEmpresas; ++i) {
-			(td->dto->dadosP->empresas[i].quantidadeAcoes >= listaEmpresas[i].quantidadeAcoes) ? 
+			(td->dto->dadosP->empresas[i].quantidadeAcoes >= listaEmpresas[i].quantidadeAcoes) ?
 				// o preço desce
-				(td->dto->dadosP->empresas[i].valorAcao *= (1 - percentagem)) : 
+				(td->dto->dadosP->empresas[i].valorAcao *= (1 - percentagem)) :
 				// o preço sobe
 				(td->dto->dadosP->empresas[i].valorAcao *= (1 + percentagem));
 		}

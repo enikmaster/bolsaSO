@@ -25,13 +25,13 @@ void OrganizarEExibirEmpresas(DadosPartilhados* pDados, DWORD N) {
         _tprintf_s(ERRO_DPARTILHADOS);
         return;
     }
-    
-    if(pDados->numEmpresas == 0) {
+
+    if (pDados->numEmpresas == 0) {
         system("cls");
-		_tprintf_s(INFO_EMPRESAS_VAZIA);
-		return;
-	}
-    
+        _tprintf_s(INFO_EMPRESAS_VAZIA);
+        return;
+    }
+
     Empresa empresasOrganizadas[TAM_MAX_EMPRESAS];
 
     //mutex - TODO
@@ -47,11 +47,11 @@ void OrganizarEExibirEmpresas(DadosPartilhados* pDados, DWORD N) {
     _tprintf_s(INFO_TOP_EMPRESAS, N);
     for (DWORD i = 0; i < N && i < pDados->numEmpresas; i++) {
         _tprintf_s(INFO_EMPRESA_ACOES),
-            i + 1, 
-            empresasOrganizadas[i].nome, 
+            i + 1,
+            empresasOrganizadas[i].nome,
             empresasOrganizadas[i].quantidadeAcoes,
-            empresasOrganizadas[i].valorAcao, 
-            empresasOrganizadas[i].quantidadeAcoes * empresasOrganizadas[i].valorAcao);
+            empresasOrganizadas[i].valorAcao,
+            empresasOrganizadas[i].quantidadeAcoes* empresasOrganizadas[i].valorAcao);
     }
     ExibirUltimaTransacao(pDados);
 }
