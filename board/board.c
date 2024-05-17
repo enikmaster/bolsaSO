@@ -9,6 +9,7 @@ void WINAPI WaitForCloseCommand(PVOID param) {
         if (_fgetts(comando, sizeof(comando) / sizeof(comando[0]), stdin) == NULL)
             break;
         comando[TAM_COMANDO - 1] = _T('\0');
+        comando[_tcslen(comando) - 1] = _T('\0');
         if (_tcsicmp(comando, _T("close")) == 0) {
             SetEvent(estado->eventoLocalExit);
             break;
@@ -45,13 +46,7 @@ int _tmain(int argc, TCHAR** argv) {
         ExitProcess(-1);
     }
 
-    estado.pDados = (DadosPartilhados*)MapViewOfFile(
-        estado.hMap,
-        FILE_MAP_READ,
-        0,
-        0,
-        sizeof(DadosPartilhados));
-
+    estado.pDados = (DadosPartilhados*)MapViewOfFile(estado.hMap, FILE_MAP_READ, 0, 0, sizeof(DadosPartilhados));
     if (estado.pDados == NULL) {
         _tprintf_s(ERRO_CREATE_FILE_MAPPING);
         CloseHandle(estado.hMap);
@@ -115,7 +110,7 @@ int _tmain(int argc, TCHAR** argv) {
 
         dwWaitResult = WaitForMultipleObjects(3, hEvents, FALSE, 10000); //espera por um evento
         if (dwWaitResult == WAIT_OBJECT_0 + 1 || dwWaitResult == WAIT_OBJECT_0 + 2) {
-            _tprintf_s(INFO_CLOSEC);
+            _tprintf_s(dwWaitResult == WAIT_OBJECT_0 + 1 ? INFO_CLOSEC : INFO_CLOSEB);
             break;
         }
 

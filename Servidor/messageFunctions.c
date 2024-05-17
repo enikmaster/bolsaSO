@@ -26,6 +26,47 @@ BOOL verificaEmpresaCarteira(ThreadData* td, DWORD indexUtilizador, Mensagem men
 	return FALSE;
 }
 
+void atualizaEmpresaCompra(ThreadData* td, DWORD indexUtilizador, DWORD indexEmpresa, Mensagem mensagemRead, double totalCompra, double taxaVariacao) {
+	// alterar o valor das ações
+	td->dto->dadosP->empresas[indexEmpresa].valorAcao *= taxaVariacao;
+	// diminui a quantidade de ações na empresa
+	td->dto->dadosP->empresas[indexEmpresa].quantidadeAcoes -= mensagemRead.quantidade;
+	// atualiza o saldo do utilizador
+	td->dto->utilizadores[indexUtilizador].saldo -= totalCompra;
+	
+}
+
+void atualizaCarteiraAcoes(ThreadData* td, DWORD indexUtilizador, DWORD indexEA, DWORD indexEmpresa, Mensagem mensagemRead, double totalCompra, double taxaVariacao) {
+	// aumenta a quantidade de ações
+	td->dto->utilizadores[indexUtilizador].carteiraAcoes[indexEA].quantidadeAcoes += mensagemRead.quantidade;
+	// atualizar a empresa na carteira de ações do utilizador
+	atualizaEmpresaCompra(td, indexUtilizador, indexEmpresa, mensagemRead, totalCompra, taxaVariacao);
+
+	// alterar o valor das ações
+		//td->dto->dadosP->empresas[indexEmpresa].valorAcao *= taxaVariacao;
+	// diminui a quantidade de ações na empresa
+		//td->dto->dadosP->empresas[indexEmpresa].quantidadeAcoes -= mensagemRead.quantidade;
+	// atualiza o saldo do utilizador
+		//td->dto->utilizadores[indexUtilizador].saldo -= totalCompra;
+}
+
+void adicionaEmpresaCarteiraAcoes(ThreadData* td, DWORD indexUtilizador, DWORD indexEA, DWORD indexEmpresa, Mensagem mensagemRead, double totalCompra, double taxaVariacao) {
+	// acrescentar uma EmpresaAcao na carteira de ações do utilizador
+	td->dto->utilizadores[indexUtilizador].carteiraAcoes[indexEA].quantidadeAcoes = mensagemRead.quantidade;
+	memcpy(td->dto->utilizadores[indexUtilizador].carteiraAcoes[indexEA].nomeEmpresa, mensagemRead.empresa, (_tcslen(mensagemRead.empresa) + 1) * sizeof(TCHAR));
+	// atualizar a empresa na carteira de ações do utilizador
+	atualizaEmpresaCompra(td, indexUtilizador, indexEmpresa, mensagemRead, totalCompra, taxaVariacao);
+	
+	// alterar o valor das ações
+		//td->dto->dadosP->empresas[indexEmpresa].valorAcao *= taxaVariacao;
+	// diminui a quantidade de ações na empresa
+		//td->dto->dadosP->empresas[indexEmpresa].quantidadeAcoes -= mensagemRead.quantidade;
+	// atualiza o numero de ações na carteira de ações do utilizador
+	td->dto->utilizadores[indexUtilizador].numEmpresasAcoes++;
+	// atualiza o saldo do utilizador
+		//td->dto->utilizadores[indexUtilizador].saldo -= totalCompra;
+}
+
 // funções de tratamento de mensagens
 void mensagemLogin(ThreadData* td, Mensagem mensagem) {
 	pUtilizador uLocais = (pUtilizador)malloc(TAM_MAX_USERS * sizeof(Utilizador));
@@ -149,45 +190,27 @@ void mensagemBuy(ThreadData* td, Mensagem mensagemRead) {
 	for (indexEA = 0; indexEA < numEmpresasAcoes; ++indexEA) {
 		if (_tcscmp(td->dto->utilizadores[indexUtilizador].carteiraAcoes[indexEA].nomeEmpresa, mensagemRead.empresa) == 0) {
 			// empresa já existe na carteira de ações do utilizador
-			// aumenta a quantidade de ações
-			td->dto->utilizadores[indexUtilizador].carteiraAcoes[indexEA].quantidadeAcoes += mensagemRead.quantidade;
-			// alterar o valor das ações
-			td->dto->dadosP->empresas[indexEmpresa].valorAcao *= taxaVariacao;
-			// diminui a quantidade de ações na empresa
-			td->dto->dadosP->empresas[indexEmpresa].quantidadeAcoes -= mensagemRead.quantidade;
-			// atualiza o saldo do utilizador
-			td->dto->utilizadores[indexUtilizador].saldo -= totalCompra;
+			// atualiza a carteira de ações do utilizador
+			atualizaCarteiraAcoes(td, indexUtilizador, indexEA, indexEmpresa, mensagemRead, totalCompra, taxaVariacao);
 			empresaAcaoAtualizada = TRUE;
 			break;
 		}
 	}
 	// a empresa não existe na carteira de ações do utilizador
-	if (numEmpresasAcoes == TAM_MAX_EMPRESA_ACAO && !empresaAcaoAtualizada) {
-		// carteira de ações cheia
-		LeaveCriticalSection(&td->dto->pSync->csUtilizadores);
-		LeaveCriticalSection(&td->dto->pSync->csEmpresas);
-		mensagem.sucesso = FALSE;
-		// Enviar resposta insucesso ao cliente
-		enviarMensagem(td->hPipeInst, mensagem, td->dto->pSync->csWrite);
-		return;
-	}
-	// 5. acrescentar uma EmpresaAcao na carteira de ações do utilizador
 	if (!empresaAcaoAtualizada) {
+		if (numEmpresasAcoes == TAM_MAX_EMPRESA_ACAO) {
+			// carteira de ações cheia
+			LeaveCriticalSection(&td->dto->pSync->csUtilizadores);
+			LeaveCriticalSection(&td->dto->pSync->csEmpresas);
+			mensagem.sucesso = FALSE;
+			// Enviar resposta insucesso ao cliente
+			enviarMensagem(td->hPipeInst, mensagem, td->dto->pSync->csWrite);
+			return;
+		}
 		// empresa não existe na carteira de ações do utilizador
-		// acrescentar uma EmpresaAcao na carteira de ações do utilizador
-		td->dto->utilizadores[indexUtilizador].carteiraAcoes[indexEA].quantidadeAcoes = mensagemRead.quantidade;
-		memcpy(td->dto->utilizadores[indexUtilizador].carteiraAcoes[indexEA].nomeEmpresa, mensagemRead.empresa, (_tcslen(mensagemRead.empresa) + 1) * sizeof(TCHAR));
+		adicionaEmpresaCarteiraAcoes(td, indexUtilizador, indexEA, indexEmpresa, mensagemRead, totalCompra, taxaVariacao);
 	}
-	// alterar o valor das ações
-	td->dto->dadosP->empresas[indexEmpresa].valorAcao *= taxaVariacao;
-	// diminui a quantidade de ações na empresa
-	td->dto->dadosP->empresas[indexEmpresa].quantidadeAcoes -= mensagemRead.quantidade;
-	// atualiza o numero de ações na carteira de ações do utilizador
-	if(!empresaAcaoAtualizada)
-		td->dto->utilizadores[indexUtilizador].numEmpresasAcoes++;
-	// atualiza o saldo do utilizador
-	td->dto->utilizadores[indexUtilizador].saldo -= totalCompra;
-	empresaAcaoAtualizada = TRUE;
+	
 	// 6. Enviar resposta sucesso ao cliente
 	LeaveCriticalSection(&td->dto->pSync->csUtilizadores);
 	LeaveCriticalSection(&td->dto->pSync->csEmpresas);
