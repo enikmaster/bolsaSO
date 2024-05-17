@@ -304,6 +304,8 @@ void WINAPI threadVariacaoPrecoHandler(PVOID p) {
 		}
 		// depois de verificar as variações, guardar os novos dados para a próxima verificação
 		memcpy(listaEmpresas, td->dto->dadosP->empresas, numEmpresas * sizeof(Empresa));
+		// alterar o tipo de transação para atualizar o board
+		td->dto->dadosP->ultimaTransacao.TipoT = TTransacao_UPDATE;
 		// assinalar o evento para atualizar o board
 		WaitForSingleObject(td->dto->pSync->hMtxBolsa, INFINITE);
 		SetEvent(td->dto->hUpdateEvent);

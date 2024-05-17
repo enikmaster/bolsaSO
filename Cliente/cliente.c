@@ -25,9 +25,8 @@ int _tmain(int argc, TCHAR** argv)
 		ExitProcess(-1);
 	}
 
-
 	LARGE_INTEGER liDueTime;
-	liDueTime.QuadPart = -100000000LL;
+	liDueTime.QuadPart = -100000000LL; // 10 segundos
 
 	int contadorTentativas = 0;
 	BOOL isConnected = FALSE;
