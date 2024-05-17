@@ -19,9 +19,9 @@ void WINAPI threadComandosClienteHandler(PVOID p) {
 		memset(argumento1, 0, sizeof(argumento1));
 		memset(argumento2, 0, sizeof(argumento2));
 		memset(failSafe, 0, sizeof(failSafe));
-		fflush(stdin);
 		if (!cd->logado)
 			_tprintf_s(_T("Efetue login primeiro\nComando:  "));
+		fflush(stdin);
 		if (_fgetts(comando, sizeof(comando) / sizeof(comando[0]), stdin) == NULL)
 			break;
 
