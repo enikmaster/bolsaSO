@@ -195,9 +195,9 @@ int _tmain(int argc, TCHAR** argv)
 		case TMensagem_CLOSE:
 			_tprintf_s(INFO_CLOSEC);
 			continuar = FALSE;
-			WaitForSingleObject(cd.hMutex, INFINITE);
+			/*WaitForSingleObject(cd.hMutex, INFINITE);
 			SetEvent(cd.hExitEvent);
-			ReleaseMutex(cd.hMutex);
+			ReleaseMutex(cd.hMutex);*/
 			CancelSynchronousIo(hThread);
 			break;
 		default:
@@ -212,6 +212,9 @@ int _tmain(int argc, TCHAR** argv)
 	DisconnectNamedPipe(cd.hPipe);
 
 	CloseHandle(cd.hPipe);
+	CloseHandle(ov.hEvent);
+	CloseHandle(cd.hExitEvent);
+	CloseHandle(cd.hMutex);
 	CloseHandle(hThread);
 
 	ExitProcess(0);
