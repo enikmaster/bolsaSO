@@ -26,28 +26,20 @@ BOOL verificaEmpresaCarteira(ThreadData* td, DWORD indexUtilizador, Mensagem men
 	return FALSE;
 }
 
-void atualizaEmpresaCompra(ThreadData* td, DWORD indexUtilizador, DWORD indexEmpresa, Mensagem mensagemRead, double totalCompra, double taxaVariacao) {
+void atualizaEmpresa(ThreadData* td, DWORD indexUtilizador, DWORD indexEmpresa, Mensagem mensagemRead, double totalCompra, double taxaVariacao) {
 	// alterar o valor das ações
 	td->dto->dadosP->empresas[indexEmpresa].valorAcao *= taxaVariacao;
 	// diminui a quantidade de ações na empresa
 	td->dto->dadosP->empresas[indexEmpresa].quantidadeAcoes -= mensagemRead.quantidade;
 	// atualiza o saldo do utilizador
 	td->dto->utilizadores[indexUtilizador].saldo -= totalCompra;
-	
 }
 
 void atualizaCarteiraAcoes(ThreadData* td, DWORD indexUtilizador, DWORD indexEA, DWORD indexEmpresa, Mensagem mensagemRead, double totalCompra, double taxaVariacao) {
 	// aumenta a quantidade de ações
 	td->dto->utilizadores[indexUtilizador].carteiraAcoes[indexEA].quantidadeAcoes += mensagemRead.quantidade;
 	// atualizar a empresa na carteira de ações do utilizador
-	atualizaEmpresaCompra(td, indexUtilizador, indexEmpresa, mensagemRead, totalCompra, taxaVariacao);
-
-	// alterar o valor das ações
-		//td->dto->dadosP->empresas[indexEmpresa].valorAcao *= taxaVariacao;
-	// diminui a quantidade de ações na empresa
-		//td->dto->dadosP->empresas[indexEmpresa].quantidadeAcoes -= mensagemRead.quantidade;
-	// atualiza o saldo do utilizador
-		//td->dto->utilizadores[indexUtilizador].saldo -= totalCompra;
+	atualizaEmpresa(td, indexUtilizador, indexEmpresa, mensagemRead, totalCompra, taxaVariacao);
 }
 
 void adicionaEmpresaCarteiraAcoes(ThreadData* td, DWORD indexUtilizador, DWORD indexEA, DWORD indexEmpresa, Mensagem mensagemRead, double totalCompra, double taxaVariacao) {
@@ -55,16 +47,9 @@ void adicionaEmpresaCarteiraAcoes(ThreadData* td, DWORD indexUtilizador, DWORD i
 	td->dto->utilizadores[indexUtilizador].carteiraAcoes[indexEA].quantidadeAcoes = mensagemRead.quantidade;
 	memcpy(td->dto->utilizadores[indexUtilizador].carteiraAcoes[indexEA].nomeEmpresa, mensagemRead.empresa, (_tcslen(mensagemRead.empresa) + 1) * sizeof(TCHAR));
 	// atualizar a empresa na carteira de ações do utilizador
-	atualizaEmpresaCompra(td, indexUtilizador, indexEmpresa, mensagemRead, totalCompra, taxaVariacao);
-	
-	// alterar o valor das ações
-		//td->dto->dadosP->empresas[indexEmpresa].valorAcao *= taxaVariacao;
-	// diminui a quantidade de ações na empresa
-		//td->dto->dadosP->empresas[indexEmpresa].quantidadeAcoes -= mensagemRead.quantidade;
-	// atualiza o numero de ações na carteira de ações do utilizador
+	atualizaEmpresa(td, indexUtilizador, indexEmpresa, mensagemRead, totalCompra, taxaVariacao);
+	// incrementar o número de empresas na carteira de ações do utilizador
 	td->dto->utilizadores[indexUtilizador].numEmpresasAcoes++;
-	// atualiza o saldo do utilizador
-		//td->dto->utilizadores[indexUtilizador].saldo -= totalCompra;
 }
 
 // funções de tratamento de mensagens
@@ -210,6 +195,10 @@ void mensagemBuy(ThreadData* td, Mensagem mensagemRead) {
 		// empresa não existe na carteira de ações do utilizador
 		adicionaEmpresaCarteiraAcoes(td, indexUtilizador, indexEA, indexEmpresa, mensagemRead, totalCompra, taxaVariacao);
 	}
+	// 5. Avisar o board de que a bolsa foi atualizada
+	WaitForSingleObject(td->dto->pSync->hMtxBolsa, INFINITE);
+	SetEvent(td->dto->hUpdateEvent);
+	ReleaseMutex(td->dto->pSync->hMtxBolsa);
 	
 	// 6. Enviar resposta sucesso ao cliente
 	LeaveCriticalSection(&td->dto->pSync->csUtilizadores);
@@ -284,6 +273,7 @@ void mensagemSell(ThreadData* td, Mensagem mensagemRead) {
 		enviarMensagem(td->hPipeInst, resposta, td->dto->pSync->csWrite);
 		return;
 	}
+	
 	// a empresa existe na carteira de ações do utilizador
 	// 4. Verificar se a quantidade de ações é válida
 	if (mensagemRead.quantidade > td->dto->utilizadores[indexUtilizador].carteiraAcoes[indexEA].quantidadeAcoes) {
@@ -295,7 +285,7 @@ void mensagemSell(ThreadData* td, Mensagem mensagemRead) {
 		enviarMensagem(td->hPipeInst, resposta, td->dto->pSync->csWrite);
 		return;
 	}
-	// quantidade válida
+	// quantidade válida, guardar o valor da venda
 	totalVenda = mensagemRead.quantidade * td->dto->dadosP->empresas[indexEmpresa].valorAcao;
 
 	// 5. Atualizar a carteira de ações do utilizador
@@ -308,10 +298,17 @@ void mensagemSell(ThreadData* td, Mensagem mensagemRead) {
 		td->dto->utilizadores[indexUtilizador].numEmpresasAcoes--;
 	}
 	td->dto->utilizadores[indexUtilizador].saldo += totalVenda;
+	
 	// 6. Atualizar o valor das ações da empresa
 	td->dto->dadosP->empresas[indexEmpresa].valorAcao *= taxaVariacao;
 	td->dto->dadosP->empresas[indexEmpresa].quantidadeAcoes += mensagemRead.quantidade;
-	// 7. Enviar resposta sucesso ao cliente
+
+	// 7. Avisar o board de que a bolsa foi atualizada
+	WaitForSingleObject(td->dto->pSync->hMtxBolsa, INFINITE);
+	SetEvent(td->dto->hUpdateEvent);
+	ReleaseMutex(td->dto->pSync->hMtxBolsa);
+
+	// 8. Enviar resposta sucesso ao cliente
 	LeaveCriticalSection(&td->dto->pSync->csUtilizadores);
 	LeaveCriticalSection(&td->dto->pSync->csEmpresas);
 	resposta.sucesso = TRUE;
