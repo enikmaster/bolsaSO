@@ -22,7 +22,7 @@ void WINAPI threadComandosClienteHandler(PVOID p) {
 		if (!cd->logado)
 			_tprintf_s(_T("Efetue login primeiro\nComando:  "));
 		fflush(stdin);
-		if (_fgetts(comando, sizeof(comando) / sizeof(comando[0]), stdin) == NULL)
+		if (_fgetts(comando, (sizeof(comando) - 1 ) / sizeof(comando[0]), stdin) == NULL)
 			break;
 
 		comando[_tcslen(comando) - 1] = _T('\0');
