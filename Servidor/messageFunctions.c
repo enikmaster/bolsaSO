@@ -26,7 +26,16 @@ BOOL verificaEmpresaCarteira(ThreadData* td, DWORD indexUtilizador, Mensagem men
 	return FALSE;
 }
 
+void escreverDetalhesTransacao(ThreadData* td, DWORD indexEmpresa, Mensagem mensagemRead) {
+	td->dto->dadosP->ultimaTransacao.precoPorAcao = td->dto->dadosP->empresas[indexEmpresa].valorAcao;
+	td->dto->dadosP->ultimaTransacao.quantidadeAcoes = mensagemRead.quantidade;
+	memcpy(td->dto->dadosP->ultimaTransacao.nomeEmpresa, mensagemRead.empresa, (_tcslen(mensagemRead.empresa) + 1) * sizeof(TCHAR));
+}
+
 void atualizaEmpresa(ThreadData* td, DWORD indexUtilizador, DWORD indexEmpresa, Mensagem mensagemRead, double totalCompra, double taxaVariacao) {
+	// Escrever os detalhes da transação
+	td->dto->dadosP->ultimaTransacao.TipoT = TTransacao_COMPRA;
+	escreverDetalhesTransacao(td, indexEmpresa, mensagemRead);
 	// alterar o valor das ações
 	td->dto->dadosP->empresas[indexEmpresa].valorAcao *= taxaVariacao;
 	// diminui a quantidade de ações na empresa
@@ -195,6 +204,7 @@ void mensagemBuy(ThreadData* td, Mensagem mensagemRead) {
 		// empresa não existe na carteira de ações do utilizador
 		adicionaEmpresaCarteiraAcoes(td, indexUtilizador, indexEA, indexEmpresa, mensagemRead, totalCompra, taxaVariacao);
 	}
+
 	// 5. Avisar o board de que a bolsa foi atualizada
 	WaitForSingleObject(td->dto->pSync->hMtxBolsa, INFINITE);
 	SetEvent(td->dto->hUpdateEvent);
@@ -299,16 +309,20 @@ void mensagemSell(ThreadData* td, Mensagem mensagemRead) {
 	}
 	td->dto->utilizadores[indexUtilizador].saldo += totalVenda;
 	
-	// 6. Atualizar o valor das ações da empresa
+	// 6. Escrever os detalhes da transação
+	td->dto->dadosP->ultimaTransacao.TipoT = TTransacao_VENDA;
+	escreverDetalhesTransacao(td, indexEmpresa, mensagemRead);
+
+	// 7. Atualizar o valor das ações da empresa
 	td->dto->dadosP->empresas[indexEmpresa].valorAcao *= taxaVariacao;
 	td->dto->dadosP->empresas[indexEmpresa].quantidadeAcoes += mensagemRead.quantidade;
-
-	// 7. Avisar o board de que a bolsa foi atualizada
+	
+	// 8. Avisar o board de que a bolsa foi atualizada
 	WaitForSingleObject(td->dto->pSync->hMtxBolsa, INFINITE);
 	SetEvent(td->dto->hUpdateEvent);
 	ReleaseMutex(td->dto->pSync->hMtxBolsa);
 
-	// 8. Enviar resposta sucesso ao cliente
+	// 9. Enviar resposta sucesso ao cliente
 	LeaveCriticalSection(&td->dto->pSync->csUtilizadores);
 	LeaveCriticalSection(&td->dto->pSync->csEmpresas);
 	resposta.sucesso = TRUE;

@@ -13,8 +13,25 @@ int CompareEmpresa(const void* a, const void* b) {
 }
 
 void ExibirUltimaTransacao(DadosPartilhados* pDados) {
-    _tprintf_s(INFO_ULTIMA_TRANSACAO, pDados->ultimaTransacao.nomeEmpresa,
-        pDados->ultimaTransacao.quantidadeAcoes, pDados->ultimaTransacao.precoPorAcao);
+    switch(pDados->ultimaTransacao.TipoT) {
+		case TTransacao_COMPRA:
+			_tprintf_s(INFO_TRANSACAO_COMPRA,
+                pDados->ultimaTransacao.quantidadeAcoes,
+                pDados->ultimaTransacao.nomeEmpresa,
+                pDados->ultimaTransacao.quantidadeAcoes * pDados->ultimaTransacao.precoPorAcao, 
+                pDados->ultimaTransacao.precoPorAcao);
+			break;
+		case TTransacao_VENDA:
+			_tprintf_s(INFO_TRANSACAO_VENDA,
+                pDados->ultimaTransacao.quantidadeAcoes,
+                pDados->ultimaTransacao.nomeEmpresa,
+                pDados->ultimaTransacao.quantidadeAcoes * pDados->ultimaTransacao.precoPorAcao, 
+                pDados->ultimaTransacao.precoPorAcao);
+			break;
+		default:
+			_tprintf_s(INFO_TRANSACAO_UPDATE);
+			return;
+    };
 }
 
 void OrganizarEExibirEmpresas(DadosPartilhados* pDados, DWORD N) {
@@ -31,8 +48,6 @@ void OrganizarEExibirEmpresas(DadosPartilhados* pDados, DWORD N) {
 
     Empresa empresasOrganizadas[TAM_MAX_EMPRESAS];
 
-    //mutex - TODO
-    // 
     // Copiar os dados para o array local
     CopyMemory(empresasOrganizadas, pDados->empresas, pDados->numEmpresas * sizeof(Empresa));
 

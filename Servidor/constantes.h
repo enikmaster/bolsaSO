@@ -94,7 +94,9 @@
 #define INFO_VENDA _T("[INFO] Venda de ações da empresa %s efetuada com sucesso\n")
 #define INFO_WALLET_VAZIA _T("[INFO] Carteira de ações vazia\n")
 #define INFO_WALLET _T("Empresa: %s \tQuantidade: %lu\n")
-#define INFO_ULTIMA_TRANSACAO _T("Ultima Transação: %s - %lu e %.2f\n")
+#define INFO_TRANSACAO_COMPRA _T("Ultima Transação: Foram compradas %lu ações da empresa %s por %.2f (%.2f por ação)\n")
+#define INFO_TRANSACAO_VENDA _T("Ultima Transação: Foram vendidas %lu ações da empresa %s por %.2f (%.2f por ação)\n")
+#define INFO_TRANSACAO_UPDATE _T("Atualização de valores das empresas\n")
 #define INFO_CLOSEC _T("[INFO] O programa bolsa está a terminar e este também\n")
 #define INFO_CLOSEB _T("[INFO] O programa board está a terminar\n")
 #define INFO_PAUSE _T("[INFO] As transações estão suspensas por %lu segundos\n")
@@ -113,7 +115,8 @@
 // Tipos de trnsação
 typedef enum {
     TTransacao_COMPRA,
-    TTransacao_VENDA
+    TTransacao_VENDA,
+    TTransacao_UPDATE
 } TipoTransacao;
 
 // Tipos de mensagem
