@@ -426,7 +426,7 @@ void mensagemExit(ThreadData* td, Mensagem mensagem) {
 			break;
 		}
 	}
-	if (j == td->dto->limiteClientes) {
+	if (j != td->dto->limiteClientes) {
 		// todos os clientes ocupados mas saiu um agora
 		SetEvent(td->dto->hLimiteClientes);
 	}

@@ -110,6 +110,7 @@ int _tmain(int argc, TCHAR** argv) {
 				break;
 		if (i == dto.limiteClientes) {
 			_tprintf_s(ERRO_MAX_CLIENTES);
+			ResetEvent(hLimiteClientes);
 			// meter aqui um WaitForSingleObject à espera de um evento que diga que já pode continuar
 			DWORD dwWaitResulLimiteClientes = WaitForMultipleObjects(2, hEvents, FALSE, INFINITE);
 			if (dwWaitResulLimiteClientes == WAIT_OBJECT_0) {
