@@ -1,5 +1,5 @@
 maria qwerty 1000
-antÃ³nio 12345 1230.56
+antónio 12345 1230.56
 marques asdf 2000
 filipe qazwsxedc 1500
 alberta 123456 2000

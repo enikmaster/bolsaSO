@@ -52,6 +52,7 @@ int _tmain(int argc, TCHAR** argv)
 		// verificar se a conexão foi bem sucedida
 		if (GetLastError() == ERROR_PIPE_BUSY) {
 			_tprintf_s(ERRO_PIPE_BUSY);
+			CloseHandle(cd.hPipe);
 			contadorTentativas++;
 		}
 		else {
@@ -59,7 +60,6 @@ int _tmain(int argc, TCHAR** argv)
 			_tprintf_s(ERRO_LIGAR_BOLSA);
 			CloseHandle(cd.hPipe);
 			contadorTentativas++;
-			//ExitProcess(-1);
 		}
 
 		if (!SetWaitableTimer(hTimer, &liDueTime, 0, NULL, NULL, FALSE)) {
@@ -195,16 +195,14 @@ int _tmain(int argc, TCHAR** argv)
 		case TMensagem_CLOSE:
 			_tprintf_s(INFO_CLOSEC);
 			continuar = FALSE;
-			/*WaitForSingleObject(cd.hMutex, INFINITE);
-			SetEvent(cd.hExitEvent);
-			ReleaseMutex(cd.hMutex);*/
-			CancelSynchronousIo(hThread);
 			break;
 		default:
 			_tprintf_s(ERRO_INVALID_MSG);
 			break;
 		}
 	}
+	// cancelar a thread
+	CancelSynchronousIo(hThread);
 	// esperar que a thread termine
 	WaitForSingleObject(hThread, INFINITE);
 
