@@ -1,7 +1,8 @@
-maria qwerty 1000
-antónio 12345 1230.56
-marques asdf 2000
-filipe qazwsxedc 1500
-alberta 123456 2000
-pierce qwerty 1290.56
-ben 435ert 2500
+maria qwerty 10000
+antonio qwerty 12300.56
+marques qwerty 20000
+filipe qwerty 15000
+alberto qwerty 20000
+pierce qwerty 12900.56
+joana qwerty 25000
+ze qwerty 14050
