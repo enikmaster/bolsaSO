@@ -1,1 +1,1 @@
-Trabalh prático realizado no âmbito da cadeira de SO2
+Trabalho prático realizado no âmbito da cadeira de SO2
